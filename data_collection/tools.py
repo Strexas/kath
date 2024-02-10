@@ -165,7 +165,10 @@ def get_file_from_url(url, save_to, override=False):
             print(f"The file at {save_to} already exists.")
             return
 
-        response = requests.get(url)
+        try:
+            response = requests.get(url)
+        except requests.exceptions.RequestException as e:
+            raise DownloadError(f"Error downloading file from {url}: {e}")
 
         if response.status_code != 200:
             raise BadResponseException(f"Bad response from {url}. Status code: {response.status_code}")
@@ -174,9 +177,6 @@ def get_file_from_url(url, save_to, override=False):
             f.write(response.content)
 
     # check request exceptions
-    except requests.exceptions.RequestException as e:
-        raise DownloadError(f"Error downloading file from {url}: {e}")
-
     except BadResponseException as e:
         print(f"Error: {e}")
 
