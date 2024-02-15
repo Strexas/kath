@@ -234,7 +234,7 @@ def from_lovd_to_pandas(path):
 
         d = dict()
 
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             # skip header
             [f.readline() for _ in range(4)]
 
@@ -265,9 +265,9 @@ def from_lovd_to_pandas(path):
                 convert_lovd_data_types(frame, table_name)
 
                 d[table_name] = (frame, notes)
+
                 # skip inter tables lines
                 [f.readline() for _ in range(1)]
-
         return d
     except FileNotFoundError as e:
         print(f"Error: {e}")
