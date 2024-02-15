@@ -317,7 +317,9 @@ def calculate_max_frequency(row):
         'European (Finnish)',
         'European (non-Finnish)',
         'Middle Eastern',
-        'South Asian']
+        'South Asian',
+        'Remaining'
+    ]
 
     max_freq = 0
     max_pop = population_groups[0]
