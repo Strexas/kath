@@ -2,6 +2,14 @@ import requests
 import os
 import pandas as pd
 from pandas import DataFrame
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import time
+import glob
+
 
 
 # EXCEPTIONS
@@ -333,3 +341,83 @@ def calculate_max_frequency(row):
             max_pop = group
 
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
+
+
+def download_gnomad_database(url, path):
+    """
+    scrapes the gnomad database
+    :param url: the url of the database website
+    :param path: path where the file is saved
+    """
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.headless = True
+    firefox_options.add_argument('--headless')
+    firefox_options.set_preference('browser.download.folderList', 2)
+    firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
+    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", path))
+    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+
+    driver = webdriver.Firefox(options=firefox_options)
+    driver.get(url)
+
+    wait = WebDriverWait(driver, 30)
+
+    export_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]')))
+    export_button.click()
+
+
+    time.sleep(10)
+    driver.quit()
+
+
+def download_clinvar_database(url, path):
+    """
+    scrapes the clinvar database
+    :param url: the url of the database website
+    :param path: path where the file is saved
+    """
+    firefox_options = webdriver.FirefoxOptions()
+    firefox_options.headless = True
+    firefox_options.add_argument('--headless')
+    firefox_options.set_preference("browser.download.folderList", 2)
+    firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
+    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", path))
+    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+
+    driver = webdriver.Firefox(options=firefox_options)
+
+    driver.get(url)
+
+    driver.execute_script("document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()")
+    time.sleep(30)
+    driver.quit()
+
+
+def download_database(database_name, save_as, url, override=False):
+    """
+    calls a function to download a database
+    and handles where it should be saved
+    :param database_name: the name of the database that should be downloaded
+    :param save_as: the name by which the database file should be saved
+    :param url: the url of the database website
+    :param override: should already existing file be overwritten
+    """
+    ospath = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
+    if os.path.exists(ospath):
+        if override:
+            os.remove(ospath)
+        else:
+            print("File is already downloaded")
+            return
+    match database_name:
+        case 'gnomad':
+            download_gnomad_database(url, database_name)
+        case 'clinvar':
+            download_clinvar_database(url, database_name)
+        case _:
+            print('This database is not supported')
+
+    list_of_files = glob.glob(os.path.join(os.getcwd(), "..", "data", database_name, '*'))
+    latest_file = max(list_of_files, key=os.path.getctime)
+    os.rename(latest_file, ospath)
+

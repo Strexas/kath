@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame, Series
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA
+from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, download_database
 
 # CONSTANTS
 # files
@@ -60,8 +60,10 @@ def calculate_max_frequency(row):
 # MAIN
 # Download all data
 get_file_from_url(LOVD_FILE_URL, LOVD_PATH + f"/lovd_data.txt", override=True)
-get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
-get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
+#get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
+#get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
+download_database('gnomad', 'gnomad_data.csv', GNOMAD_URL, True)
+download_database('clinvar', 'clinvar_data.txt', CLINVAR_URL, True)
 
 # Read and convert data
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
@@ -98,7 +100,6 @@ lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Rema
 lovd_with_gnomad = main_frame[~lovd_without_association_in_gnomad].copy()
 max_values = lovd_with_gnomad.apply(calculate_max_frequency, axis=1)
 lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
-
 
 # Leaving necessary columns
 
