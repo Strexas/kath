@@ -2,8 +2,6 @@ import requests
 import os
 import pandas as pd
 from pandas import DataFrame
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
 
 # EXCEPTIONS
 class BadResponseException(Exception):
