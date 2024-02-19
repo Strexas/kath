@@ -3,144 +3,190 @@ import os
 import pandas as pd
 from pandas import DataFrame
 
-# EXCEPTIONS
+# Exceptions
 class BadResponseException(Exception):
-    pass
-
+  pass
 
 class DownloadError(Exception):
-    pass
+  pass
+class ColumnError(Exception):
+  pass
 
 
 # CONSTANTS
-LOVD_VARIABLES_DATA_TYPES = {
-    'id': 'String',
-    'name': 'String',
-    'chromosome': 'Integer',
-    'chrom_band': 'String',
-    'imprinting': 'String',
-    'refseq_genomic': 'String',
-    'refseq_UD': 'String',
-    'reference': 'String',
-    'url_homepage': 'String',
-    'url_external': 'String',
-    'allow_download': 'Boolean',
-    'id_hgnc': 'Integer',
-    'id_entrez': 'Integer',
-    'id_omim': 'Integer',
-    'show_hgmd': 'Boolean',
-    'show_genecards': 'Boolean',
-    'show_genetests': 'Boolean',
-    'show_orphanet': 'Boolean',
-    'note_index': 'String',
-    'note_listing': 'String',
-    'refseq': 'String',
-    'refseq_url': 'String',
-    'disclaimer': 'Boolean',
-    'disclaimer_text': 'String',
-    'header': 'String',
-    'header_align': 'Integer',
-    'footer': 'String',
-    'footer_align': 'Integer',
-    'created_by': 'Integer',
-    'created_date': 'Date',
-    'edited_by': 'Integer',
-    'edited_date': 'Date',
-    'updated_by': 'Integer',
-    'updated_date': 'Date',
-    'transcriptid': 'Integer',
-    'effectid': 'Integer',
-    'position_c_start': 'Integer',
-    'position_c_start_intron': 'Integer',
-    'position_c_end': 'Integer',
-    'position_c_end_intron': 'Integer',
-    'VariantOnTranscript/DNA': 'String',
-    'VariantOnTranscript/RNA': 'String',
-    'VariantOnTranscript/Protein': 'String',
-    'VariantOnTranscript/Exon': 'String',
-    'symbol': 'String',
-    'inheritance': 'String',
-    'id_omin': 'Integer',
-    'tissues': 'String',
-    'features': 'String',
-    'remarks': 'String',
-    'geneid': 'String',
-    'id_mutalyzer': 'Integer',
-    'id_ncbi': 'String',
-    'id_ensembl': 'String',
-    'id_protein_ncbi': 'String',
-    'id_protein_ensembl': 'String',
-    'id_protein_uniprot': 'String',
-    'position_c_mrna_start': 'Integer',
-    'position_c_mrna_end': 'Integer',
-    'position_c_cds_end': 'Integer',
-    'position_g_mrna_start': 'Integer',
-    'position_g_mrna_end': 'Integer',
-    'diseaseid': 'Integer',
-    'individualid': 'Integer',
-    'Phenotype/Inheritance': 'String',
-    'Phenotype/Age': 'String',
-    'Phenotype/Additional': 'String',
-    'Phenotype/Biochem_param': 'String',
-    'Phenotype/Age/Onset': 'String',
-    'Phenotype/Age/Diagnosis': 'String',
-    'Phenotype/Severity_score': 'String',
-    'Phenotype/Onset': 'String',
-    'Phenotype/Protein': 'String',
-    'Phenotype/Tumor/MSI': 'String',
-    'Phenotype/Enzyme/CPK': 'String',
-    'Phenotype/Heart/Myocardium': 'String',
-    'Phenotype/Lung': 'String',
-    'Phenotype/Diagnosis/Definite': 'String',
-    'Phenotype/Diagnosis/Initial': 'String',
-    'Phenotype/Diagnosis/Criteria': 'String',
-    'variants_found': 'Integer',
-    'Screening/Technique': 'String',
-    'Screening/Template': 'String',
-    'Screening/Tissue': 'String',
-    'Screening/Remarks': 'String',
-    'fatherid': 'String',
-    'motherid': 'String',
-    'panelid': 'Integer',
-    'panel_size': 'Integer',
-    'license': 'String',
-    'Individual/Reference': 'String',
-    'Individual/Remarks': 'String',
-    'Individual/Gender': 'String',
-    'Individual/Consanguinity': 'String',
-    'Individual/Age_of_death': 'String',
-    'Individual/VIP': 'String',
-    'Individual/Data_av': 'String',
-    'Individual/Treatment': 'String',
-    'Individual/Origin/Population': 'String',
-    'Individual/Individual_ID': 'String',
-    'allele': 'Integer',
-    'chromosome': 'Integer',
-    'position_g_start': 'Integer',
-    'position_g_end': 'Integer',
-    'type': 'String',
-    'average_frequency': 'Double',
-    'VariantOnGenome/DBID': 'String',
-    'VariantOnGenome/DNA': 'String',
-    'VariantOnGenome/Frequency': 'String',
-    'VariantOnGenome/Reference': 'String',
-    'VariantOnGenome/Restriction_site': 'String',
-    'VariantOnGenome/Published_as': 'String',
-    'VariantOnGenome/Remarks': 'String',
-    'VariantOnGenome/Genetic_origin': 'String',
-    'VariantOnGenome/Segregation': 'String',
-    'VariantOnGenome/dbSNP': 'String',
-    'VariantOnGenome/VIP': 'String',
-    'VariantOnGenome/Methylation': 'String',
-    'VariantOnGenome/ISCN': 'String',
-    'VariantOnGenome/DNA/hg38': 'String',
-    'VariantOnGenome/ClinVar': 'String',
-    'VariantOnGenome/ClinicalClassification': 'String',
-    'VariantOnGenome/ClinicalClassification/Method': 'String',
-    'screeningid': 'Integer',
-    'variantid': 'Integer',
-    'owned_by': 'Integer',
-    'Individual/Origin/Geographic': 'String'
+LOVD_DATA_TYPES = {
+    'Genes': {
+        'id': 'String',
+        'name': 'String',
+        'chromosome': 'Integer',
+        'chrom_band': 'String',
+        'imprinting': 'String',
+        'refseq_genomic': 'String',
+        'refseq_UD': 'String',
+        'reference': 'String',
+        'url_homepage': 'String',
+        'url_external': 'String',
+        'allow_download': 'Boolean',
+        'id_hgnc': 'Integer',
+        'id_entrez': 'Integer',
+        'id_omim': 'Integer',
+        'show_hgmd': 'Boolean',
+        'show_genecards': 'Boolean',
+        'show_genetests': 'Boolean',
+        'show_orphanet': 'Boolean',
+        'note_index': 'String',
+        'note_listing': 'String',
+        'refseq': 'String',
+        'refseq_url': 'String',
+        'disclaimer': 'Boolean',
+        'disclaimer_text': 'String',
+        'header': 'String',
+        'header_align': 'Integer',
+        'footer': 'String',
+        'footer_align': 'Integer',
+        'created_by': 'Integer',
+        'created_date': 'Date',
+        'edited_by': 'Integer',
+        'edited_date': 'Date',
+        'updated_by': 'Integer',
+        'updated_date': 'Date'
+    },
+    'Variants_On_Transcripts': {
+        'id': 'Integer',
+        'transcriptid': 'Integer',
+        'effectid': 'Integer',
+        'position_c_start': 'Integer',
+        'position_c_start_intron': 'Integer',
+        'position_c_end': 'Integer',
+        'position_c_end_intron': 'Integer',
+        'VariantOnTranscript/DNA': 'String',
+        'VariantOnTranscript/RNA': 'String',
+        'VariantOnTranscript/Protein': 'String',
+        'VariantOnTranscript/Exon': 'String'
+    },
+    'Diseases': {
+        'id': 'Integer',
+        'symbol': 'String',
+        'name': 'String',
+        'inheritance': 'String',
+        'id_omim': 'Integer',
+        'tissues': 'String',
+        'features': 'String',
+        'remarks': 'String',
+        'created_by': 'Integer',
+        'created_date': 'Date',
+        'edited_by': 'Integer',
+        'edited_date': 'Date'
+    },
+    'Transcripts': {
+        'id': 'Integer',
+        'geneid': 'String',
+        'name': 'String',
+        'id_mutalyzer': 'Integer',
+        'id_ncbi': 'String',
+        'id_ensembl': 'String',
+        'id_protein_ncbi': 'String',
+        'id_protein_ensembl': 'String',
+        'id_protein_uniprot': 'String',
+        'remarks': 'String',
+        'position_c_mrna_start': 'Integer',
+        'position_c_mrna_end': 'Integer',
+        'position_c_cds_end': 'Integer',
+        'position_g_mrna_start': 'Integer',
+        'position_g_mrna_end': 'Integer',
+        'created_by': 'Integer',
+        'created_date': 'Date',
+        'edited_by': 'Integer',
+        'edited_date': 'Date'
+    },
+    'Phenotypes': {
+        'id': 'Integer',
+        'diseaseid': 'Integer',
+        'individualid': 'Integer',
+        'owned_by' : 'Integer',
+        'Phenotype/Inheritance': 'String',
+        'Phenotype/Age': 'String',
+        'Phenotype/Additional': 'String',
+        'Phenotype/Biochem_param': 'String',
+        'Phenotype/Age/Onset': 'String',
+        'Phenotype/Age/Diagnosis': 'String',
+        'Phenotype/Severity_score': 'String',
+        'Phenotype/Onset': 'String',
+        'Phenotype/Protein': 'String',
+        'Phenotype/Tumor/MSI': 'String',
+        'Phenotype/Enzyme/CPK': 'String',
+        'Phenotype/Heart/Myocardium': 'String',
+        'Phenotype/Lung': 'String',
+        'Phenotype/Diagnosis/Definite': 'String',
+        'Phenotype/Diagnosis/Initial': 'String',
+        'Phenotype/Diagnosis/Criteria': 'String'
+    },
+    'Screenings': {
+        'id': 'Integer',
+        'individualid': 'Integer',
+        'variants_found': 'Integer',
+        'owned_by': 'Integer',
+        'created_by': 'Integer',
+        'created_date': 'Date',
+        'edited_by': 'Integer',
+        'edited_date': 'Date',
+        'Screening/Technique': 'String',
+        'Screening/Template': 'String',
+        'Screening/Tissue': 'String',
+        'Screening/Remarks': 'String'
+    },
+    'Individuals': {
+        'id': 'Integer',
+        'fatherid': 'String',
+        'motherid': 'String',
+        'panelid': 'Integer',
+        'panel_size': 'Integer',
+        'license': 'String',
+        'owned_by': 'Integer',
+        'Individual/Reference': 'String',
+        'Individual/Remarks': 'String',
+        'Individual/Gender': 'String',
+        'Individual/Consanguinity': 'String',
+        'Individual/Origin/Geographic': 'String',
+        'Individual/Age_of_death': 'String',
+        'Individual/VIP': 'String',
+        'Individual/Data_av': 'String',
+        'Individual/Treatment': 'String',
+        'Individual/Origin/Population': 'String',
+        'Individual/Individual_ID': 'String'
+    },
+    'Variants_On_Genome': {
+        'id' : 'Integer',
+        'allele' : 'Integer',
+        'effectid' : 'Integer',
+        'chromosome': 'Integer',
+        'position_g_start': 'Integer',
+        'position_g_end': 'Integer',
+        'type': 'String',
+        'average_frequency': 'Double',
+        'owned_by' : 'Integer',
+        'VariantOnGenome/DBID': 'String',
+        'VariantOnGenome/DNA': 'String',
+        'VariantOnGenome/Frequency': 'String',
+        'VariantOnGenome/Reference': 'String',
+        'VariantOnGenome/Restriction_site': 'String',
+        'VariantOnGenome/Published_as': 'String',
+        'VariantOnGenome/Remarks': 'String',
+        'VariantOnGenome/Genetic_origin': 'String',
+        'VariantOnGenome/Segregation': 'String',
+        'VariantOnGenome/dbSNP': 'String',
+        'VariantOnGenome/VIP': 'String',
+        'VariantOnGenome/Methylation': 'String',
+        'VariantOnGenome/ISCN': 'String',
+        'VariantOnGenome/DNA/hg38': 'String',
+        'VariantOnGenome/ClinVar': 'String',
+        'VariantOnGenome/ClinicalClassification': 'String',
+        'VariantOnGenome/ClinicalClassification/Method': 'String'
+    },
+    'Screenings_To_Variants': {
+        'screeningid': 'Integer',
+        'variantid': 'Integer'
+    }
 }
 
 
@@ -186,33 +232,34 @@ def get_file_from_url(url, save_to, override=False):
         print(f"Error: {e}")
 
 
-def convert_lovd_data_types(frame, table_name):
+def convert_LOVD_to_datatypes(table, data_types):
     """
-    Converts DataFrame object data types from object to specific type.
+    Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param DataFrame frame: pointer to LOVD DataFrame
-    :param str table_name: name of a LOVD DataFrame
+    :param dict table: Dictionary of tables where each table is represented by its name and contains a tuple with a DataFrame and a list of notes.
+    :param dict data_types: Dictionary representing the expected data types for each table.
+    :raises ColumnError: If a specified column is not found in the DataFrame.
     """
+    for constant_table_name, attributes in data_types.items():
+      frame, notes = table[constant_table_name]
+      for column, data_type in attributes.items():
+          if column not in frame.columns:
+            raise ColumnError(f"{column} was not found in {constant_table_name} table")
 
-    for column, data_type in LOVD_VARIABLES_DATA_TYPES.items():
-        if column not in frame.columns:
-            continue
-
-        match [data_type]:
-            case ["Date"]:
+          match [data_type]:
+              case ["Date"]:
                 frame[column] = pd.to_datetime(frame[column], errors='coerce')
-            case ["Boolean"]:
+              case ["Boolean"]:
                 frame[column] = (frame[column] != 0).astype('bool')
-            case ["String"]:
-                frame[column] = frame[column].astype('string')
-            case ["Integer"]:
-                frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
-            case ["Double"]:
-                frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
+              case ["String"]:
+                 frame[column] = frame[column].astype('string')
+              case ["Integer"]:
+                 frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
+              case ["Double"]:
+                  frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
+              case _:
+                raise ColumnError(f"{data_type} was not found in {constant_table_name} table")
 
-    # exception
-    if table_name == "Genes":
-        frame['id'] = frame['id'].astype('string')
 
 
 def from_lovd_to_pandas(path):
@@ -259,9 +306,6 @@ def from_lovd_to_pandas(path):
                     observation = DataFrame([variables], columns=table_header)
                     frame = pd.concat([frame, observation], ignore_index=True)
                     line = f.readline()
-
-                # formats the frame
-                convert_lovd_data_types(frame, table_name)
 
                 d[table_name] = (frame, notes)
                 # skip inter tables lines

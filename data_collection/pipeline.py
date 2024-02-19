@@ -1,6 +1,7 @@
 import pandas as pd
 from pandas import DataFrame, Series
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA
+from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, convert_LOVD_to_datatypes, \
+    LOVD_DATA_TYPES
 
 # CONSTANTS
 # files
@@ -65,6 +66,9 @@ get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", overrid
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
 gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
 clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
+
+# Convert LOVD data types
+convert_LOVD_to_datatypes(from_lovd_to_pandas(), LOVD_DATA_TYPES)
 
 # renaming databases' columns
 gnomad_data.columns += "(gnomad)"
