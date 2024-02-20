@@ -405,7 +405,7 @@ def store_database(database_name, override=False):
     if os.path.exists(os_path) and override:
         os.remove(os_path)
     elif os.path.exists(os_path) and not override:
-        print("File already exits")
+        print("File already exists")
         return
 
     url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
