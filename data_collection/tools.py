@@ -377,7 +377,7 @@ def get_file_from_clinvar(override=False):
     file_exist = file_exists_and_not_empty(download_dir, file_name)
     if not override and file_exist:
         print(f"File {file_name} already exists")
-        return
+        return True
     
     if file_exist:
         os.remove(os.path.join(download_dir, file_name))
