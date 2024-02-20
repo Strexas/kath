@@ -3,12 +3,27 @@ import os
 import pandas as pd
 from pandas import DataFrame
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 import glob
+
+
+DATABASES_DOWNLOAD_PATHS = {
+    "clinvar": {
+        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
+        "url": "https://www.ncbi.nlm.nih.gov/clinvar/?term=EYS%5Bgene%5D&redir=gene",
+        "store_as": "clinvar_data.txt",
+        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/div[2]/div[1]/div/div[1]/a[3]"
+    },
+    "gnomad": {
+        "button":"document.getElementsByClassName('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
+        "url": "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4",
+        "store_as": "gnomad_data.csv",
+        "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]"
+    }
+}
 
 
 
@@ -343,81 +358,63 @@ def calculate_max_frequency(row):
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
 
 
-def download_gnomad_database(url, path):
+def download_database(url, database_name, button_location, clickable):
     """
-    scrapes the gnomad database
-    :param url: the url of the database website
-    :param path: path where the file is saved
-    """
-    firefox_options = webdriver.FirefoxOptions()
-    firefox_options.headless = True
-    firefox_options.add_argument('--headless')
-    firefox_options.set_preference('browser.download.folderList', 2)
-    firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
-    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", path))
-    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
-
-    driver = webdriver.Firefox(options=firefox_options)
-    driver.get(url)
-
-    wait = WebDriverWait(driver, 30)
-
-    export_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]')))
-    export_button.click()
-
-
-    time.sleep(10)
-    driver.quit()
-
-
-def download_clinvar_database(url, path):
-    """
-    scrapes the clinvar database
-    :param url: the url of the database website
-    :param path: path where the file is saved
+    downloads chosen database
+    :param url: the url of the database's website
+    :param database_name: the name of the database
+    :param button_location: button which should be clicked on page for download
+    :param clickable: an element in a webpage indicating that the download can start
     """
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.headless = True
     firefox_options.add_argument('--headless')
     firefox_options.set_preference("browser.download.folderList", 2)
     firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
-    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", path))
+    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", database_name))
     firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
 
     driver = webdriver.Firefox(options=firefox_options)
-
     driver.get(url)
 
-    driver.execute_script("document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()")
-    time.sleep(30)
-    driver.quit()
+    try:
+        WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, clickable)))
+        driver.execute_script(button_location)
+
+        time.sleep(30)
+    except TimeoutError as e:
+        print(f"Error: {e}")
+    finally:
+        driver.quit()
 
 
-def download_database(database_name, save_as, url, override=False):
+def store_database(database_name, override=False):
     """
     calls a function to download a database
-    and handles where it should be saved
+    and handles where it should be saved,
+    renames the downloaded (latest) file to appropriate name
     :param database_name: the name of the database that should be downloaded
-    :param save_as: the name by which the database file should be saved
-    :param url: the url of the database website
     :param override: should already existing file be overwritten
     """
-    ospath = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
-    if os.path.exists(ospath):
-        if override:
-            os.remove(ospath)
-        else:
-            print("File is already downloaded")
-            return
-    match database_name:
-        case 'gnomad':
-            download_gnomad_database(url, database_name)
-        case 'clinvar':
-            download_clinvar_database(url, database_name)
-        case _:
-            print('This database is not supported')
+    if database_name not in DATABASES_DOWNLOAD_PATHS.keys():
+        print("Requested database is not supported")
+        return
+    save_as = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
+    os_path = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
+
+    if os.path.exists(os_path) and override:
+        os.remove(os_path)
+    elif os.path.exists(os_path) and not override:
+        print("File already exits")
+        return
+
+    url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
+    button = DATABASES_DOWNLOAD_PATHS[database_name]["button"]
+    clickable = DATABASES_DOWNLOAD_PATHS[database_name]["clickable"]
+
+    download_database(url, database_name, button, clickable)
 
     list_of_files = glob.glob(os.path.join(os.getcwd(), "..", "data", database_name, '*'))
     latest_file = max(list_of_files, key=os.path.getctime)
-    os.rename(latest_file, ospath)
+    os.rename(latest_file, os_path)
 

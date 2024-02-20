@@ -1,6 +1,5 @@
 import pandas as pd
-from pandas import DataFrame, Series
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, download_database
+from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, store_database
 
 # CONSTANTS
 # files
@@ -62,8 +61,8 @@ def calculate_max_frequency(row):
 get_file_from_url(LOVD_FILE_URL, LOVD_PATH + f"/lovd_data.txt", override=True)
 #get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
 #get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
-download_database('gnomad', 'gnomad_data.csv', GNOMAD_URL, True)
-download_database('clinvar', 'clinvar_data.txt', CLINVAR_URL, True)
+store_database('gnomad', True)
+store_database('clinvar', True)
 
 # Read and convert data
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
