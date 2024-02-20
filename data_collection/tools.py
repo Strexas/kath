@@ -5,6 +5,8 @@ from pandas import DataFrame
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 
+# CONSTANTS
+CLINVAR_URL = 'https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D'
 
 # EXCEPTIONS
 class BadResponseException(Exception):
@@ -337,17 +339,32 @@ def calculate_max_frequency(row):
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
 
 def file_exists_and_not_empty(directory, filename):
+    """
+    Checks if file exists and is not empty.
+
+    :param directory: directory
+    :param filename: filename
+    :returns: True if file exists and is not empty, False otherwise
+    :rtype: bool
+    """
+
     file_path = os.path.join(directory, filename)
     if os.path.exists(file_path):
         if os.path.getsize(file_path) > 0:
             return True
     return False
 
-def get_file_from_clinvar(override=False):
+def get_file_from_clinvar(override=False): 
+    """
+    Downloads file from Clinvar. If override is True, it will override the file if it exists.
+
+    :param override: needs to override
+    :returns: True if it finished downloading the file, False otherwise
+    :rtype: bool
+    """
 
     file_name = 'clinvar_result.txt'
     download_dir = os.path.join(os.getcwd(), "..", "data")
-    url = 'https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D'
 
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.headless = True
@@ -366,7 +383,8 @@ def get_file_from_clinvar(override=False):
         os.remove(os.path.join(download_dir, file_name))
 
     driver = webdriver.Firefox(options=firefox_options)
-    driver.get(url)
+    driver.get(CLINVAR_URL)
     driver.execute_script("document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()")
     WebDriverWait(driver, 30).until(lambda driver: file_exists_and_not_empty(download_dir, file_name))
-    print("File downloaded")
+
+    return file_exists_and_not_empty(download_dir, file_name)
