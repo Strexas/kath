@@ -3,14 +3,14 @@ import os
 import pandas as pd
 from pandas import DataFrame
 
+
 # Exceptions
 class BadResponseException(Exception):
-  pass
+    pass
+
 
 class DownloadError(Exception):
-  pass
-class ColumnError(Exception):
-  pass
+    pass
 
 
 # CONSTANTS
@@ -103,7 +103,7 @@ LOVD_DATA_TYPES = {
         'id': 'Integer',
         'diseaseid': 'Integer',
         'individualid': 'Integer',
-        'owned_by' : 'Integer',
+        'owned_by': 'Integer',
         'Phenotype/Inheritance': 'String',
         'Phenotype/Age': 'String',
         'Phenotype/Additional': 'String',
@@ -156,15 +156,15 @@ LOVD_DATA_TYPES = {
         'Individual/Individual_ID': 'String'
     },
     'Variants_On_Genome': {
-        'id' : 'Integer',
-        'allele' : 'Integer',
-        'effectid' : 'Integer',
+        'id': 'Integer',
+        'allele': 'Integer',
+        'effectid': 'Integer',
         'chromosome': 'Integer',
         'position_g_start': 'Integer',
         'position_g_end': 'Integer',
         'type': 'String',
         'average_frequency': 'Double',
-        'owned_by' : 'Integer',
+        'owned_by': 'Integer',
         'VariantOnGenome/DBID': 'String',
         'VariantOnGenome/DNA': 'String',
         'VariantOnGenome/Frequency': 'String',
@@ -232,34 +232,55 @@ def get_file_from_url(url, save_to, override=False):
         print(f"Error: {e}")
 
 
-def convert_LOVD_to_datatypes(table, data_types):
+# write a function which takes a dictionary of tables and converts the data from LOVD format to the desired data format based on the specified data types
+def convert_lovd_to_datatypes(table):
+    """
+    Converts data from LOVD format to the desired data format based on the specified data types.
+
+    :param dict[str, tuple[DataFrame, list[str]]] table: dictionary of tables
+    :returns: dictionary of tables with converted data types
+    :rtype: dict[str, tuple[DataFrame, list[str]]]
+    """
+
+    try:
+        for table_name, (frame, notes) in table.items():
+            if table_name in LOVD_DATA_TYPES:
+                frame = frame.astype(LOVD_DATA_TYPES[table_name])
+
+            table[table_name] = (frame, notes)
+
+        return table
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def convert_lovd_to_datatype(table):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param dict table: Dictionary of tables where each table is represented by its name and contains a tuple with a DataFrame and a list of notes.
-    :param dict data_types: Dictionary representing the expected data types for each table.
-    :raises ColumnError: If a specified column is not found in the DataFrame.
+    :param dict table: Dictionary of tables where each table is represented by its name
+     and contains a tuple with a DataFrame and a list of notes.
     """
-    for constant_table_name, attributes in data_types.items():
-      frame, notes = table[constant_table_name]
-      for column, data_type in attributes.items():
-          if column not in frame.columns:
-            raise ColumnError(f"{column} was not found in {constant_table_name} table")
 
-          match [data_type]:
-              case ["Date"]:
-                frame[column] = pd.to_datetime(frame[column], errors='coerce')
-              case ["Boolean"]:
-                frame[column] = (frame[column] != 0).astype('bool')
-              case ["String"]:
-                 frame[column] = frame[column].astype('string')
-              case ["Integer"]:
-                 frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
-              case ["Double"]:
-                  frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
-              case _:
-                raise ColumnError(f"{data_type} was not found in {constant_table_name} table")
+    for constant_table_name, attributes in LOVD_DATA_TYPES.items():
+        frame, notes = table[constant_table_name]
+        for column, data_type in attributes.items():
+            if column not in frame.columns:
+                continue
 
+            match [data_type]:
+                case ["Date"]:
+                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
+                case ["Boolean"]:
+                    frame[column] = (frame[column] != 0).astype('bool')
+                case ["String"]:
+                    frame[column] = frame[column].astype('string')
+                case ["Integer"]:
+                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
+                case ["Double"]:
+                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
+                case _:
+                    continue
 
 
 def from_lovd_to_pandas(path):
