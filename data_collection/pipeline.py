@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame, Series
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, convert_LOVD_to_datatypes, \
+from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA, convert_lovd_to_datatype, \
     LOVD_DATA_TYPES
 
 # CONSTANTS
@@ -68,7 +68,7 @@ gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
 clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
 
 # Convert LOVD data types
-convert_LOVD_to_datatypes(from_lovd_to_pandas(), LOVD_DATA_TYPES)
+convert_lovd_to_datatype(from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt"))
 
 # renaming databases' columns
 gnomad_data.columns += "(gnomad)"
@@ -94,13 +94,11 @@ main_frame = pd.merge(main_frame,
                       left_on="VariantOnTranscript/DNA",
                       right_on="HGVS Consequence(gnomad)").drop("HGVS Consequence(gnomad)", axis=1)
 
-
 # Calculating frequencies
 lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])
 lovd_with_gnomad = main_frame[~lovd_without_association_in_gnomad].copy()
 max_values = lovd_with_gnomad.apply(calculate_max_frequency, axis=1)
 lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
-
 
 # Leaving necessary columns
 
