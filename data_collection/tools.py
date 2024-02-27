@@ -225,9 +225,9 @@ def from_lovd_to_pandas(path):
 
     d = {}
 
-    with open(path) as f:
+    with open(path, encoding="UTF-8") as f:
         # skip header
-        [f.readline() for _ in range(4)]
+        [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
         while True:
             line = f.readline()
@@ -257,7 +257,7 @@ def from_lovd_to_pandas(path):
 
             d[table_name] = (frame, notes)
             # skip inter tables lines
-            [f.readline() for _ in range(1)]
+            [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
 
     return d
 
