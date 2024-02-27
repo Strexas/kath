@@ -1,3 +1,5 @@
+"""Module providing a functionality to collect data from various sources."""
+
 import os
 import requests
 from requests.exceptions import RequestException

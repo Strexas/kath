@@ -1,3 +1,4 @@
+"""Module executes general pipeline for data collection"""
 import pandas as pd
 
 from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna
