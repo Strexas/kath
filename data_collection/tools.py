@@ -217,53 +217,48 @@ def from_lovd_to_pandas(path):
     :rtype: dict[str, tuple[DataFrame, list[str]]]
     """
 
-    try:
-        # Check if the file exists
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"The file at {path} does not exist.")
+    # Check if the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"The file at {path} does not exist.")
 
-        d = {}
+    d = {}
 
-        with open(path) as f:
-            # skip header
-            [f.readline() for _ in range(4)]
+    with open(path) as f:
+        # skip header
+        [f.readline() for _ in range(4)]
 
-            while True:
+        while True:
+            line = f.readline()
+
+            if line == '':
+                break
+
+            table_name = line.split("##")[1].strip()
+
+            notes = []
+            line = f.readline()
+            while line.startswith("##"):
+                notes.append(line[2:-1])
                 line = f.readline()
 
-                if line == '':
-                    break
-
-                table_name = line.split("##")[1].strip()
-
-                notes = []
+            table_header = [column[3:-3] for column in line[:-1].split('\t')]
+            frame = DataFrame([], columns=table_header)
+            line = f.readline()
+            while line != '\n':
+                variables = [variable[1:-1] for variable in line[:-1].split('\t')]
+                observation = DataFrame([variables], columns=table_header)
+                frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
-                while line.startswith("##"):
-                    notes.append(line[2:-1])
-                    line = f.readline()
 
-                table_header = [column[3:-3] for column in line[:-1].split('\t')]
-                frame = DataFrame([], columns=table_header)
-                line = f.readline()
-                while line != '\n':
-                    variables = [variable[1:-1] for variable in line[:-1].split('\t')]
-                    observation = DataFrame([variables], columns=table_header)
-                    frame = pd.concat([frame, observation], ignore_index=True)
-                    line = f.readline()
+            # formats the frame
+            convert_lovd_data_types(frame, table_name)
 
-                # formats the frame
-                convert_lovd_data_types(frame, table_name)
+            d[table_name] = (frame, notes)
+            # skip inter tables lines
+            [f.readline() for _ in range(1)]
 
-                d[table_name] = (frame, notes)
-                # skip inter tables lines
-                [f.readline() for _ in range(1)]
+    return d
 
-        return d
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-
-    except Exception as e:
-        print(f"Error: {e}")
 
 
 def from_clinvar_name_to_dna(name):
