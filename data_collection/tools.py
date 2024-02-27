@@ -1,15 +1,19 @@
-import requests
+"""Module providing a functionality to collect data from various sources."""
+
 import os
+import requests
+from requests.exceptions import RequestException
 import pandas as pd
 from pandas import DataFrame
 
+
 # EXCEPTIONS
 class BadResponseException(Exception):
-    pass
+    """Custom exception for bad responses."""
 
 
 class DownloadError(Exception):
-    pass
+    """Custom exception for download errors."""
 
 
 # CONSTANTS
@@ -115,7 +119,6 @@ LOVD_VARIABLES_DATA_TYPES = {
     'Individual/Origin/Population': 'String',
     'Individual/Individual_ID': 'String',
     'allele': 'Integer',
-    'chromosome': 'Integer',
     'position_g_start': 'Integer',
     'position_g_end': 'Integer',
     'type': 'String',
@@ -153,37 +156,27 @@ def get_file_from_url(url, save_to, override=False):
     :param bool override: needs override
     """
 
+    # check if directory exists, if not - create
+    save_to_dir = os.path.dirname(save_to)
+    if not os.path.exists(save_to_dir):
+        os.makedirs(save_to_dir)
+
+    # check if file exist and needs to override
+    if os.path.exists(save_to) and not override:
+        print(f"The file at {save_to} already exists.")
+        return
+
     try:
-        # check if directory exists, if not - create
-        save_to_dir = os.path.dirname(save_to)
-        if not os.path.exists(save_to_dir):
-            os.makedirs(save_to_dir)
+        response = requests.get(url, timeout=10)
+    except RequestException as e:
+        raise DownloadError(f"Error while downloading file from {url}") from e
 
-        # check if file exist and needs to override
-        if os.path.exists(save_to) and not override:
-            print(f"The file at {save_to} already exists.")
-            return
+    if response.status_code != 200:
+        raise BadResponseException(f"Bad response from {url}."
+                                   f" Status code: {response.status_code}")
 
-        try:
-            response = requests.get(url)
-        except requests.exceptions.RequestException as e:
-            raise DownloadError(f"Error downloading file from {url}: {e}")
-
-        if response.status_code != 200:
-            raise BadResponseException(f"Bad response from {url}. Status code: {response.status_code}")
-
-        with open(save_to, "wb") as f:
-            f.write(response.content)
-
-    # check request exceptions
-    except BadResponseException as e:
-        print(f"Error: {e}")
-
-    except DownloadError as e:
-        print(f"Error: {e}")
-
-    except Exception as e:
-        print(f"Error: {e}")
+    with open(save_to, "wb") as f:
+        f.write(response.content)
 
 
 def convert_lovd_data_types(frame, table_name):
@@ -226,56 +219,50 @@ def from_lovd_to_pandas(path):
     :rtype: dict[str, tuple[DataFrame, list[str]]]
     """
 
-    try:
-        # Check if the file exists
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"The file at {path} does not exist.")
+    # Check if the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"The file at {path} does not exist.")
 
-        d = dict()
+    d = {}
 
-        with open(path) as f:
-            # skip header
-            [f.readline() for _ in range(4)]
+    with open(path, encoding="UTF-8") as f:
+        # skip header
+        [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
-            while True:
+        while True:
+            line = f.readline()
+
+            if line == '':
+                break
+
+            table_name = line.split("##")[1].strip()
+
+            notes = []
+            line = f.readline()
+            while line.startswith("##"):
+                notes.append(line[2:-1])
                 line = f.readline()
 
-                if line == '':
-                    break
-
-                table_name = line.split("##")[1].strip()
-
-                notes = []
+            table_header = [column[3:-3] for column in line[:-1].split('\t')]
+            frame = DataFrame([], columns=table_header)
+            line = f.readline()
+            while line != '\n':
+                variables = [variable[1:-1] for variable in line[:-1].split('\t')]
+                observation = DataFrame([variables], columns=table_header)
+                frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
-                while line.startswith("##"):
-                    notes.append(line[2:-1])
-                    line = f.readline()
 
-                table_header = [column[3:-3] for column in line[:-1].split('\t')]
-                frame = DataFrame([], columns=table_header)
-                line = f.readline()
-                while line != '\n':
-                    variables = [variable[1:-1] for variable in line[:-1].split('\t')]
-                    observation = DataFrame([variables], columns=table_header)
-                    frame = pd.concat([frame, observation], ignore_index=True)
-                    line = f.readline()
+            # formats the frame
+            convert_lovd_data_types(frame, table_name)
 
-                # formats the frame
-                convert_lovd_data_types(frame, table_name)
+            d[table_name] = (frame, notes)
+            # skip inter tables lines
+            [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
 
-                d[table_name] = (frame, notes)
-                # skip inter tables lines
-                [f.readline() for _ in range(1)]
-
-        return d
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-
-    except Exception as e:
-        print(f"Error: {e}")
+    return d
 
 
-def from_clinvar_name_to_DNA(name):
+def from_clinvar_name_to_dna(name):
     """
     Custom cleaner to extract DNA from Clinvar name variable.
 
@@ -298,37 +285,3 @@ def from_clinvar_name_to_DNA(name):
             break
 
     return name[start:end]
-
-
-def calculate_max_frequency(row):
-    """
-    Calculating maximum allele frequency in GNOMAD row.
-
-    :param row: row in dataframe
-    :returns: panda series with 'PopMax', 'PopMax population' fields
-    :rtype: pd.Series
-    """
-
-    population_groups = [
-        'Admixed American',
-        'African/African American',
-        'Amish',
-        'Ashkenazi Jewish',
-        'East Asian',
-        'European (Finnish)',
-        'European (non-Finnish)',
-        'Middle Eastern',
-        'South Asian']
-
-    max_freq = 0
-    max_pop = population_groups[0]
-
-    for group in population_groups:
-        count_column = f'Allele Count {group}(gnomad)'
-        number_column = f'Allele Number {group}(gnomad)'
-        freq = row[count_column] / row[number_column]
-        if (freq > max_freq):
-            max_freq = freq
-            max_pop = group
-
-    return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
