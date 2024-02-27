@@ -10,12 +10,10 @@ from pandas import DataFrame
 # EXCEPTIONS
 class BadResponseException(Exception):
     """Custom exception for bad responses."""
-    pass
 
 
 class DownloadError(Exception):
     """Custom exception for download errors."""
-    pass
 
 
 # CONSTANTS
@@ -262,7 +260,6 @@ def from_lovd_to_pandas(path):
             [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
 
     return d
-
 
 
 def from_clinvar_name_to_dna(name):
