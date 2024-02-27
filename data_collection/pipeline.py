@@ -1,6 +1,6 @@
 import pandas as pd
-from pandas import DataFrame, Series
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_DNA
+
+from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna
 
 # CONSTANTS
 # files
@@ -8,10 +8,12 @@ LOVD_URL = "https://databases.lovd.nl/shared/genes/EYS"
 LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/EYS"
 
 GNOMAD_URL = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
-GNOMAD_FILE_URL = "https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28-T_3y&export=download"
+GNOMAD_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28"
+                   "-T_3y&export=download")
 
 CLINVAR_URL = "https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D&redir=gene"
-CLINVAR_FILE_URL = "https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF-H2U6u&export=download"
+CLINVAR_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF"
+                    "-H2U6u&export=download")
 
 # path
 DATA_PATH = "../data"
@@ -57,9 +59,9 @@ def calculate_max_frequency(row):
 
 # MAIN
 # Download all data
-get_file_from_url(LOVD_FILE_URL, LOVD_PATH + f"/lovd_data.txt", override=True)
-get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
-get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
+get_file_from_url(LOVD_FILE_URL, LOVD_PATH + "/lovd_data.txt", override=True)
+get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + "/gnomad_data.csv", override=True)
+get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + "/clinvar_data.txt", override=True)
 
 # Read and convert data
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
@@ -75,8 +77,10 @@ main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
 notes = lovd_data["Variants_On_Transcripts"][1][::]
 
 # Merging Clinvar
-clinvar = clinvar_data.copy()[["Name(clinvar)", "Germline classification(clinvar)", "Accession(clinvar)"]]
-clinvar["VariantOnTranscript/DNA"] = clinvar["Name(clinvar)"].apply(from_clinvar_name_to_DNA)
+clinvar = clinvar_data.copy()[["Name(clinvar)",
+                               "Germline classification(clinvar)",
+                               "Accession(clinvar)"]]
+clinvar["VariantOnTranscript/DNA"] = clinvar["Name(clinvar)"].apply(from_clinvar_name_to_dna)
 
 main_frame = pd.merge(main_frame,
                       clinvar,
@@ -84,19 +88,18 @@ main_frame = pd.merge(main_frame,
                       on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
 
 # MERGING GnomAd
-main_frame = pd.merge(main_frame,
-                      gnomad_data,
-                      how="left",
-                      left_on="VariantOnTranscript/DNA",
-                      right_on="HGVS Consequence(gnomad)").drop("HGVS Consequence(gnomad)", axis=1)
-
+main_frame = (pd.merge(main_frame,
+                       gnomad_data,
+                       how="left",
+                       left_on="VariantOnTranscript/DNA",
+                       right_on="HGVS Consequence(gnomad)").drop("HGVS Consequence(gnomad)",
+                                                                 axis=1))
 
 # Calculating frequencies
 lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])
 lovd_with_gnomad = main_frame[~lovd_without_association_in_gnomad].copy()
 max_values = lovd_with_gnomad.apply(calculate_max_frequency, axis=1)
 lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
-
 
 # Leaving necessary columns
 

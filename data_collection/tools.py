@@ -3,6 +3,7 @@ import os
 import pandas as pd
 from pandas import DataFrame
 
+
 # EXCEPTIONS
 class BadResponseException(Exception):
     pass
@@ -275,7 +276,7 @@ def from_lovd_to_pandas(path):
         print(f"Error: {e}")
 
 
-def from_clinvar_name_to_DNA(name):
+def from_clinvar_name_to_dna(name):
     """
     Custom cleaner to extract DNA from Clinvar name variable.
 
@@ -298,37 +299,3 @@ def from_clinvar_name_to_DNA(name):
             break
 
     return name[start:end]
-
-
-def calculate_max_frequency(row):
-    """
-    Calculating maximum allele frequency in GNOMAD row.
-
-    :param row: row in dataframe
-    :returns: panda series with 'PopMax', 'PopMax population' fields
-    :rtype: pd.Series
-    """
-
-    population_groups = [
-        'Admixed American',
-        'African/African American',
-        'Amish',
-        'Ashkenazi Jewish',
-        'East Asian',
-        'European (Finnish)',
-        'European (non-Finnish)',
-        'Middle Eastern',
-        'South Asian']
-
-    max_freq = 0
-    max_pop = population_groups[0]
-
-    for group in population_groups:
-        count_column = f'Allele Count {group}(gnomad)'
-        number_column = f'Allele Number {group}(gnomad)'
-        freq = row[count_column] / row[number_column]
-        if (freq > max_freq):
-            max_freq = freq
-            max_pop = group
-
-    return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
