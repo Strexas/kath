@@ -9,10 +9,12 @@ from pandas import DataFrame
 
 # EXCEPTIONS
 class BadResponseException(Exception):
+    """Custom exception for bad responses."""
     pass
 
 
 class DownloadError(Exception):
+    """Custom exception for download errors."""
     pass
 
 
