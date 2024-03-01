@@ -285,3 +285,45 @@ def from_clinvar_name_to_dna(name):
             break
 
     return name[start:end]
+
+
+def check_if_valid_name(gene,folder_path,raise_exception=False):
+    """
+    Checks if gene symbol is valid
+
+    :param str gene: gene's symbol
+    :param str folder_path: folder to save the data
+    :param bool raise_exception: True if raise exception, otherwise print into console
+    """
+
+    correct_symbol = True
+    with open(folder_path+f'{gene}.txt','r') as rf:
+        line = rf.readline()
+        if 'Error' in line:
+            correct_symbol = False
+    if not correct_symbol:
+        os.remove(folder_path+f"{gene}.txt")
+        if raise_exception:
+            raise DownloadError(f"Symbol: {gene} does not exist in the LOVD database")
+        else:
+            print(f"Symbol: {gene} does not exist in the LOVD database")
+
+
+
+def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
+    """
+    Downloads data into txt files from gene_list.
+
+    :param list gene_list: list of gene's symbols
+    :param str folder_path: folder to save the data
+    :param bool raise_exception: True if raise exception, otherwise print into console
+    """
+
+    for gene in gene_list:
+        url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
+        get_file_from_url(url,folder_path+f'/{gene}.txt')
+        check_if_valid_name(gene,folder_path,raise_exception)
+
+
+
+
