@@ -297,7 +297,7 @@ def check_if_valid_name(gene,folder_path,raise_exception=False):
     """
 
     correct_symbol = True
-    with open(folder_path+f'{gene}.txt','r') as rf:
+    with open(folder_path+f'{gene}.txt','r',encoding='utf-8') as rf:
         line = rf.readline()
         if 'Error' in line:
             correct_symbol = False
@@ -307,7 +307,6 @@ def check_if_valid_name(gene,folder_path,raise_exception=False):
             raise DownloadError(f"Symbol: {gene} does not exist in the LOVD database")
         else:
             print(f"Symbol: {gene} does not exist in the LOVD database")
-
 
 
 def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
@@ -322,8 +321,4 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
     for gene in gene_list:
         url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
         get_file_from_url(url,folder_path+f'/{gene}.txt')
-        check_if_valid_name(gene,folder_path,raise_exception)
-
-
-
-
+       git check_if_valid_name(gene,folder_path,raise_exception)
