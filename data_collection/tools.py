@@ -1,6 +1,7 @@
 import requests
 import os
 import pandas as pd
+import selenium.common
 from pandas import DataFrame
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -8,23 +9,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 import glob
-
-
-DATABASES_DOWNLOAD_PATHS = {
-    "clinvar": {
-        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
-        "url": "https://www.ncbi.nlm.nih.gov/clinvar/?term=EYS%5Bgene%5D&redir=gene",
-        "store_as": "clinvar_data.txt",
-        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/div[2]/div[1]/div/div[1]/a[3]"
-    },
-    "gnomad": {
-        "button":"document.getElementsByClassName('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
-        "url": "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4",
-        "store_as": "gnomad_data.csv",
-        "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]"
-    }
-}
-
 
 
 # EXCEPTIONS
@@ -166,15 +150,16 @@ LOVD_VARIABLES_DATA_TYPES = {
 }
 
 
-def get_file_from_url(url, save_to, override=False):
+def get_file_from_url(database_name, override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
-    :param str url: link with file
-    :param str save_to: path to save
+    :param str database_name: link with file
     :param bool override: needs override
     """
 
+    url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
+    save_to = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
     try:
         # check if directory exists, if not - create
         save_to_dir = os.path.dirname(save_to)
@@ -358,14 +343,19 @@ def calculate_max_frequency(row):
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
 
 
-def download_database(url, database_name, button_location, clickable):
+def download_database_for_eys_gene(database_name, override=False):
     """
     downloads chosen database
-    :param url: the url of the database's website
+    and handles where it should be saved,
+    renames the downloaded (latest) file to appropriate name
     :param database_name: the name of the database
-    :param button_location: button which should be clicked on page for download
-    :param clickable: an element in a webpage indicating that the download can start
+    :param override: should an existing file be overriden with a new one
     """
+
+    url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
+    button_location = DATABASES_DOWNLOAD_PATHS[database_name]["button"]
+    clickable = DATABASES_DOWNLOAD_PATHS[database_name]["clickable"]
+
     firefox_options = webdriver.FirefoxOptions()
     firefox_options.headless = True
     firefox_options.add_argument('--headless')
@@ -376,29 +366,12 @@ def download_database(url, database_name, button_location, clickable):
 
     driver = webdriver.Firefox(options=firefox_options)
     driver.get(url)
+    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, clickable)))
+    driver.execute_script(button_location)
 
-    try:
-        WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, clickable)))
-        driver.execute_script(button_location)
+    time.sleep(30)
+    driver.quit()
 
-        time.sleep(30)
-    except TimeoutError as e:
-        print(f"Error: {e}")
-    finally:
-        driver.quit()
-
-
-def store_database(database_name, override=False):
-    """
-    calls a function to download a database
-    and handles where it should be saved,
-    renames the downloaded (latest) file to appropriate name
-    :param database_name: the name of the database that should be downloaded
-    :param override: should already existing file be overwritten
-    """
-    if database_name not in DATABASES_DOWNLOAD_PATHS.keys():
-        print("Requested database is not supported")
-        return
     save_as = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
     os_path = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
 
@@ -407,14 +380,53 @@ def store_database(database_name, override=False):
     elif os.path.exists(os_path) and not override:
         print("File already exists")
         return
-
-    url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
-    button = DATABASES_DOWNLOAD_PATHS[database_name]["button"]
-    clickable = DATABASES_DOWNLOAD_PATHS[database_name]["clickable"]
-
-    download_database(url, database_name, button, clickable)
-
     list_of_files = glob.glob(os.path.join(os.getcwd(), "..", "data", database_name, '*'))
     latest_file = max(list_of_files, key=os.path.getctime)
     os.rename(latest_file, os_path)
 
+
+def store_database_for_eys_gene(database_name, override=False):
+    """
+    calls a function to download a database
+    :param database_name: the name of the database that should be downloaded
+    :param override: should already existing file be overwritten
+    """
+    try:
+        if database_name not in DATABASES_DOWNLOAD_PATHS:
+            raise IndexError(f"Requested {database_name} database is not supported")
+
+        DATABASES_DOWNLOAD_PATHS[database_name]["function"](database_name, override)
+
+    except TimeoutError as e:
+        print(f"Error: {e}")
+    except selenium.common.InvalidArgumentException as e:
+        print(f"Error: {e}")
+    except selenium.common.exceptions.WebDriverException as e:
+        print(f"Error: {e}")
+    except ValueError as e:
+        print(f"Error:{e}")
+    except IndexError as e:
+        print(f"Error:{e}")
+
+
+DATABASES_DOWNLOAD_PATHS = {
+    "clinvar": {
+        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
+        "url": "https://www.ncbi.nlm.nih.gov/clinvar/?term=EYS%5Bgene%5D&redir=gene",
+        "store_as": "clinvar_data.txt",
+        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/div[2]/div[1]/div/div[1]/a[3]",
+        "function": download_database_for_eys_gene
+    },
+    "gnomad": {
+        "button":"document.getElementsByClassName('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
+        "url": "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4",
+        "store_as": "gnomad_data.csv",
+        "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
+        "function": download_database_for_eys_gene
+    },
+    "lovd": {
+        "url": "https://databases.lovd.nl/shared/download/all/gene/EYS",
+        "store_as": "../data/lovd/lovd_data.txt",
+        "function": get_file_from_url
+    }
+}
