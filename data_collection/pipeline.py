@@ -2,8 +2,13 @@
 import pandas as pd
 
 from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna
-from constants import LOVD_FILE_URL, GNOMAD_FILE_URL, CLINVAR_FILE_URL, DATA_PATH, LOVD_PATH, GNOMAD_PATH, CLINVAR_PATH
-
+from constants import (LOVD_FILE_URL, 
+                       GNOMAD_FILE_URL, 
+                       CLINVAR_FILE_URL, 
+                       DATA_PATH, 
+                       LOVD_PATH, 
+                       GNOMAD_PATH, 
+                       CLINVAR_PATH)
 
 def calculate_max_frequency(row):
     """
