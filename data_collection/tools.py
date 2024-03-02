@@ -154,7 +154,7 @@ def get_file_from_url(database_name, override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
-    :param str database_name: link with file
+    :param str database_name: database to download
     :param bool override: needs override
     """
 
