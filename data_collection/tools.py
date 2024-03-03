@@ -5,6 +5,7 @@ import requests
 from requests.exceptions import RequestException
 import pandas as pd
 from pandas import DataFrame
+import logging
 
 
 # EXCEPTIONS
@@ -14,7 +15,6 @@ class BadResponseException(Exception):
 
 class DownloadError(Exception):
     """Custom exception for download errors."""
-
 
 # CONSTANTS
 LOVD_VARIABLES_DATA_TYPES = {
@@ -145,6 +145,9 @@ LOVD_VARIABLES_DATA_TYPES = {
     'owned_by': 'Integer',
     'Individual/Origin/Geographic': 'String'
 }
+
+# CONFIGURATIONS
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 def get_file_from_url(url, save_to, override=False):
@@ -287,25 +290,16 @@ def from_clinvar_name_to_dna(name):
     return name[start:end]
 
 
-def check_if_valid_name(gene,folder_path,raise_exception=False):
+def check_if_valid_response(text):
     """
     Checks if gene symbol is valid
 
-    :param str gene: gene's symbol
-    :param str folder_path: folder to save the data
-    :param bool raise_exception: True if raise exception, otherwise print into console
+    :param str text: response's text
     """
 
-    correct_symbol = True
-    with open(folder_path+f'{gene}.txt','r',encoding='utf-8') as rf:
-        line = rf.readline()
-        if 'Error' in line:
-            correct_symbol = False
-    if not correct_symbol:
-        os.remove(folder_path+f"{gene}.txt")
-        print(f"Symbol: {gene} does not exist in the LOVD database")
-        if raise_exception:
-            raise DownloadError(f"Symbol: {gene} does not exist in the LOVD database")
+    if 'Error' in text:
+        return False
+    return True
 
 
 
@@ -315,10 +309,18 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
 
     :param list gene_list: list of gene's symbols
     :param str folder_path: folder to save the data
-    :param bool raise_exception: True if raise exception, otherwise print into console
+    :param bool raise_exception: raise exception if True, otherwise log
     """
 
     for gene in gene_list:
+        file_path = folder_path + '/'+gene + ".txt"
         url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
-        get_file_from_url(url,folder_path+f'/{gene}.txt')
-        check_if_valid_name(gene,folder_path,raise_exception)
+        response = requests.get(url,timeout=10)
+        valid = check_if_valid_response(response.text[:6])
+        if valid:
+            get_file_from_url(url,file_path)
+        elif raise_exception:
+            raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
+        else:
+            logging.info(f"Symbol: {gene} does not exist in the LOVD database")
+
