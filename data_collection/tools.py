@@ -1,11 +1,11 @@
 """Module providing a functionality to collect data from various sources."""
 
 import os
+import logging
 import requests
 from requests.exceptions import RequestException
 import pandas as pd
 from pandas import DataFrame
-import logging
 
 
 # EXCEPTIONS
