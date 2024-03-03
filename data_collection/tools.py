@@ -312,7 +312,7 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
     :param bool raise_exception: raise exception if True, otherwise log
     """
 
-    for gene in gene_list:
+    for gene in gene_list:.
         file_path = folder_path + '/'+gene + ".txt"
         url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
         response = requests.get(url,timeout=10)
@@ -322,5 +322,4 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
         elif raise_exception:
             raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
         else:
-            logging.info(f"Symbol: {gene} does not exist in the LOVD database")
-
+            logging.info("Symbol: %s does not exist in the LOVD database",gene)
