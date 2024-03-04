@@ -1,2 +1,4 @@
 requests
 pandas
+glob2
+selenium
