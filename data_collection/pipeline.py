@@ -2,9 +2,9 @@
 import pandas as pd
 
 from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna
-from constants import (LOVD_FILE_URL,
-                       GNOMAD_FILE_URL,
-                       CLINVAR_FILE_URL,
+from constants import (LOVD_FILE_URL_EYS,
+                       GNOMAD_FILE_URL_EYS,
+                       CLINVAR_FILE_URL_EYS,
                        DATA_PATH,
                        LOVD_PATH,
                        GNOMAD_PATH,
@@ -47,9 +47,9 @@ def calculate_max_frequency(row):
 
 # MAIN
 # Download all data
-get_file_from_url(LOVD_FILE_URL, LOVD_PATH + "/lovd_data.txt", override=True)
-get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + "/gnomad_data.csv", override=True)
-get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + "/clinvar_data.txt", override=True)
+get_file_from_url(LOVD_FILE_URL_EYS, LOVD_PATH + "/lovd_data.txt", override=True)
+get_file_from_url(GNOMAD_FILE_URL_EYS, GNOMAD_PATH + "/gnomad_data.csv", override=True)
+get_file_from_url(CLINVAR_FILE_URL_EYS, CLINVAR_PATH + "/clinvar_data.txt", override=True)
 
 # Read and convert data
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")

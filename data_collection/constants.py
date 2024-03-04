@@ -1,15 +1,19 @@
 """Module for constants used in data collection."""
 
 # files
-LOVD_URL = "https://databases.lovd.nl/shared/genes/EYS"
-LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/EYS"
+LOVD_URL = "https://databases.lovd.nl/shared/genes"
+LOVD_URL_EYS = "https://databases.lovd.nl/shared/genes/EYS"
+LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene"
+LOVD_FILE_URL_EYS = "https://databases.lovd.nl/shared/download/all/gene/EYS"
 
-GNOMAD_URL = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
-GNOMAD_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28"
+GNOMAD_URL = "https://gnomad.broadinstitute.org/gene"
+GNOMAD_URL_EYS = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
+GNOMAD_FILE_URL_EYS = ("https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28"
                    "-T_3y&export=download")
 
-CLINVAR_URL = "https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D&redir=gene"
-CLINVAR_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF"
+CLINVAR_URL = "https://www.ncbi.nlm.nih.gov/clinvar"
+CLINVAR_URL_EYS = "https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D&redir=gene"
+CLINVAR_FILE_URL_EYS = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF"
                     "-H2U6u&export=download")
 
 # paths
