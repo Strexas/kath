@@ -4,7 +4,7 @@ import pandas as pd
 from pandas import DataFrame
 
 
-# Exceptions
+# EXCEPTIONS
 class BadResponseException(Exception):
     pass
 
@@ -232,25 +232,33 @@ def get_file_from_url(url, save_to, override=False):
         print(f"Error: {e}")
 
 
-def convert_lovd_to_datatypes(table):
+def convert_lovd_to_datatype(df_dict):
     """
-    Converts data from LOVD format to the desired data format based on the specified data types.
+    Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param dict[str, tuple[DataFrame, list[str]]] table: dictionary of tables
-    :returns: dictionary of tables with converted data types
-    :rtype: dict[str, tuple[DataFrame, list[str]]]
+    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables where each table is represented by its name
+     and contains a tuple with a DataFrame and a list of notes.
     """
 
-    try:
-        for table_name, (frame, notes) in table.items():
-            if table_name in LOVD_DATA_TYPES:
-                frame = frame.astype(LOVD_DATA_TYPES[table_name])
+    for constant_table_name, attributes in LOVD_DATA_TYPES.items():
+        frame, notes = df_dict[constant_table_name]
+        for column, data_type in attributes.items():
+            if column not in frame.columns:
+                continue
 
-            table[table_name] = (frame, notes)
-
-        return table
-    except Exception as e:
-        print(f"Error: {e}")
+            match data_type:
+                case "Date":
+                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
+                case "Boolean":
+                    frame[column] = (frame[column] != 0).astype('bool')
+                case "String":
+                    frame[column] = frame[column].astype('string')
+                case "Integer":
+                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
+                case "Double":
+                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
+                case _:
+                    continue
 
 
 def from_lovd_to_pandas(path):
