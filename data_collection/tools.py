@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import selenium.common
 from pandas import DataFrame
+from requests import RequestException
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -150,7 +151,39 @@ LOVD_VARIABLES_DATA_TYPES = {
 }
 
 
-def get_file_from_url(database_name, override=False):
+def get_file_from_url(url, save_to, override=False):
+    """
+    Gets file from url and saves it into provided path. Overrides, if override is True.
+
+    :param str url: link with file
+    :param str save_to: path to save
+    :param bool override: needs override
+    """
+
+    # check if directory exists, if not - create
+    save_to_dir = os.path.dirname(save_to)
+    if not os.path.exists(save_to_dir):
+        os.makedirs(save_to_dir)
+
+    # check if file exist and needs to override
+    if os.path.exists(save_to) and not override:
+        print(f"The file at {save_to} already exists.")
+        return
+
+    try:
+        response = requests.get(url, timeout=10)
+    except RequestException as e:
+        raise DownloadError(f"Error while downloading file from {url}") from e
+
+    if response.status_code != 200:
+        raise BadResponseException(f"Bad response from {url}."
+                                   f" Status code: {response.status_code}")
+
+    with open(save_to, "wb") as f:
+        f.write(response.content)
+
+
+def download_lovd_database(database_name, override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
@@ -427,6 +460,6 @@ DATABASES_DOWNLOAD_PATHS = {
     "lovd": {
         "url": "https://databases.lovd.nl/shared/download/all/gene/EYS",
         "store_as": "../data/lovd/lovd_data.txt",
-        "function": get_file_from_url
+        "function": download_lovd_database
     }
 }
