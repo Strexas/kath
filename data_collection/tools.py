@@ -1,193 +1,22 @@
-import requests
+"""Module providing a functionality to collect data from various sources."""
+
 import os
+import requests
+from requests.exceptions import RequestException
 import pandas as pd
 from pandas import DataFrame
+from constants import LOVD_VARIABLES_DATA_TYPES
+
 
 
 # EXCEPTIONS
 class BadResponseException(Exception):
-    pass
+    """Custom exception for bad responses."""
 
 
 class DownloadError(Exception):
-    pass
+    """Custom exception for download errors."""
 
-
-# CONSTANTS
-LOVD_DATA_TYPES = {
-    'Genes': {
-        'id': 'String',
-        'name': 'String',
-        'chromosome': 'Integer',
-        'chrom_band': 'String',
-        'imprinting': 'String',
-        'refseq_genomic': 'String',
-        'refseq_UD': 'String',
-        'reference': 'String',
-        'url_homepage': 'String',
-        'url_external': 'String',
-        'allow_download': 'Boolean',
-        'id_hgnc': 'Integer',
-        'id_entrez': 'Integer',
-        'id_omim': 'Integer',
-        'show_hgmd': 'Boolean',
-        'show_genecards': 'Boolean',
-        'show_genetests': 'Boolean',
-        'show_orphanet': 'Boolean',
-        'note_index': 'String',
-        'note_listing': 'String',
-        'refseq': 'String',
-        'refseq_url': 'String',
-        'disclaimer': 'Boolean',
-        'disclaimer_text': 'String',
-        'header': 'String',
-        'header_align': 'Integer',
-        'footer': 'String',
-        'footer_align': 'Integer',
-        'created_by': 'Integer',
-        'created_date': 'Date',
-        'edited_by': 'Integer',
-        'edited_date': 'Date',
-        'updated_by': 'Integer',
-        'updated_date': 'Date'
-    },
-    'Variants_On_Transcripts': {
-        'id': 'Integer',
-        'transcriptid': 'Integer',
-        'effectid': 'Integer',
-        'position_c_start': 'Integer',
-        'position_c_start_intron': 'Integer',
-        'position_c_end': 'Integer',
-        'position_c_end_intron': 'Integer',
-        'VariantOnTranscript/DNA': 'String',
-        'VariantOnTranscript/RNA': 'String',
-        'VariantOnTranscript/Protein': 'String',
-        'VariantOnTranscript/Exon': 'String'
-    },
-    'Diseases': {
-        'id': 'Integer',
-        'symbol': 'String',
-        'name': 'String',
-        'inheritance': 'String',
-        'id_omim': 'Integer',
-        'tissues': 'String',
-        'features': 'String',
-        'remarks': 'String',
-        'created_by': 'Integer',
-        'created_date': 'Date',
-        'edited_by': 'Integer',
-        'edited_date': 'Date'
-    },
-    'Transcripts': {
-        'id': 'Integer',
-        'geneid': 'String',
-        'name': 'String',
-        'id_mutalyzer': 'Integer',
-        'id_ncbi': 'String',
-        'id_ensembl': 'String',
-        'id_protein_ncbi': 'String',
-        'id_protein_ensembl': 'String',
-        'id_protein_uniprot': 'String',
-        'remarks': 'String',
-        'position_c_mrna_start': 'Integer',
-        'position_c_mrna_end': 'Integer',
-        'position_c_cds_end': 'Integer',
-        'position_g_mrna_start': 'Integer',
-        'position_g_mrna_end': 'Integer',
-        'created_by': 'Integer',
-        'created_date': 'Date',
-        'edited_by': 'Integer',
-        'edited_date': 'Date'
-    },
-    'Phenotypes': {
-        'id': 'Integer',
-        'diseaseid': 'Integer',
-        'individualid': 'Integer',
-        'owned_by': 'Integer',
-        'Phenotype/Inheritance': 'String',
-        'Phenotype/Age': 'String',
-        'Phenotype/Additional': 'String',
-        'Phenotype/Biochem_param': 'String',
-        'Phenotype/Age/Onset': 'String',
-        'Phenotype/Age/Diagnosis': 'String',
-        'Phenotype/Severity_score': 'String',
-        'Phenotype/Onset': 'String',
-        'Phenotype/Protein': 'String',
-        'Phenotype/Tumor/MSI': 'String',
-        'Phenotype/Enzyme/CPK': 'String',
-        'Phenotype/Heart/Myocardium': 'String',
-        'Phenotype/Lung': 'String',
-        'Phenotype/Diagnosis/Definite': 'String',
-        'Phenotype/Diagnosis/Initial': 'String',
-        'Phenotype/Diagnosis/Criteria': 'String'
-    },
-    'Screenings': {
-        'id': 'Integer',
-        'individualid': 'Integer',
-        'variants_found': 'Integer',
-        'owned_by': 'Integer',
-        'created_by': 'Integer',
-        'created_date': 'Date',
-        'edited_by': 'Integer',
-        'edited_date': 'Date',
-        'Screening/Technique': 'String',
-        'Screening/Template': 'String',
-        'Screening/Tissue': 'String',
-        'Screening/Remarks': 'String'
-    },
-    'Individuals': {
-        'id': 'Integer',
-        'fatherid': 'String',
-        'motherid': 'String',
-        'panelid': 'Integer',
-        'panel_size': 'Integer',
-        'license': 'String',
-        'owned_by': 'Integer',
-        'Individual/Reference': 'String',
-        'Individual/Remarks': 'String',
-        'Individual/Gender': 'String',
-        'Individual/Consanguinity': 'String',
-        'Individual/Origin/Geographic': 'String',
-        'Individual/Age_of_death': 'String',
-        'Individual/VIP': 'String',
-        'Individual/Data_av': 'String',
-        'Individual/Treatment': 'String',
-        'Individual/Origin/Population': 'String',
-        'Individual/Individual_ID': 'String'
-    },
-    'Variants_On_Genome': {
-        'id': 'Integer',
-        'allele': 'Integer',
-        'effectid': 'Integer',
-        'chromosome': 'Integer',
-        'position_g_start': 'Integer',
-        'position_g_end': 'Integer',
-        'type': 'String',
-        'average_frequency': 'Double',
-        'owned_by': 'Integer',
-        'VariantOnGenome/DBID': 'String',
-        'VariantOnGenome/DNA': 'String',
-        'VariantOnGenome/Frequency': 'String',
-        'VariantOnGenome/Reference': 'String',
-        'VariantOnGenome/Restriction_site': 'String',
-        'VariantOnGenome/Published_as': 'String',
-        'VariantOnGenome/Remarks': 'String',
-        'VariantOnGenome/Genetic_origin': 'String',
-        'VariantOnGenome/Segregation': 'String',
-        'VariantOnGenome/dbSNP': 'String',
-        'VariantOnGenome/VIP': 'String',
-        'VariantOnGenome/Methylation': 'String',
-        'VariantOnGenome/ISCN': 'String',
-        'VariantOnGenome/DNA/hg38': 'String',
-        'VariantOnGenome/ClinVar': 'String',
-        'VariantOnGenome/ClinicalClassification': 'String',
-        'VariantOnGenome/ClinicalClassification/Method': 'String'
-    },
-    'Screenings_To_Variants': {
-        'screeningid': 'Integer',
-        'variantid': 'Integer'
-    }
-}
 
 
 def get_file_from_url(url, save_to, override=False):
@@ -199,37 +28,27 @@ def get_file_from_url(url, save_to, override=False):
     :param bool override: needs override
     """
 
+    # check if directory exists, if not - create
+    save_to_dir = os.path.dirname(save_to)
+    if not os.path.exists(save_to_dir):
+        os.makedirs(save_to_dir)
+
+    # check if file exist and needs to override
+    if os.path.exists(save_to) and not override:
+        print(f"The file at {save_to} already exists.")
+        return
+
     try:
-        # check if directory exists, if not - create
-        save_to_dir = os.path.dirname(save_to)
-        if not os.path.exists(save_to_dir):
-            os.makedirs(save_to_dir)
+        response = requests.get(url, timeout=10)
+    except RequestException as e:
+        raise DownloadError(f"Error while downloading file from {url}") from e
 
-        # check if file exist and needs to override
-        if os.path.exists(save_to) and not override:
-            print(f"The file at {save_to} already exists.")
-            return
+    if response.status_code != 200:
+        raise BadResponseException(f"Bad response from {url}."
+                                   f" Status code: {response.status_code}")
 
-        try:
-            response = requests.get(url)
-        except requests.exceptions.RequestException as e:
-            raise DownloadError(f"Error downloading file from {url}: {e}")
-
-        if response.status_code != 200:
-            raise BadResponseException(f"Bad response from {url}. Status code: {response.status_code}")
-
-        with open(save_to, "wb") as f:
-            f.write(response.content)
-
-    # check request exceptions
-    except BadResponseException as e:
-        print(f"Error: {e}")
-
-    except DownloadError as e:
-        print(f"Error: {e}")
-
-    except Exception as e:
-        print(f"Error: {e}")
+    with open(save_to, "wb") as f:
+        f.write(response.content)
 
 
 def convert_lovd_to_datatype(df_dict):
@@ -272,34 +91,39 @@ def from_lovd_to_pandas(path):
     :rtype: dict[str, tuple[DataFrame, list[str]]]
     """
 
-    try:
-        # Check if the file exists
-        if not os.path.exists(path):
-            raise FileNotFoundError(f"The file at {path} does not exist.")
+    # Check if the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"The file at {path} does not exist.")
 
-        d = dict()
+    d = {}
 
-        with open(path) as f:
-            # skip header
-            [f.readline() for _ in range(4)]
+    with open(path, encoding="UTF-8") as f:
+        # skip header
+        [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
-            while True:
+        while True:
+            line = f.readline()
+
+            if line == '':
+                break
+
+            table_name = line.split("##")[1].strip()
+
+            notes = []
+            line = f.readline()
+            while line.startswith("##"):
+                notes.append(line[2:-1])
                 line = f.readline()
 
-                if line == '':
-                    break
-
-                table_name = line.split("##")[1].strip()
-
-                notes = []
+            table_header = [column[3:-3] for column in line[:-1].split('\t')]
+            frame = DataFrame([], columns=table_header)
+            line = f.readline()
+            while line != '\n':
+                variables = [variable[1:-1] for variable in line[:-1].split('\t')]
+                observation = DataFrame([variables], columns=table_header)
+                frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
-                while line.startswith("##"):
-                    notes.append(line[2:-1])
-                    line = f.readline()
 
-                table_header = [column[3:-3] for column in line[:-1].split('\t')]
-                frame = DataFrame([], columns=table_header)
-                line = f.readline()
                 while line != '\n':
                     variables = [variable[1:-1] for variable in line[:-1].split('\t')]
                     observation = DataFrame([variables], columns=table_header)
@@ -310,15 +134,15 @@ def from_lovd_to_pandas(path):
                 # skip inter tables lines
                 [f.readline() for _ in range(1)]
 
-        return d
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
 
-    except Exception as e:
-        print(f"Error: {e}")
+            d[table_name] = (frame, notes)
+            # skip inter tables lines
+            [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
+
+    return d
 
 
-def from_clinvar_name_to_DNA(name):
+def from_clinvar_name_to_dna(name):
     """
     Custom cleaner to extract DNA from Clinvar name variable.
 
@@ -341,37 +165,4 @@ def from_clinvar_name_to_DNA(name):
             break
 
     return name[start:end]
-
-
-def calculate_max_frequency(row):
-    """
-    Calculating maximum allele frequency in GNOMAD row.
-
-    :param row: row in dataframe
-    :returns: panda series with 'PopMax', 'PopMax population' fields
-    :rtype: pd.Series
-    """
-
-    population_groups = [
-        'Admixed American',
-        'African/African American',
-        'Amish',
-        'Ashkenazi Jewish',
-        'East Asian',
-        'European (Finnish)',
-        'European (non-Finnish)',
-        'Middle Eastern',
-        'South Asian']
-
-    max_freq = 0
-    max_pop = population_groups[0]
-
-    for group in population_groups:
-        count_column = f'Allele Count {group}(gnomad)'
-        number_column = f'Allele Number {group}(gnomad)'
-        freq = row[count_column] / row[number_column]
-        if (freq > max_freq):
-            max_freq = freq
-            max_pop = group
-
-    return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
+  
