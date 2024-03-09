@@ -146,10 +146,6 @@ LOVD_VARIABLES_DATA_TYPES = {
     'Individual/Origin/Geographic': 'String'
 }
 
-# CONFIGURATIONS
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
-
 def get_file_from_url(url, save_to, override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
@@ -289,20 +285,6 @@ def from_clinvar_name_to_dna(name):
 
     return name[start:end]
 
-
-def check_if_valid_response(text):
-    """
-    Checks if gene symbol is valid
-
-    :param str text: response's text
-    """
-
-    if 'Error' in text:
-        return False
-    return True
-
-
-
 def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
     """
     Downloads data into txt files from gene_list.
@@ -315,11 +297,19 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
     for gene in gene_list:
         file_path = folder_path + '/'+gene + ".txt"
         url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
-        response = requests.get(url,timeout=10)
-        valid = check_if_valid_response(response.text[:6])
+        try:
+            response = requests.get(url, timeout=10)
+        except RequestException as e:
+            raise DownloadError(f"Error while downloading file from {url}") from e
+
+        if response.status_code != 200:
+            raise BadResponseException(f"Bad response from {url}."
+                                       f" Status code: {response.status_code}")
+        #If gene does not exist, the first word of the file will be Error
+        valid = 'Error' not in response.text[:6]
         if valid:
             get_file_from_url(url,file_path)
         elif raise_exception:
             raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
         else:
-            logging.info("Symbol: %s does not exist in the LOVD database",gene)
+            logging.error("Symbol: %s does not exist in the LOVD database",gene)
