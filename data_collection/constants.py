@@ -151,3 +151,29 @@ LOVD_VARIABLES_DATA_TYPES = {
     'owned_by': 'Integer',
     'Individual/Origin/Geographic': 'String'
 }
+
+
+DATABASES_DOWNLOAD_PATHS = {
+    "clinvar": {
+        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.'
+                  'clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
+        "url": CLINVAR_URL_EYS,
+        "store_as": "clinvar_data.txt",
+        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/"
+                     "div[2]/div[1]/div/div[1]/a[3]",
+        "function": "download_database_for_eys_gene"
+    },
+    "gnomad": {
+        "button": "document.getElementsByClassName"
+                  "('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
+        "url": GNOMAD_URL_EYS,
+        "store_as": "gnomad_data.csv",
+        "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
+        "function": "download_database_for_eys_gene"
+    },
+    "lovd": {
+        "url": LOVD_FILE_URL_EYS,
+        "store_as": "../data/lovd/lovd_data.txt",
+        "function": "download_lovd_database_for_eys_gene"
+    }
+}
