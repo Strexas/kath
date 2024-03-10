@@ -1,17 +1,23 @@
 """Module providing a functionality to collect data from various sources."""
 
+
+import glob
+import logging
 import os
+import time
+
 import requests
-import pandas as pd
-import selenium.common
-from pandas import DataFrame
 from requests import RequestException
+
+import pandas as pd
+from pandas import DataFrame
+
+import selenium.common
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
-import glob
+
 from constants import LOVD_VARIABLES_DATA_TYPES
 from constants import (LOVD_FILE_URL_EYS,
                        GNOMAD_URL_EYS,
@@ -25,6 +31,7 @@ class BadResponseException(Exception):
 
 class DownloadError(Exception):
     """Custom exception for download errors."""
+
 
 
 def get_file_from_url(url, save_to, override=False):
@@ -205,6 +212,36 @@ def from_clinvar_name_to_dna(name):
     return name[start:end]
 
 
+def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
+    """
+    Downloads data into txt files from gene_list.
+
+    :param list gene_list: list of gene's symbols
+    :param str folder_path: folder to save the data
+    :param bool raise_exception: raise exception if True, otherwise log
+    """
+
+    for gene in gene_list:
+        file_path = folder_path + '/'+gene + ".txt"
+        url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
+        try:
+            response = requests.get(url, timeout=10)
+        except RequestException as e:
+            raise DownloadError(f"Error while downloading file from {url}") from e
+
+        if response.status_code != 200:
+            raise BadResponseException(f"Bad response from {url}."
+                                       f" Status code: {response.status_code}")
+        #If gene does not exist, the first word of the file will be Error
+        valid = 'Error' not in response.text[:6]
+        if valid:
+            get_file_from_url(url,file_path)
+        elif raise_exception:
+            raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
+        else:
+            logging.error("Symbol: %s does not exist in the LOVD database",gene)
+
+
 def download_database_for_eys_gene(database_name, override=False):
     """
     downloads chosen database
@@ -223,8 +260,13 @@ def download_database_for_eys_gene(database_name, override=False):
     firefox_options.add_argument('--headless')
     firefox_options.set_preference("browser.download.folderList", 2)
     firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
-    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", database_name))
-    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+    firefox_options.set_preference("browser.download.dir",
+                                   os.path.join(os.getcwd(),
+                                                "..",
+                                                "data",
+                                                database_name))
+    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk",
+                                   "application/octet-stream")
 
     driver = webdriver.Firefox(options=firefox_options)
     driver.get(url)
@@ -277,14 +319,17 @@ def store_database_for_eys_gene(database_name, override=False):
 
 DATABASES_DOWNLOAD_PATHS = {
     "clinvar": {
-        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
+        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.'
+                  'clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
         "url": CLINVAR_URL_EYS,
         "store_as": "clinvar_data.txt",
-        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/div[2]/div[1]/div/div[1]/a[3]",
+        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/"
+                     "div[2]/div[1]/div/div[1]/a[3]",
         "function": download_database_for_eys_gene
     },
     "gnomad": {
-        "button":"document.getElementsByClassName('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
+        "button":"document.getElementsByClassName"
+                 "('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
         "url": GNOMAD_URL_EYS,
         "store_as": "gnomad_data.csv",
         "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
