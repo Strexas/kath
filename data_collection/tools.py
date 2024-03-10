@@ -255,8 +255,13 @@ def download_database_for_eys_gene(database_name, override=False):
     firefox_options.add_argument('--headless')
     firefox_options.set_preference("browser.download.folderList", 2)
     firefox_options.set_preference("browser.download.manager.showWhenStarting", False)
-    firefox_options.set_preference("browser.download.dir", os.path.join(os.getcwd(), "..", "data", database_name))
-    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/octet-stream")
+    firefox_options.set_preference("browser.download.dir",
+                                   os.path.join(os.getcwd(),
+                                                "..",
+                                                "data",
+                                                database_name))
+    firefox_options.set_preference("browser.helperApps.neverAsk.saveToDisk",
+                                   "application/octet-stream")
 
     driver = webdriver.Firefox(options=firefox_options)
     driver.get(url)
