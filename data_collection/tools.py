@@ -4,11 +4,10 @@
 import glob
 import logging
 import os
+import time
 
 import requests
 from requests import RequestException
-
-import time
 
 import pandas as pd
 from pandas import DataFrame
