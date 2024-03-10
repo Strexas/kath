@@ -1,18 +1,24 @@
 """Module providing a functionality to collect data from various sources."""
 
-import os
+
+import glob
 import logging
+import os
+
 import requests
-import pandas as pd
-import selenium.common
-from pandas import DataFrame
 from requests import RequestException
+
+import time
+
+import pandas as pd
+from pandas import DataFrame
+
+import selenium.common
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
-import glob
+
 from constants import LOVD_VARIABLES_DATA_TYPES
 from constants import (LOVD_FILE_URL_EYS,
                        GNOMAD_URL_EYS,
