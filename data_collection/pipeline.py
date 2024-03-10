@@ -1,26 +1,12 @@
 """Module executes general pipeline for data collection"""
 import pandas as pd
 
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna
-
-# CONSTANTS
-# files
-LOVD_URL = "https://databases.lovd.nl/shared/genes/EYS"
-LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/EYS"
-
-GNOMAD_URL = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
-GNOMAD_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28"
-                   "-T_3y&export=download")
-
-CLINVAR_URL = "https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D&redir=gene"
-CLINVAR_FILE_URL = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF"
-                    "-H2U6u&export=download")
-
-# path
-DATA_PATH = "../data"
-LOVD_PATH = DATA_PATH + "/lovd"
-GNOMAD_PATH = DATA_PATH + "/gnomad"
-CLINVAR_PATH = DATA_PATH + "/clinvar"
+from tools import store_database_for_eys_gene, from_lovd_to_pandas, from_clinvar_name_to_dna
+from constants import (
+                       DATA_PATH,
+                       LOVD_PATH,
+                       GNOMAD_PATH,
+                       CLINVAR_PATH)
 
 
 def calculate_max_frequency(row):
@@ -41,7 +27,9 @@ def calculate_max_frequency(row):
         'European (Finnish)',
         'European (non-Finnish)',
         'Middle Eastern',
-        'South Asian']
+        'South Asian',
+        'Remaining'
+    ]
 
     max_freq = 0
     max_pop = population_groups[0]
@@ -60,9 +48,13 @@ def calculate_max_frequency(row):
 
 # MAIN
 # Download all data
-get_file_from_url(LOVD_FILE_URL, LOVD_PATH + "/lovd_data.txt", override=True)
-get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + "/gnomad_data.csv", override=True)
-get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + "/clinvar_data.txt", override=True)
+
+#get_file_from_url(LOVD_FILE_URL, LOVD_PATH + f"/lovd_data.txt", override=True)
+#get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
+#get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
+store_database_for_eys_gene('lovd', True)
+store_database_for_eys_gene('gnomad', True)
+store_database_for_eys_gene('clinvar', True)
 
 # Read and convert data
 lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
