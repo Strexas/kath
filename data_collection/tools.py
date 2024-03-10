@@ -309,6 +309,6 @@ def store_database_for_eys_gene(database_name, override=False):
     except IndexError as e:
         print(f"Error:{e}")
     except BadResponseException as e:
-        print(f"Error:{e}")g
+        print(f"Error:{e}")
     except DownloadError as e:
         print(f"Error:{e}")
