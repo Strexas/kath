@@ -295,6 +295,7 @@ def store_database_for_eys_gene(database_name, override=False):
         if database_name not in DATABASES_DOWNLOAD_PATHS:
             raise IndexError(f"Requested {database_name} database is not supported")
 
+        # pylint disable: eval-used
         eval(DATABASES_DOWNLOAD_PATHS[database_name]["function"])(database_name, override)
 
     except TimeoutError as e:
@@ -308,6 +309,6 @@ def store_database_for_eys_gene(database_name, override=False):
     except IndexError as e:
         print(f"Error:{e}")
     except BadResponseException as e:
-        print(f"Error:{e}")
+        print(f"Error:{e}")g
     except DownloadError as e:
         print(f"Error:{e}")
