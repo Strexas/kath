@@ -1,9 +1,9 @@
 """Module for constants used in data collection."""
 
 # files
-LOVD_URL = "https://databases.lovd.nl/shared/genes"
+LOVD_URL = "https://databases.lovd.nl/shared/genes/"
 LOVD_URL_EYS = "https://databases.lovd.nl/shared/genes/EYS"
-LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene"
+LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/"
 LOVD_FILE_URL_EYS = "https://databases.lovd.nl/shared/download/all/gene/EYS"
 
 GNOMAD_URL = "https://gnomad.broadinstitute.org/gene"
