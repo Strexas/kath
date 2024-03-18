@@ -1,27 +1,24 @@
 """Module providing a functionality to collect data from various sources."""
 
-
 import glob
 import logging
 import os
 import time
 
-import requests
-from requests import RequestException
-
 import pandas as pd
-from pandas import DataFrame
-
+import requests
 import selenium.common
+from pandas import DataFrame
+from requests import RequestException
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-from constants import LOVD_VARIABLES_DATA_TYPES
-from constants import (LOVD_FILE_URL_EYS,
-                       GNOMAD_URL_EYS,
-                       CLINVAR_URL_EYS)
+from constants import (LOVD_FILE_URL,
+                       LOVD_PATH,
+                       LOVD_VARIABLES_DATA_TYPES,
+                       DATABASES_DOWNLOAD_PATHS)
 
 
 # EXCEPTIONS
@@ -31,7 +28,6 @@ class BadResponseException(Exception):
 
 class DownloadError(Exception):
     """Custom exception for download errors."""
-
 
 
 def get_file_from_url(url, save_to, override=False):
@@ -212,7 +208,7 @@ def from_clinvar_name_to_dna(name):
     return name[start:end]
 
 
-def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
+def download_gene_lovd(gene_list: list, folder_path=LOVD_PATH, raise_exception=False):
     """
     Downloads data into txt files from gene_list.
 
@@ -222,8 +218,8 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
     """
 
     for gene in gene_list:
-        file_path = folder_path + '/'+gene + ".txt"
-        url = f"https://databases.lovd.nl/shared/download/all/gene/{gene}"
+        file_path = os.path.join(folder_path, gene + ".txt")
+        url = LOVD_FILE_URL + gene
         try:
             response = requests.get(url, timeout=10)
         except RequestException as e:
@@ -232,14 +228,14 @@ def download_gene_lovd(gene_list:list,folder_path,raise_exception = False):
         if response.status_code != 200:
             raise BadResponseException(f"Bad response from {url}."
                                        f" Status code: {response.status_code}")
-        #If gene does not exist, the first word of the file will be Error
+        # If gene does not exist, the first word of the file will be Error
         valid = 'Error' not in response.text[:6]
         if valid:
-            get_file_from_url(url,file_path)
+            get_file_from_url(url, file_path)
         elif raise_exception:
             raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
         else:
-            logging.error("Symbol: %s does not exist in the LOVD database",gene)
+            logging.error("Symbol: %s does not exist in the LOVD database", gene)
 
 
 def download_database_for_eys_gene(database_name, override=False):
@@ -299,7 +295,8 @@ def store_database_for_eys_gene(database_name, override=False):
         if database_name not in DATABASES_DOWNLOAD_PATHS:
             raise IndexError(f"Requested {database_name} database is not supported")
 
-        DATABASES_DOWNLOAD_PATHS[database_name]["function"](database_name, override)
+        # pylint: disable=eval-used
+        eval(DATABASES_DOWNLOAD_PATHS[database_name]["function"])(database_name, override)
 
     except TimeoutError as e:
         print(f"Error: {e}")
@@ -315,29 +312,3 @@ def store_database_for_eys_gene(database_name, override=False):
         print(f"Error:{e}")
     except DownloadError as e:
         print(f"Error:{e}")
-
-
-DATABASES_DOWNLOAD_PATHS = {
-    "clinvar": {
-        "button": 'document.getElementsByName(\"EntrezSystem2.PEntrez.clinVar.'
-                  'clinVar_Entrez_ResultsPanel.Entrez_DisplayBar.SendToSubmit\")[0].click()',
-        "url": CLINVAR_URL_EYS,
-        "store_as": "clinvar_data.txt",
-        "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/"
-                     "div[2]/div[1]/div/div[1]/a[3]",
-        "function": download_database_for_eys_gene
-    },
-    "gnomad": {
-        "button":"document.getElementsByClassName"
-                 "('Button__BaseButton-sc-1eobygi-0 Button-sc-1eobygi-1 indcWT')[4].click()",
-        "url": GNOMAD_URL_EYS,
-        "store_as": "gnomad_data.csv",
-        "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
-        "function": download_database_for_eys_gene
-    },
-    "lovd": {
-        "url": LOVD_FILE_URL_EYS,
-        "store_as": "../data/lovd/lovd_data.txt",
-        "function": download_lovd_database_for_eys_gene
-    }
-}
