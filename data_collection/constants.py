@@ -1,5 +1,7 @@
 """Module for constants used in data collection."""
 
+import os
+
 # files
 LOVD_URL = "https://databases.lovd.nl/shared/genes"
 LOVD_URL_EYS = LOVD_URL + "EYS"
@@ -9,18 +11,19 @@ LOVD_FILE_URL_EYS = LOVD_FILE_URL + "EYS"
 GNOMAD_URL = "https://gnomad.broadinstitute.org/gene"
 GNOMAD_URL_EYS = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
 GNOMAD_FILE_URL_EYS = ("https://drive.usercontent.google.com/u/0/uc?id=1crkDCVcC0PSnv0JPGj3FpemBs28"
-                   "-T_3y&export=download")
+                       "-T_3y&export=download")
 
 CLINVAR_URL = "https://www.ncbi.nlm.nih.gov/clinvar"
 CLINVAR_URL_EYS = "https://www.ncbi.nlm.nih.gov/clinvar/?term=eys%5Bgene%5D&redir=gene"
 CLINVAR_FILE_URL_EYS = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3k5h0K6f-qfwJSQj7tlF"
-                    "-H2U6u&export=download")
+                        "-H2U6u&export=download")
 
 # paths
-DATA_PATH = "../data/"
-LOVD_PATH = DATA_PATH + "lovd/"
-GNOMAD_PATH = DATA_PATH + "gnomad/"
-CLINVAR_PATH = DATA_PATH + "clinvar/"
+DATA_PATH = os.path.join(__file__[:__file__.index("kath") + 4], "data/")
+
+LOVD_PATH = os.path.join(DATA_PATH, "lovd/")
+GNOMAD_PATH = os.path.join(DATA_PATH, "gnomad/")
+CLINVAR_PATH = os.path.join(DATA_PATH, "clinvar/")
 
 # variable data types
 LOVD_TABLES_DATA_TYPES = {
@@ -195,9 +198,19 @@ LOVD_TABLES_DATA_TYPES = {
     'Screenings_To_Variants': {
         'screeningid': 'Integer',
         'variantid': 'Integer'
-    }
+    },
+    'Genes_To_Diseases': {
+        'geneid': 'String',
+        'diseaseid': 'Integer'
+    },
+    'Individuals_To_Diseases': {
+        'individualid': 'Integer',
+        'diseaseid': 'Integer'
+    },
+    'Screenings_To_Genes': {
+        'screeningid': 'Integer',
+        'geneid': 'String'}
 }
-
 
 DATABASES_DOWNLOAD_PATHS = {
     "clinvar": {
