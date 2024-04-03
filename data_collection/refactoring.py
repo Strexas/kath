@@ -1,9 +1,12 @@
-import os
+""" Module dedicated for refactoring collected data for further processing """
 
-from .constants import LOVD_TABLES_DATA_TYPES
+import os
 
 import pandas as pd
 from pandas import DataFrame
+
+from .constants import LOVD_TABLES_DATA_TYPES
+
 
 
 def convert_lovd_to_datatype(df_dict):
