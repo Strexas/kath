@@ -1,4 +1,4 @@
-"""Module providing a functionality to collect data from various sources."""
+""" Module providing a functionality to collect data from various sources """
 
 import glob
 import logging
