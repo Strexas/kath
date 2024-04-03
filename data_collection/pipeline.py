@@ -1,11 +1,8 @@
 """Module executes general pipeline for data collection"""
 import pandas as pd
 
-from collection import get_file_from_url, from_clinvar_name_to_dna, store_database_for_eys_gene
-from refactoring import parse_lovd, _convert_lovd_to_datatype
-from constants import (LOVD_FILE_URL_EYS,
-                       GNOMAD_FILE_URL_EYS,
-                       CLINVAR_FILE_URL_EYS,
+from .collection import store_database_for_eys_gene
+from .refactoring import parse_lovd, convert_lovd_to_datatype, from_clinvar_name_to_cdna_position
 from constants import (DATA_PATH,
                        LOVD_PATH,
                        GNOMAD_PATH,
@@ -51,10 +48,6 @@ def calculate_max_frequency(row):
 
 # MAIN
 # Download all data
-
-#get_file_from_url(LOVD_FILE_URL, LOVD_PATH + f"/lovd_data.txt", override=True)
-#get_file_from_url(GNOMAD_FILE_URL, GNOMAD_PATH + f"/gnomad_data.csv", override=True)
-#get_file_from_url(CLINVAR_FILE_URL, CLINVAR_PATH + f"/clinvar_data.txt", override=True)
 store_database_for_eys_gene('lovd', True)
 store_database_for_eys_gene('gnomad', True)
 store_database_for_eys_gene('clinvar', True)
@@ -64,7 +57,7 @@ lovd_data = parse_lovd(LOVD_PATH + "/lovd_data.txt")
 gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
 clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
 
-_convert_lovd_to_datatype(lovd_data)
+convert_lovd_to_datatype(lovd_data)
 
 # renaming databases' columns
 gnomad_data.columns += "(gnomad)"
@@ -78,7 +71,8 @@ notes = lovd_data["Variants_On_Transcripts"][1][::]
 clinvar = clinvar_data.copy()[["Name(clinvar)",
                                "Germline classification(clinvar)",
                                "Accession(clinvar)"]]
-clinvar["VariantOnTranscript/DNA"] = clinvar["Name(clinvar)"].apply(from_clinvar_name_to_dna)
+clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
+                                      apply(from_clinvar_name_to_cdna_position))
 
 main_frame = pd.merge(main_frame,
                       clinvar,

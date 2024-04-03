@@ -10,11 +10,11 @@ def convert_lovd_to_datatype(df_dict):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of LOVD tables saved as ``DataFrame``
+    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables saved as DataFrame
     """
     # TODO: rewrite to cast using only `astype`, remove second loop, optimize int usage
     for table_name in df_dict:
-        frame, notes = df_dict[table_name]
+        frame: DataFrame = df_dict[table_name][0]
         for column in frame.columns:
             if column not in LOVD_TABLES_DATA_TYPES[table_name]:
                 raise ValueError(f"Column {column} is undefined in LOVD_TABLES_DATA_TYPES")
@@ -41,7 +41,7 @@ def parse_lovd(path):
     Key is name of table, value is tuple, where first element is data saved as
     pandas DataFrame and second element is list of notes provided for table.
 
-    **IMPORTANT:** It doesn't provide types for data inside. Use ``convert_lovd_to_datatype`` for this.
+    **IMPORTANT:** It doesn't provide types for data inside. Use convert_lovd_to_datatype for this.
 
     :param str path: path to text file
     :returns: dictionary of tables
