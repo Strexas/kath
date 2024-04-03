@@ -1,7 +1,8 @@
 """Module executes general pipeline for data collection"""
 import pandas as pd
 
-from tools import get_file_from_url, from_lovd_to_pandas, from_clinvar_name_to_dna, store_database_for_eys_gene
+from collection import get_file_from_url, from_clinvar_name_to_dna, store_database_for_eys_gene
+from refactoring import parse_lovd, _convert_lovd_to_datatype
 from constants import (LOVD_FILE_URL_EYS,
                        GNOMAD_FILE_URL_EYS,
                        CLINVAR_FILE_URL_EYS,
@@ -59,11 +60,11 @@ store_database_for_eys_gene('gnomad', True)
 store_database_for_eys_gene('clinvar', True)
 
 # Read and convert data
-lovd_data = from_lovd_to_pandas(LOVD_PATH + "/lovd_data.txt")
+lovd_data = parse_lovd(LOVD_PATH + "/lovd_data.txt")
 gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
 clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
 
-convert_lovd_to_datatype(lovd_data)
+_convert_lovd_to_datatype(lovd_data)
 
 # renaming databases' columns
 gnomad_data.columns += "(gnomad)"

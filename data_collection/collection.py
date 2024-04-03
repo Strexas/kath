@@ -5,21 +5,18 @@ import logging
 import os
 import time
 
-import pandas as pd
 import requests
-import selenium.common
-from pandas import DataFrame
 from requests import RequestException
+
+import selenium.common
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from constants import (LOVD_FILE_URL,
-                       LOVD_PATH,
-                       LOVD_VARIABLES_DATA_TYPES,
-                       DATABASES_DOWNLOAD_PATHS)
-
+from .constants import (LOVD_FILE_URL,
+                        LOVD_PATH,
+                        DATABASES_DOWNLOAD_PATHS)
 
 
 # EXCEPTIONS
@@ -40,19 +37,19 @@ def get_file_from_url(url, save_to, override=False):
     :param bool override: needs override
     """
 
+    # check if path is not directory
+    if os.path.isdir(save_to):
+        raise IsADirectoryError("Specified path is a directory, specify name of file")
+
     # check if directory exists, if not - create
-    save_to_dir = os.path.dirname(save_to)
-    if not os.path.exists(save_to_dir):
-        os.makedirs(save_to_dir)
-    # check if directory exists, if not - create
-    save_to_dir = os.path.dirname(save_to)
-    if not os.path.exists(save_to_dir):
-        os.makedirs(save_to_dir)
+    directory = os.path.dirname(save_to)
+    if not os.path.exists(directory):
+        # TODO: notify about creation of folder
+        os.makedirs(directory)
 
     # check if file exist and needs to override
     if os.path.exists(save_to) and not override:
-        print(f"The file at {save_to} already exists.")
-        return
+        raise FileExistsError(f"The file at {save_to} already exists.")
 
     try:
         response = requests.get(url, timeout=10)
@@ -101,123 +98,7 @@ def download_lovd_database_for_eys_gene(database_name, override=False):
         f.write(response.content)
 
 
-def convert_lovd_to_datatype(df_dict):
-    """
-    Convert data from LOVD format table to desired data format based on specified data types.
-
-    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables where each table is represented by its name
-     and contains a tuple with a DataFrame and a list of notes.
-    """
-
-    for constant_table_name, attributes in LOVD_DATA_TYPES.items():
-        frame, notes = df_dict[constant_table_name]
-        for column, data_type in attributes.items():
-            if column not in frame.columns:
-                continue
-
-            match data_type:
-                case "Date":
-                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
-                case "Boolean":
-                    frame[column] = (frame[column] != 0).astype('bool')
-                case "String":
-                    frame[column] = frame[column].astype('string')
-                case "Integer":
-                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('Int64')
-                case "Double":
-                    frame[column] = pd.to_numeric(frame[column], errors='coerce').astype('float')
-                case _:
-                    continue
-
-
-def from_lovd_to_pandas(path):
-    """
-    Converts data from text file with LOVD format to dictionary of tables. \
-    Key is name of table, value is tuple, where first element is data saved as \
-    pandas DataFrame and second element is list of notes.
-
-    :param str path: path to text file
-    :returns: dictionary of tables
-    :rtype: dict[str, tuple[DataFrame, list[str]]]
-    """
-
-    # Check if the file exists
-    if not os.path.exists(path):
-        raise FileNotFoundError(f"The file at {path} does not exist.")
-
-    d = {}
-
-    with open(path, encoding="UTF-8") as f:
-        # skip header
-        [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
-
-        while True:
-            line = f.readline()
-
-            if line == '':
-                break
-
-            table_name = line.split("##")[1].strip()
-
-            notes = []
-            line = f.readline()
-            while line.startswith("##"):
-                notes.append(line[2:-1])
-                line = f.readline()
-
-            table_header = [column[3:-3] for column in line[:-1].split('\t')]
-            frame = DataFrame([], columns=table_header)
-            line = f.readline()
-            while line != '\n':
-                variables = [variable[1:-1] for variable in line[:-1].split('\t')]
-                observation = DataFrame([variables], columns=table_header)
-                frame = pd.concat([frame, observation], ignore_index=True)
-                line = f.readline()
-
-                while line != '\n':
-                    variables = [variable[1:-1] for variable in line[:-1].split('\t')]
-                    observation = DataFrame([variables], columns=table_header)
-                    frame = pd.concat([frame, observation], ignore_index=True)
-                    line = f.readline()
-
-                d[table_name] = (frame, notes)
-                # skip inter tables lines
-                [f.readline() for _ in range(1)]
-
-
-            d[table_name] = (frame, notes)
-            # skip inter tables lines
-            [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
-
-    return d
-
-
-def from_clinvar_name_to_dna(name):
-    """
-    Custom cleaner to extract DNA from Clinvar name variable.
-
-    :param str name:
-    :returns: extracted DNA
-    :rtype: str
-    """
-
-    start = name.find(":") + 1
-    ends = {'del', 'delins', 'dup', 'ins', 'inv', 'subst'}
-
-    if "p." in name:
-        name = name[:name.index("p.") - 1].strip()
-
-    end = len(name)
-
-    for i in ends:
-        if i in name:
-            end = name.index(i) + len(i)
-            break
-
-    return name[start:end]
-
-
-def download_gene_lovd(gene_list: list, folder_path=LOVD_PATH, raise_exception=False):
+def download_genes_lovd(gene_list: list, folder_path=LOVD_PATH, raise_exception=False):
     """
     Downloads data into txt files from gene_list.
 
@@ -298,8 +179,9 @@ def store_database_for_eys_gene(database_name, override=False):
     """
     calls a function to download a database
     :param database_name: the name of the database that should be downloaded
-    :param override: should already existing file be overwritten
+    :param override: should be already existing file be overwritten
     """
+
     try:
         if database_name not in DATABASES_DOWNLOAD_PATHS:
             raise IndexError(f"Requested {database_name} database is not supported")
