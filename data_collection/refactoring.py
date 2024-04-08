@@ -15,7 +15,7 @@ def convert_lovd_to_datatype(df_dict):
 
     :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables saved as DataFrame
     """
-    # TODO: rewrite to cast using only `astype`, remove second loop, optimize int usage
+
     for table_name in df_dict:
         frame: DataFrame = df_dict[table_name][0]
         for column in frame.columns:
@@ -51,7 +51,6 @@ def parse_lovd(path):
     :rtype: dict[str, tuple[DataFrame, list[str]]]
     """
 
-    # TODO: remove notes from dict, they should be logged using `logging` module
     # Check if the file exists
     if not os.path.exists(path):
         raise FileNotFoundError(f"The file at {path} does not exist.")
