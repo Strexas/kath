@@ -120,7 +120,10 @@ def main():
 
     # final join
     main_frame = main_frame.iloc[:, range(13)]
-    main_frame = pd.merge(main_frame, lovd_with_gnomad, how="left", on=list(main_frame.columns[:13]))
+    main_frame = pd.merge(main_frame,
+                          lovd_with_gnomad,
+                          how="left",
+                          on=list(main_frame.columns[:13]))
 
     main_frame.to_csv(DATA_PATH + "/final.csv")
 
