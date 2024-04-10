@@ -47,75 +47,86 @@ def calculate_max_frequency(row):
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
 
 
-# MAIN
-# Download all data
-store_database_for_eys_gene('lovd', True)
-store_database_for_eys_gene('gnomad', True)
-store_database_for_eys_gene('clinvar', True)
+def main():
+    """
+    Main function implementing pipeline for data collection and merging of data from
+    LOVD, GNOMAD and CLINVAR.
+    """
 
-# Read and convert data
-lovd_data = parse_lovd(LOVD_PATH + "/lovd_data.txt")
-gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
-clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
+    # Download all data
+    store_database_for_eys_gene('lovd', True)
+    store_database_for_eys_gene('gnomad', True)
+    store_database_for_eys_gene('clinvar', True)
 
-convert_lovd_to_datatype(lovd_data)
+    # Read and convert data
+    lovd_data = parse_lovd(LOVD_PATH + "/lovd_data.txt")
+    gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
+    clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
 
-# renaming databases' columns
-gnomad_data.columns += "(gnomad)"
-clinvar_data.columns += "(clinvar)"
+    convert_lovd_to_datatype(lovd_data)
 
-# Reading main working table
-main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
-notes = lovd_data["Variants_On_Transcripts"][1][::]
+    # renaming databases' columns
+    gnomad_data.columns += "(gnomad)"
+    clinvar_data.columns += "(clinvar)"
 
-# Merging Clinvar
-clinvar = clinvar_data.copy()[["Name(clinvar)",
-                               "Germline classification(clinvar)",
-                               "Accession(clinvar)"]]
-clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
-                                      apply(from_clinvar_name_to_cdna_position))
+    # Reading main working table
+    main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
 
-main_frame = pd.merge(main_frame,
-                      clinvar,
-                      how="outer",
-                      on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
+    # Merging Clinvar
+    clinvar = clinvar_data.copy()[["Name(clinvar)",
+                                   "Germline classification(clinvar)",
+                                   "Accession(clinvar)"]]
+    clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
+                                          apply(from_clinvar_name_to_cdna_position))
 
-# MERGING GnomAd
-main_frame = (pd.merge(main_frame,
-                       gnomad_data,
-                       how="left",
-                       left_on="VariantOnTranscript/DNA",
-                       right_on="HGVS Consequence(gnomad)").drop("HGVS Consequence(gnomad)",
-                                                                 axis=1))
+    main_frame = pd.merge(main_frame,
+                          clinvar,
+                          how="outer",
+                          on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
 
-# Calculating frequencies
-lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])
-lovd_with_gnomad = main_frame[~lovd_without_association_in_gnomad].copy()
-max_values = lovd_with_gnomad.apply(calculate_max_frequency, axis=1)
-lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
+    # MERGING GnomAd
+    main_frame = (pd.merge(main_frame,
+                           gnomad_data,
+                           how="left",
+                           left_on="VariantOnTranscript/DNA",
+                           right_on="HGVS Consequence(gnomad)").
+                  drop("HGVS Consequence(gnomad)",
+                       axis=1))
 
-# Leaving necessary columns
+    # Calculating frequencies
+    lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])
+    lovd_with_gnomad = main_frame[~lovd_without_association_in_gnomad].copy()
+    max_values = lovd_with_gnomad.apply(calculate_max_frequency, axis=1)
+    lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
 
-lovd_with_gnomad = lovd_with_gnomad.loc[:, ['id',
-                                            'transcriptid',
-                                            'effectid',
-                                            'position_c_start',
-                                            'position_c_start_intron',
-                                            'position_c_end',
-                                            'position_c_end_intron',
-                                            'VariantOnTranscript/DNA',
-                                            'VariantOnTranscript/RNA',
-                                            'VariantOnTranscript/Protein',
-                                            'VariantOnTranscript/Exon',
-                                            'Germline classification(clinvar)',
-                                            'Accession(clinvar)',
-                                            'Allele Frequency(gnomad)',
-                                            'Homozygote Count(gnomad)',
-                                            'PopMax(gnomad)',
-                                            'PopMax population(gnomad)']]
+    # Leaving necessary columns
+    lovd_with_gnomad = lovd_with_gnomad.loc[:, ['id',
+                                                'transcriptid',
+                                                'effectid',
+                                                'position_c_start',
+                                                'position_c_start_intron',
+                                                'position_c_end',
+                                                'position_c_end_intron',
+                                                'VariantOnTranscript/DNA',
+                                                'VariantOnTranscript/RNA',
+                                                'VariantOnTranscript/Protein',
+                                                'VariantOnTranscript/Exon',
+                                                'Germline classification(clinvar)',
+                                                'Accession(clinvar)',
+                                                'Allele Frequency(gnomad)',
+                                                'Homozygote Count(gnomad)',
+                                                'PopMax(gnomad)',
+                                                'PopMax population(gnomad)']]
 
-# final join
-main_frame = main_frame.iloc[:, range(13)]
-main_frame = pd.merge(main_frame, lovd_with_gnomad, how="left", on=list(main_frame.columns[:13]))
+    # final join
+    main_frame = main_frame.iloc[:, range(13)]
+    main_frame = pd.merge(main_frame,
+                          lovd_with_gnomad,
+                          how="left",
+                          on=list(main_frame.columns[:13]))
 
-main_frame.to_csv(DATA_PATH + "/final.csv")
+    main_frame.to_csv(DATA_PATH + "/final.csv")
+
+
+if __name__ == "__main__":
+    main()
