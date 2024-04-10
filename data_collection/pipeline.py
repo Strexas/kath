@@ -48,7 +48,11 @@ def calculate_max_frequency(row):
 
 
 def main():
-    # MAIN
+    """
+    Main function implementing pipeline for data collection and merging of data from
+    LOVD, GNOMAD and CLINVAR.
+    """
+
     # Download all data
     store_database_for_eys_gene('lovd', True)
     store_database_for_eys_gene('gnomad', True)
@@ -67,7 +71,6 @@ def main():
 
     # Reading main working table
     main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
-    notes = lovd_data["Variants_On_Transcripts"][1][::]
 
     # Merging Clinvar
     clinvar = clinvar_data.copy()[["Name(clinvar)",
@@ -86,8 +89,9 @@ def main():
                            gnomad_data,
                            how="left",
                            left_on="VariantOnTranscript/DNA",
-                           right_on="HGVS Consequence(gnomad)").drop("HGVS Consequence(gnomad)",
-                                                                     axis=1))
+                           right_on="HGVS Consequence(gnomad)").
+                  drop("HGVS Consequence(gnomad)",
+                       axis=1))
 
     # Calculating frequencies
     lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])
@@ -96,7 +100,6 @@ def main():
     lovd_with_gnomad[['PopMax(gnomad)', 'PopMax population(gnomad)']] = max_values
 
     # Leaving necessary columns
-
     lovd_with_gnomad = lovd_with_gnomad.loc[:, ['id',
                                                 'transcriptid',
                                                 'effectid',
