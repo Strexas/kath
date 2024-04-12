@@ -84,7 +84,7 @@ def parse_lovd(path):
                 notes += (f"\n    - Note {i}: {line[3:-1]}")
                 i += 1
                 line = f.readline()
-                
+
             # Log notes for each table
             if notes:
                 log.info("[%s]%s", table_name, notes)
