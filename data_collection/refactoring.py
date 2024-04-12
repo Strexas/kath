@@ -9,7 +9,8 @@ from pandas import DataFrame
 from .constants import LOVD_TABLES_DATA_TYPES
 
 # Configure logging
-log.basicConfig(level=log.INFO, format="%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+log.basicConfig(level=log.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def convert_lovd_to_datatype(df_dict):
@@ -65,7 +66,7 @@ def parse_lovd(path):
         [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
         # Notify about parsing in log
-        log.info(f"Parsing file {path} using parse_lovd.")
+        log.info("Parsing file %s using parse_lovd.", path)
 
         while True:
             line = f.readline()
@@ -86,7 +87,7 @@ def parse_lovd(path):
                 
             # Log notes for each table
             if notes:
-                log.info(f"[{table_name}]{notes}")
+                log.info("[%s]%s", table_name, notes)
 
             table_header = [column[3:-3] for column in line[:-1].split('\t')]
             frame = DataFrame([], columns=table_header)
@@ -97,7 +98,7 @@ def parse_lovd(path):
                 frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
 
-            d[table_name] = (frame)
+            d[table_name] = frame
 
             # skip inter tables lines
             [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
