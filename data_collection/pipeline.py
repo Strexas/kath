@@ -1,7 +1,7 @@
 """ Module executes general pipeline for data collection """
 
-import pandas as pd
 import logging
+import pandas as pd
 
 from .collection import store_database_for_eys_gene
 from .refactoring import parse_lovd, convert_lovd_to_datatype, from_clinvar_name_to_cdna_position
