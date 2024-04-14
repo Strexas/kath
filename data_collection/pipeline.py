@@ -1,5 +1,6 @@
 """ Module executes general pipeline for data collection """
 
+import logging
 import pandas as pd
 
 from .collection import store_database_for_eys_gene
@@ -9,6 +10,9 @@ from .constants import (DATA_PATH,
                        GNOMAD_PATH,
                        CLINVAR_PATH)
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S")
 
 def calculate_max_frequency(row):
     """

@@ -1,13 +1,12 @@
 """ Module dedicated for refactoring collected data for further processing """
 
 import os
+import logging
 
 import pandas as pd
 from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES
-
-
 
 def convert_lovd_to_datatype(df_dict):
     """
@@ -41,8 +40,8 @@ def parse_lovd(path):
     """
     Converts data from text file with LOVD format to dictionary of tables.
 
-    Key is name of table, value is tuple, where first element is data saved as
-    pandas DataFrame and second element is list of notes provided for table.
+    Key is name of table, value is data saved as pandas DataFrame.
+    Notes for each table are displayed with log.
 
     **IMPORTANT:** It doesn't provide types for data inside. Use convert_lovd_to_datatype for this.
 
@@ -61,6 +60,9 @@ def parse_lovd(path):
         # skip header
         [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
+        # Notify about parsing in log
+        logging.info("Parsing file %s using parse_lovd.", path)
+
         while True:
             line = f.readline()
 
@@ -69,11 +71,18 @@ def parse_lovd(path):
 
             table_name = line.split("##")[1].strip()
 
-            notes = []
+            # Save notes for each table
+            notes = ""
+            i = 1
             line = f.readline()
             while line.startswith("##"):
-                notes.append(line[2:-1])
+                notes += f"\n    - Note {i}: {line[3:-1]}"
+                i += 1
                 line = f.readline()
+
+            # Log notes for each table
+            if notes:
+                logging.info("[%s]%s", table_name, notes)
 
             table_header = [column[3:-3] for column in line[:-1].split('\t')]
             frame = DataFrame([], columns=table_header)
@@ -84,7 +93,7 @@ def parse_lovd(path):
                 frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
 
-            d[table_name] = (frame, notes)
+            d[table_name] = frame
 
             # skip inter tables lines
             [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned
