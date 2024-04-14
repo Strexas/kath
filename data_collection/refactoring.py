@@ -1,17 +1,12 @@
 """ Module dedicated for refactoring collected data for further processing """
 
 import os
-import logging as log
+import logging
 
 import pandas as pd
 from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES
-
-# Configure logging
-log.basicConfig(level=log.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S")
-
 
 def convert_lovd_to_datatype(df_dict):
     """
@@ -46,7 +41,7 @@ def parse_lovd(path):
     Converts data from text file with LOVD format to dictionary of tables.
 
     Key is name of table, value is data saved as pandas DataFrame.
-    Notes for each tables are displayed with log.
+    Notes for each table are displayed with log.
 
     **IMPORTANT:** It doesn't provide types for data inside. Use convert_lovd_to_datatype for this.
 
@@ -66,7 +61,7 @@ def parse_lovd(path):
         [f.readline() for _ in range(4)]  # pylint: disable=expression-not-assigned
 
         # Notify about parsing in log
-        log.info("Parsing file %s using parse_lovd.", path)
+        logging.info("Parsing file %s using parse_lovd.", path)
 
         while True:
             line = f.readline()
@@ -81,13 +76,13 @@ def parse_lovd(path):
             i = 1
             line = f.readline()
             while line.startswith("##"):
-                notes += (f"\n    - Note {i}: {line[3:-1]}")
+                notes += f"\n    - Note {i}: {line[3:-1]}"
                 i += 1
                 line = f.readline()
 
             # Log notes for each table
             if notes:
-                log.info("[%s]%s", table_name, notes)
+                logging.info("[%s]%s", table_name, notes)
 
             table_header = [column[3:-3] for column in line[:-1].split('\t')]
             frame = DataFrame([], columns=table_header)
