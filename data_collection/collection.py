@@ -45,6 +45,7 @@ def get_file_from_url(url, save_to, override=False):
     directory = os.path.dirname(save_to)
     if not os.path.exists(directory):
         os.makedirs(directory)
+        logging.info(f"Created directory: {directory}")
 
     # check if file exist and needs to override
     if os.path.exists(save_to) and not override:
