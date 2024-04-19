@@ -4,7 +4,8 @@ import logging
 import pandas as pd
 
 from .collection import store_database_for_eys_gene
-from .refactoring import parse_lovd, convert_lovd_to_datatype, from_clinvar_name_to_cdna_position
+from .refactoring import (parse_lovd, convert_lovd_to_datatype,
+    from_clinvar_name_to_cdna_position, merge_lovd_with_gnomad)
 from .constants import (DATA_PATH,
                        LOVD_PATH,
                        GNOMAD_PATH,
@@ -89,13 +90,7 @@ def main():
                           on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
 
     # MERGING GnomAd
-    main_frame = (pd.merge(main_frame,
-                           gnomad_data,
-                           how="left",
-                           left_on="VariantOnTranscript/DNA",
-                           right_on="HGVS Consequence(gnomad)").
-                  drop("HGVS Consequence(gnomad)",
-                       axis=1))
+    main_frame = merge_lovd_with_gnomad(main_frame, gnomad_data)
 
     # Calculating frequencies
     lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])

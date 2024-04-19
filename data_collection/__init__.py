@@ -54,5 +54,8 @@ from .refactoring import (
   # Functions for refactoring data
   convert_lovd_to_datatype,
   parse_lovd,
-  from_clinvar_name_to_cdna_position
+  from_clinvar_name_to_cdna_position,
+
+  # Functions for data merging
+  merge_lovd_with_gnomad,
 )
