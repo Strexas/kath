@@ -124,3 +124,19 @@ def from_clinvar_name_to_cdna_position(name):
             break
 
     return name[start:end]
+
+def merge_lovd_with_gnomad(lovd_data, gnomad_data):
+    """
+    Merges LOVD and GNOMAD data based on DNA variant.
+
+    :param DataFrame lovd_data: LOVD data
+    :param DataFrame gnomad_data: GNOMAD data
+    :returns: merged data
+    :rtype: DataFrame
+    """
+
+    return pd.merge(lovd_data,
+                    gnomad_data,
+                    how="outer",
+                    left_on="VariantOnTranscript/DNA",
+                    right_on="Transcript Consequence(gnomad)")
