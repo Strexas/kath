@@ -52,7 +52,7 @@ from .collection import (
 # DATA REFACTORING IMPORT
 from .refactoring import (
   # Functions for refactoring data
-  convert_lovd_to_datatype,
-  parse_lovd,
-  from_clinvar_name_to_cdna_position
+    set_lovd_dtypes,
+    parse_lovd,
+    from_clinvar_name_to_cdna_position
 )

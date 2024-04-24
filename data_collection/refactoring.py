@@ -8,7 +8,7 @@ from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES
 
-def convert_lovd_to_datatype(df_dict):
+def set_lovd_dtypes(df_dict):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
@@ -16,24 +16,25 @@ def convert_lovd_to_datatype(df_dict):
     """
 
     for table_name in df_dict:
-        frame: DataFrame = df_dict[table_name][0]
+        frame: DataFrame = df_dict[table_name]
         for column in frame.columns:
             if column not in LOVD_TABLES_DATA_TYPES[table_name]:
                 raise ValueError(f"Column {column} is undefined in LOVD_TABLES_DATA_TYPES")
 
             match LOVD_TABLES_DATA_TYPES[table_name][column]:
                 case "Date":
-                    frame[column] = pd.to_datetime(frame[column])
+                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
                 case "Boolean":
-                    frame[column] = (frame[column] != 0).astype('bool')
+                    frame[column] = frame[column].map({"0": False, "1": True})
                 case "String":
                     frame[column] = frame[column].astype('string')
-                case "Integer64":
+                case "Integer":
                     frame[column] = pd.to_numeric(frame[column]).astype('Int64')
                 case "Double":
                     frame[column] = pd.to_numeric(frame[column]).astype('float')
                 case _:
-                    raise ValueError("Undefined data type")
+                    raise ValueError(f"Undefined data type: "
+                                     f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
 
 
 def parse_lovd(path):

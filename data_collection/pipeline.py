@@ -1,10 +1,10 @@
-""" Module executes general pipeline for data collection """
+""" Module executes general pipeline for data collection. FILE WILL BE DEPRECATED. """
 
 import logging
 import pandas as pd
 
 from .collection import store_database_for_eys_gene
-from .refactoring import parse_lovd, convert_lovd_to_datatype, from_clinvar_name_to_cdna_position
+from .refactoring import parse_lovd, set_lovd_dtypes, from_clinvar_name_to_cdna_position
 from .constants import (DATA_PATH,
                        LOVD_PATH,
                        GNOMAD_PATH,
@@ -67,7 +67,7 @@ def main():
     gnomad_data = pd.read_csv(GNOMAD_PATH + "/gnomad_data.csv")
     clinvar_data = pd.read_csv(CLINVAR_PATH + "/clinvar_data.txt", sep='\t')
 
-    convert_lovd_to_datatype(lovd_data)
+    set_lovd_dtypes(lovd_data)
 
     # renaming databases' columns
     gnomad_data.columns += "(gnomad)"
