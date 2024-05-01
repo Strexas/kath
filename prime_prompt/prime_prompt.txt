@@ -1,0 +1,77 @@
+Documentation for get_file_from_url
+    Gets file from url and saves it into provided path. Overrides, if override is True.
+
+    :param str url: link with file
+    :param str save_to: path to save
+    :param bool override: needs override
+
+
+Documentation for download_lovd_database_for_eys_gene
+    Gets file from url and saves it into provided path. Overrides, if override is True.
+
+    :param str database_name: database to download
+    :param bool override: needs override
+
+
+Documentation for download_genes_lovd
+    Downloads data into txt files from gene_list.
+
+    :param list gene_list: list of gene's symbols
+    :param str folder_path: folder to save the data
+    :param bool raise_exception: raise exception if True, otherwise log
+
+
+Documentation for download_database_for_eys_gene
+    downloads chosen database
+    and handles where it should be saved,
+    renames the downloaded (latest) file to appropriate name
+    :param database_name: the name of the database
+    :param override: should an existing file be overriden with a new one
+
+
+Documentation for store_database_for_eys_gene
+    calls a function to download a database
+    :param database_name: the name of the database that should be downloaded
+    :param override: should be already existing file be overwritten
+
+
+Documentation for calculate_max_frequency
+    Calculating maximum allele frequency in GNOMAD row.
+
+    :param row: row in dataframe
+    :returns: panda series with 'PopMax', 'PopMax population' fields
+    :rtype: pd.Series
+
+
+Documentation for main
+    Main function implementing pipeline for data collection and merging of data from
+    LOVD, GNOMAD and CLINVAR.
+
+
+Documentation for set_lovd_dtypes
+    Convert data from LOVD format table to desired data format based on specified data types.
+
+    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables saved as DataFrame
+
+
+Documentation for parse_lovd
+    Converts data from text file with LOVD format to dictionary of tables.
+
+    Key is name of table, value is data saved as pandas DataFrame.
+    Notes for each table are displayed with log.
+
+    **IMPORTANT:** It doesn't provide types for data inside. Use convert_lovd_to_datatype for this.
+
+    :param str path: path to text file
+    :returns: dictionary of tables
+    :rtype: dict[str, tuple[DataFrame, list[str]]]
+
+
+Documentation for from_clinvar_name_to_cdna_position
+    Custom cleaner to extract cDNA position from Clinvar `name` variable.
+
+    :param str name:
+    :returns: extracted cDNA
+    :rtype: str
+
+
