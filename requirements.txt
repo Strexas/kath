@@ -1,3 +1,5 @@
 requests
 pandas
 selenium
+spliceai
+tensorflow
