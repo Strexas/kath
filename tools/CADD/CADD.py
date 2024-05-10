@@ -4,7 +4,7 @@ def fetch_cadd_score(cadd_version, chromosome, position):
     """
     Fetches a single SNV (Single Nucleotide Variant) score from the Combined Annotation Dependent Depletion (CADD) tool.
     
-    :param str cadd_version: Version of the CADD model used, e.g., "v1.3" or "GRCh38-v17.7".
+    :param str cadd_version: Version of the CADD model used, e.g., "v1.3" or "GRCh38-v1.7".
     :param int chromosome: Chromosome number where the SNV is located.
     :param int position: Genomic position of the SNV on the chromosome.
     :return: A dictionary containing CADD scores and annotations for the specified SNV, or None if an error occurs.
@@ -26,7 +26,7 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end):
     """
     Fetches CADD (Combined Annotation Dependent Depletion) scores for a range of genomic positions.
 
-    :param str cadd_version: Version of the CADD model used, e.g., "v1.3" or "GRCh38-v17.7".
+    :param str cadd_version: Version of the CADD model used, e.g., "v1.3" or "GRCh38-v1.7".
     :param int chromosome: Chromosome number for the genomic region.
     :param int start: Genomic start position of the region.
     :param int end: Genomic end position of the region.
