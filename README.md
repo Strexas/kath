@@ -15,3 +15,10 @@ python install -r requirements.txt
 ./install_spliceai.sh
 spliceai -I ./tests/tools/spliceai/input.vcf -O ./tests/tools/spliceai/actual_output.vcf -R ./tools/spliceai/hg19.fa -A grch37
 ```
+
+## Usage
+### CADD
+CADD SNV scoress can be obtained in JSON format:
+```
+python -c 'from tools.CADD.CADD import *; print(fetch_cadd_score("v1.3", 5, 2003402))'
+```
