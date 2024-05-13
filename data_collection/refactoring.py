@@ -2,6 +2,7 @@
 
 import os
 import logging
+import re
 
 import pandas as pd
 from pandas import DataFrame
@@ -125,3 +126,54 @@ def from_clinvar_name_to_cdna_position(name):
             break
 
     return name[start:end]
+
+
+def filter_eys_genes(clinvar_data):
+    """
+    Filters out EYS genes from ClinVar data.
+
+    :param DataFrame clinvar_data: Dataframe data
+    :returns: filtered data
+    """
+    filtered_data = []
+    ends = {'del', 'delins', 'dup', 'ins', 'inv', 'subst'}
+    for item in clinvar_data["Name"]:
+        if "(EYS)" in item:
+            match = re.match(r'^.*\(EYS\):(c\.[A-Za-z0-9_]+>[A-Za-z])(?:\s*\(.*\))?', item)
+            if match and not any(end in match.group(1) for end in ends):
+                filtered_data.append(match.group(1))
+
+    return filtered_data
+
+
+def lovd_gnomad_merge(lovd, clinvar):
+    """
+    Merges LOVD and GnomAD data based on the DNA position.
+
+    :param dict[str, dict[DataFrame, str]] lovd: LOVD data
+    :param DataFrame clinvar: ClinVar data
+    :returns: Merged data
+    :rtype: list[str]
+    """
+    # region_EYS_extraction
+    filtered_data = filter_eys_genes(clinvar)
+
+    lovd_data = lovd
+
+    gene_ids = []
+
+    for key, value in lovd_data["Variants_On_Transcripts"]["VariantOnTranscript/DNA"].items():
+        if value in filtered_data:
+            gene_id = key
+            if gene_id:
+                gene_ids.append(key)
+                print(key)
+
+    final_dna = []
+    for key, value in lovd_data["Variants_On_Genome"]["VariantOnGenome/DNA/hg38"].items():
+        if key in gene_ids:
+            gene = value
+            if gene:
+                final_dna.append(gene)
+
+    return final_dna
