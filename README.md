@@ -20,4 +20,4 @@ spliceai -I ./tests/tools/spliceai/input.vcf -O ./tests/tools/spliceai/actual_ou
 ### CADD
 CADD SNV scoress can be obtained in JSON format:
 
-`python tools/CADD/CADD.py v1.3 5 --position 2003402` or `python tools/CADD/CADD.py GRCh38-v1.4 22 --start 44044001 --end 44044002`
+`python tools/cadd/cadd.py v1.3 5 --position 2003402` or `python tools/cadd/cadd.py GRCh38-v1.4 22 --start 44044001 --end 44044002`
