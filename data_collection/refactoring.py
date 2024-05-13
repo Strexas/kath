@@ -154,4 +154,3 @@ def save_lovd_as_vcf(df, save_to):
 
             f.write("\t".join(record))
             f.write("\n")
-
