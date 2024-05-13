@@ -1,7 +1,7 @@
 """ Module provides interface to web APIs of CADD tool. """
 
-import requests
 import argparse
+import requests
 
 def fetch_cadd_score(cadd_version, chromosome, position):
     """
