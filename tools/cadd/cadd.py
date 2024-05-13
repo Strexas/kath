@@ -23,9 +23,13 @@ def fetch_cadd_score(cadd_version, chromosome, position):
             return data
         print(f"Error: {response.status_code} - {response.text}")
         return None
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
+    except requests.exceptions.Timeout:
+        print("Error: Timeout occurred while trying to reach the server.")
+    except requests.exceptions.RequestException as req_err:
+        print(f"Error: {req_err}")
+    except ValueError:
+        print("Error: Invalid JSON format in response.")
+    return None
 
 def fetch_cadd_scores(cadd_version, chromosome, start, end):
     """
@@ -47,9 +51,13 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end):
             return data
         print(f"Error: {response.status_code} - {response.text}")
         return None
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
+    except requests.exceptions.Timeout:
+        print("Error: Timeout occurred while trying to reach the server.")
+    except requests.exceptions.RequestException as req_err:
+        print(f"Error: {req_err}")
+    except ValueError:
+        print("Error: Invalid JSON format in response.")
+    return None
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch CADD scores for genomic positions.")
