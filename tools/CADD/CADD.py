@@ -14,6 +14,7 @@ def fetch_cadd_score(cadd_version, chromosome, position):
     :return: A dictionary containing CADD scores and annotations
     for the specified SNV, or None if an error occurs.
     """
+
     url = f"https://cadd.gs.washington.edu/api/v1.0/{cadd_version}/{chromosome}:{position}"
     try:
         response = requests.get(url)
@@ -38,6 +39,7 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end):
     :return: A dictionary containing CADD scores and annotations
     for the specified genomic region, or None if an error occurs.
     """
+    
     url = f"https://cadd.gs.washington.edu/api/v1.0/{cadd_version}/{chromosome}:{start}-{end}"
     try:
         response = requests.get(url)
