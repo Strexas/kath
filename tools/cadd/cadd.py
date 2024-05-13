@@ -17,7 +17,7 @@ def fetch_cadd_score(cadd_version, chromosome, position):
 
     url = f"https://cadd.gs.washington.edu/api/v1.0/{cadd_version}/{chromosome}:{position}"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout = 30)
         if response.status_code == 200:
             data = response.json()
             return data
@@ -41,7 +41,7 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end):
 
     url = f"https://cadd.gs.washington.edu/api/v1.0/{cadd_version}/{chromosome}:{start}-{end}"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout = 30)
         if response.status_code == 200:
             data = response.json()
             return data
