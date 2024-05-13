@@ -1,3 +1,5 @@
+""" Module provides interface to web APIs of CADD tool. """
+
 import requests
 import argparse
 
