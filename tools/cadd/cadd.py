@@ -3,6 +3,15 @@
 import argparse
 import requests
 
+
+class BadResponseException(Exception):
+    """Custom exception for bad responses."""
+
+
+class DownloadError(Exception):
+    """Custom exception for download errors."""
+
+
 def fetch_cadd_score(cadd_version, chromosome, position):
     """
     Fetches a single SNV (Single Nucleotide Variant) score
@@ -21,14 +30,13 @@ def fetch_cadd_score(cadd_version, chromosome, position):
         if response.status_code == 200:
             data = response.json()
             return data
-        print(f"Error: {response.status_code} - {response.text}")
-        return None
-    except requests.exceptions.Timeout:
-        print("Error: Timeout occurred while trying to reach the server.")
+        raise BadResponseException (f"Error: {response.status_code} - {response.text}")
+    except requests.exceptions.Timeout as exc:
+        raise DownloadError("Error: Timeout occurred while trying to reach the server.") from exc
     except requests.exceptions.RequestException as req_err:
-        print(f"Error: {req_err}")
-    except ValueError:
-        print("Error: Invalid JSON format in response.")
+        raise DownloadError(f"Error: {req_err}") from req_err
+    except ValueError as exc:
+        raise BadResponseException("Error: Invalid JSON format in response.") from exc
     return None
 
 def fetch_cadd_scores(cadd_version, chromosome, start, end):
@@ -51,12 +59,12 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end):
             return data
         print(f"Error: {response.status_code} - {response.text}")
         return None
-    except requests.exceptions.Timeout:
-        print("Error: Timeout occurred while trying to reach the server.")
+    except requests.exceptions.Timeout as exc:
+        raise DownloadError("Error: Timeout occurred while trying to reach the server.") from exc
     except requests.exceptions.RequestException as req_err:
-        print(f"Error: {req_err}")
-    except ValueError:
-        print("Error: Invalid JSON format in response.")
+        raise DownloadError(f"Error: {req_err}") from req_err
+    except ValueError as exc:
+        raise BadResponseException("Error: Invalid JSON format in response.") from exc
     return None
 
 if __name__ == "__main__":
