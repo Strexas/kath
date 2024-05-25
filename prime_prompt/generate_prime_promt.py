@@ -29,7 +29,7 @@ def scan_docs(path: str):
                     break
                 function_documentation += lines[i]
                 i += 1
-            yield function_name, documentation
+            yield function_name, function_documentation
 
 
 llm_related_modules = ["data_collection"]
