@@ -125,3 +125,32 @@ def from_clinvar_name_to_cdna_position(name):
             break
 
     return name[start:end]
+
+
+def save_lovd_as_vcf(df, save_to):
+    """
+    Gets hg38 variants from LOVD and saves as VCF file.
+    :param DataFrame df: LOVD DataFrame with data
+    :param str save_to: path where to save VCF file.
+    """
+
+    if "VariantOnGenome/DNA/hg38" not in df.columns:
+        raise ValueError("VariantOnGenome/DNA/hg38 is not in the LOVD DataFrame.")
+
+    save_to_dir = os.path.dirname(save_to)
+    if not os.path.exists(save_to_dir):
+        os.makedirs(save_to_dir)
+
+    with open(save_to, "w", encoding="UTF-8") as f:
+        header = ("##fileformat=VCFv4.2\n"
+                  "##contig=<ID=6,length=63719980>\n"
+                  "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n")
+        f.write(header)
+        for variant in df.loc[:, "VariantOnGenome/DNA/hg38"]:
+            if len(variant) != 13 or variant[-2] != '>':
+                logging.warning("Skipping variant %s", variant)
+                continue
+            record = ["6", variant[2:-3], ".", variant[-3], variant[-1], ".", ".", "."]
+
+            f.write("\t".join(record))
+            f.write("\n")
