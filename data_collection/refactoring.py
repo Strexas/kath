@@ -5,9 +5,11 @@ import logging
 import re
 
 import pandas as pd
+import numpy as np
 from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES
+
 
 def set_lovd_dtypes(df_dict):
     """
@@ -128,52 +130,48 @@ def from_clinvar_name_to_cdna_position(name):
     return name[start:end]
 
 
-def filter_eys_genes(clinvar_data):
+def filter_eys_genes(name):
     """
-    Filters out EYS genes from ClinVar data.
+    Filters out EYS genes from ClinVar data and adds a column for the simplified gene position.
 
-    :param DataFrame clinvar_data: Dataframe data
-    :returns: filtered data
+    :param name str: Name of the gene
+    :returns: filtered string
     """
-    filtered_data = []
     ends = {'del', 'delins', 'dup', 'ins', 'inv', 'subst'}
-    for item in clinvar_data["Name"]:
-        if "(EYS)" in item:
-            match = re.match(r'^.*\(EYS\):(c\.[A-Za-z0-9_]+>[A-Za-z])(?:\s*\(.*\))?', item)
-            if match and not any(end in match.group(1) for end in ends):
-                filtered_data.append(match.group(1))
 
-    return filtered_data
+    if "(EYS)" in name:
+        match = re.match(r'^.*\(EYS\):(c\.[A-Za-z0-9_]+>[A-Za-z])(?:\s*\(.*\))?', name)
+        if match and not any(end in match.group(1) for end in ends):
+            return match.group(1)
+        else:
+            return np.nan
 
 
-def lovd_gnomad_merge(lovd, clinvar):
+def lovd_clinvar_merging(lovd, clinvar):
     """
-    Merges LOVD and GnomAD data based on the DNA position.
+    Merges LOVD and ClinVar data based on the DNA position.
 
-    :param dict[str, dict[DataFrame, str]] lovd: LOVD data
+    :param dict[str, dict[str, str]] lovd: LOVD data
     :param DataFrame clinvar: ClinVar data
     :returns: Merged data
     :rtype: list[str]
     """
-    # region_EYS_extraction
-    filtered_data = filter_eys_genes(clinvar)
+    # Extract EYS genes from ClinVar data
+    filtered_clinvar_df = filter_eys_genes(clinvar)
 
-    lovd_data = lovd
+    # Convert LOVD data into DataFrames
+    lovd_transcripts_df = pd.DataFrame(list(lovd["Variants_On_Transcripts"]["VariantOnTranscript/DNA"].items()),
+                                       columns=['Gene_ID', 'DNA_Position'])
+    lovd_genome_df = pd.DataFrame(list(lovd["Variants_On_Genome"]["VariantOnGenome/DNA/hg38"].items()),
+                                  columns=['Gene_ID', 'Genome_DNA_Position'])
 
-    gene_ids = []
+    # Merge filtered_clinvar_df with lovd_transcripts_df on DNA_Position
+    merged_clinvar_lovd = pd.merge(filtered_clinvar_df, lovd_transcripts_df, on='DNA_Position')
 
-    for key, value in lovd_data["Variants_On_Transcripts"]["VariantOnTranscript/DNA"].items():
-        if value in filtered_data:
-            gene_id = key
-            if gene_id:
-                gene_ids.append(key)
-                print(key)
+    # Merge the result with lovd_genome_df on Gene_ID
+    final_merged_df = pd.merge(merged_clinvar_lovd, lovd_genome_df, on='Gene_ID')
 
-    final_dna = []
-    for key, value in lovd_data["Variants_On_Genome"]["VariantOnGenome/DNA/hg38"].items():
-        if key in gene_ids:
-            gene = value
-            if gene:
-                final_dna.append(gene)
+    # Extract final DNA positions from the merged DataFrame
+    final_dna = final_merged_df['Genome_DNA_Position'].tolist()
 
     return final_dna
