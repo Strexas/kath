@@ -4,7 +4,7 @@ import logging
 import pandas as pd
 
 from .collection import store_database_for_eys_gene
-from .refactoring import parse_lovd, set_lovd_dtypes, from_clinvar_name_to_cdna_position
+from .refactoring import parse_lovd, set_lovd_dtypes, from_clinvar_name_to_cdna_position, filter_eys_genes
 from .constants import (DATA_PATH,
                        LOVD_PATH,
                        GNOMAD_PATH,
@@ -76,12 +76,17 @@ def main():
     # Reading main working table
     main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
 
+
+
+
     # Merging Clinvar
     clinvar = clinvar_data.copy()[["Name(clinvar)",
                                    "Germline classification(clinvar)",
                                    "Accession(clinvar)"]]
     clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
                                           apply(from_clinvar_name_to_cdna_position))
+
+    clinvar["Simple_Gene"] = clinvar["Name(clinvar)"].apply(filter_eys_genes)
 
     main_frame = pd.merge(main_frame,
                           clinvar,
@@ -96,6 +101,22 @@ def main():
                            right_on="HGVS Consequence(gnomad)").
                   drop("HGVS Consequence(gnomad)",
                        axis=1))
+
+    #merging clinvar to lovd
+    main_frame = pd.merge(main_frame,
+                           clinvar_data,
+                           how="outer",
+                           on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
+
+    #removing unnecessary rows which are not related to EYS gene
+    main_frame = main_frame[main_frame["Simplified_Gene"].notna()]
+
+    #merging genomes to main lovd clinvar data by ids
+    main_frame = pd.merge(main_frame,
+                        lovd_data["Variants_On_Genome"][0],
+                        how="left",
+                        left_on="id",
+                        right_on="id")
 
     # Calculating frequencies
     lovd_without_association_in_gnomad = pd.isnull(main_frame["Hemizygote Count Remaining(gnomad)"])

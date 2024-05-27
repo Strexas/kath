@@ -51,8 +51,10 @@ from .collection import (
 
 # DATA REFACTORING IMPORT
 from .refactoring import (
-  # Functions for refactoring data
+    # Functions for refactoring data
     set_lovd_dtypes,
     parse_lovd,
-    from_clinvar_name_to_cdna_position
+    from_clinvar_name_to_cdna_position,
+    lovd_clinvar_merge,
+    filter_eys_genes,
 )

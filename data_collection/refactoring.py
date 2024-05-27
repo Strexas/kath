@@ -5,9 +5,11 @@ import logging
 import re
 
 import pandas as pd
+import numpy as np
 from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES
+
 
 def set_lovd_dtypes(df_dict):
     """
@@ -142,11 +144,15 @@ def filter_eys_genes(clinvar_data):
             match = re.match(r'^.*\(EYS\):(c\.[A-Za-z0-9_]+>[A-Za-z])(?:\s*\(.*\))?', item)
             if match and not any(end in match.group(1) for end in ends):
                 filtered_data.append(match.group(1))
+            else:
+                filtered_data.append("")
+        else:
+            filtered_data.append("")
 
     return filtered_data
 
 
-def lovd_gnomad_merge(lovd, clinvar):
+def lovd_clinvar_merge(lovd, clinvar):
     """
     Merges LOVD and GnomAD data based on the DNA position.
 
