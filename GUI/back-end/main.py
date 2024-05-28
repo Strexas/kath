@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -33,10 +35,14 @@ cors = CORS(app, origins=origins)
 @app.route('/api/v1/request', methods=['POST'])
 def process():
   request_data = request.get_json()
+  print("Got data")
+  logging.info(request_data)
   if not request_data:
     return ''
 
-  openai.api_key = "sk-proj-eWH61LkiWI5jdiRVrxRhT3BlbkFJAjtKQGoYXwzt2JXaWZMz"
+  with open("key") as f:
+    openai.api_key = f.readline()
+
   discussions = [{"role": "system", "content": "I guessed number 5"}]
   discussions.append({"role": "user", "content": request_data})
 
