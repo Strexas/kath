@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 from pandas import DataFrame
 
-from .constants import LOVD_TABLES_DATA_TYPES
+from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH
 
 def set_lovd_dtypes(df_dict):
     """
@@ -37,7 +37,7 @@ def set_lovd_dtypes(df_dict):
                                      f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
 
 
-def parse_lovd(path):
+def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
     """
     Converts data from text file with LOVD format to dictionary of tables.
 
@@ -127,13 +127,13 @@ def from_clinvar_name_to_cdna_position(name):
     return name[start:end]
 
 
-def save_lovd_as_vcf(df, save_to):
+def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
     """
     Gets hg38 variants from LOVD and saves as VCF file.
-    :param DataFrame df: LOVD DataFrame with data
+    :param DataFrame data: LOVD DataFrame with data
     :param str save_to: path where to save VCF file.
     """
-
+    df = data["Variants_On_Genome"]
     if "VariantOnGenome/DNA/hg38" not in df.columns:
         raise ValueError("VariantOnGenome/DNA/hg38 is not in the LOVD DataFrame.")
 
