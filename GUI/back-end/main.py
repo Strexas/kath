@@ -36,7 +36,7 @@ app = Flask(__name__)
 app.register_blueprint(router_bp('/api/v1'))
 
 # Configurations
-cors = CORS(app, origins=origins)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.route('/api/v1/request', methods=['POST'])
@@ -48,7 +48,7 @@ def process():
     return ''
 
   with open("key") as f:
-    openai.api_key = f.readline()
+    openai.api_key = f.readline().strip()
 
   discussions = [{"role": "system", "content": "I guessed number 5"}]
   discussions.append({"role": "user", "content": request_data})
@@ -77,4 +77,4 @@ def process():
 
 # Run the app
 if __name__ == '__main__':
-  app.run(debug=True, port=8080)
+  app.run(debug=True, host='0.0.0.0', port=8080)
