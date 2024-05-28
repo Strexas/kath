@@ -1,8 +1,8 @@
 import { Box, Typography, useTheme } from '@mui/material';
 import { useState } from 'react';
 import { useLanguageContext } from '../../../contexts';
-import FunctionalityInstance from './FunctionalityInstance';
-import HistoryInstance from './HistoryInstance';
+// import FunctionalityInstance from './FunctionalityInstance';
+// import HistoryInstance from './HistoryInstance';
 
 interface Props {}
 
@@ -50,7 +50,7 @@ export const ExtensionDisplay: React.FC<Props> = () => {
 					</Typography>
 				</Box>
 			</Box>
-			<Box
+			{/* <Box
 				display={'flex'}
 				flexDirection={'column'}
 				height={'calc(100% - 80px)'}
@@ -58,7 +58,7 @@ export const ExtensionDisplay: React.FC<Props> = () => {
 				sx={{ backgroundColor: Theme.palette.background.paper }}
 			>
 				{selectedTab === 'Functionality' ? <FunctionalityInstance /> : <HistoryInstance />}
-			</Box>
+			</Box> */}
 		</Box>
 	);
 };

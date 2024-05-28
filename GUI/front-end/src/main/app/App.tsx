@@ -15,8 +15,8 @@ function App() {
 	}, [data]);
 
 	/////////////////////////////////////////////////
-
-	const [isDrawerOpen, setIsDrawerOpen] = React.useState(true);
+	
+	const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 	const Theme = useTheme();
 
 	useEffect(() => {
@@ -60,7 +60,8 @@ function App() {
 					}}
 				>
 					{/* Up - header */}
-					<HeaderLayout open={isDrawerOpen} onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
+					{/* TODO: set to isDrawerOpen */}
+					<HeaderLayout open={false} onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
 
 					{/* Chat display */}
 					<Box
