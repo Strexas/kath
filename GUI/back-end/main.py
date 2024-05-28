@@ -35,7 +35,7 @@ def process():
   if not request_data:
     return ''
 
-  openai.api_key = ""
+  openai.api_key = "sk-proj-FCpUZQtdF7z9gBjMfbgVT3BlbkFJUSgsIUYLbmGrfcZ3SJ4k"
 
 
   response = openai.chat.completions.create(
