@@ -29,7 +29,7 @@ app = Flask(__name__)
 app.register_blueprint(router_bp('/api/v1'))
 
 # Configurations
-cors = CORS(app, origins=origins)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app.route('/api/v1/request', methods=['POST'])
