@@ -36,6 +36,7 @@ export const ChatDisplay: React.FC<Props> = () => {
 		]);
 
 		const responseResult = await sendRequest.mutateAsync(content);
+		setIsInputDisabled(false);
 
 		setChatInstances((prevInstances) => [
 			...prevInstances,
