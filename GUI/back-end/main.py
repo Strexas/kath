@@ -29,18 +29,20 @@ app.register_blueprint(router_bp('/api/v1'))
 # Configurations
 cors = CORS(app, origins=origins)
 
+
 @app.route('/api/v1/request', methods=['POST'])
 def process():
   request_data = request.get_json()
   if not request_data:
     return ''
 
-  openai.api_key = "sk-proj-FCpUZQtdF7z9gBjMfbgVT3BlbkFJUSgsIUYLbmGrfcZ3SJ4k"
-
+  openai.api_key = "sk-proj-eWH61LkiWI5jdiRVrxRhT3BlbkFJAjtKQGoYXwzt2JXaWZMz"
+  discussions = [{"role": "system", "content": "I guessed number 5"}]
+  discussions.append({"role": "user", "content": request_data})
 
   response = openai.chat.completions.create(
     model="gpt-3.5-turbo",
-    messages=[{"role": "user", "content": request_data}],
+    messages=discussions,
   )
 
   return response.choices[0].message.content
