@@ -59,14 +59,14 @@ def process():
 
   api_answer = answer + '\n\n'
   if '```' in api_answer and '```python' in api_answer:
-    execute = 'from data_collection import *\n\n' + api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
-    # old_stdout = sys.stdout
-    # redirected_output = sys.stdout = StringIO()
-    # exec(execute)
-    # sys.stdout = old_stdout
-    #
-    # api_answer += redirected_output.getvalue()
-    api_answer = execute
+    execute = api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
+    old_stdout = sys.stdout
+    redirected_output = sys.stdout = StringIO()
+    exec(execute)
+    sys.stdout = old_stdout
+
+    api_answer += redirected_output.getvalue()
+    # api_answer = execute
   return api_answer.replace('\n', '\n\n')
 
 
