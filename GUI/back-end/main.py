@@ -71,7 +71,7 @@ def process():
     api_answer = execute
   else:
     api_answer += 'nothing to execute'
-  return api_answer
+  return api_answer.replace('\n', '\n\n')
 
 
 # Run the app
