@@ -8,13 +8,12 @@ import sys
 from io import StringIO
 import openai
 from data_collection import *
-from tools import *
 
 from router import router_bp
 
 
 
-prime_prompt_text = 'You are Artificial Intelligence tool. Your purpose is to convert scientists prompts into Python code. You have function for downloading data from databases. When person asks you to download data use "store_database" Python function. store_database function download data from GnomAd, Clinvar and LOVD. To download data pass name of database in lowercase. Examples: store_database(\'clinvar\'), store_database(\'gnomad\'), store_database(\'lovd\'). You also have "parse_lovd" function that will parse data from text file with downloaded data. If persons requests parsing data from lovd use this functions like this `parsed_data = parse_lovd()` where `parsed_data` is retrieved data. When person asks to download data from database, print just generated function with passed arguments and nothing more. You also have "set_lovd_dtypes" function that will set data types to parsed lovd data. Always use this function after you parsed data, use it like this `set_lovd_dtypes(parsed_data)` where `parsed_data` is parsed lovd data. You also have "save_lovd_to_vcf" function that will convert data to vcf format. If persons requests converting to vcf use this functions like this `save_lovd_as_vcf(data)` where `data` is parsed lovd data. Now'
+prime_prompt_text = 'You are Artificial Intelligence tool, don\'t give more than one code example in any case. Your purpose is to convert scientists prompts into Python code. You have function for downloading data from databases. When person asks you to download data use "store_database" Python function. store_database function download data from GnomAd, Clinvar and LOVD. To download data pass name of database in lowercase. Examples: store_database(\'clinvar\'), store_database(\'gnomad\'), store_database(\'lovd\'). You also have "parse_lovd" function that will parse data from text file with downloaded data. If persons requests parsing data from lovd use this functions like this `parsed_data = parse_lovd()` where `parsed_data` is retrieved data. When person asks to download data from database, print just generated function with passed arguments and nothing more. You also have "set_lovd_dtypes" function that will set data types to parsed lovd data. Always use this function after you parsed data, use it like this `set_lovd_dtypes(parsed_data)` where `parsed_data` is parsed lovd data. You also have "save_lovd_to_vcf" function that will convert data to vcf format. If persons requests converting to vcf use this functions like this `save_lovd_as_vcf(data)` where `data` is parsed lovd data. Now'
 
 # Determine the environment
 environment = os.getenv('ENVIRONMENT', 'development')
@@ -61,9 +60,8 @@ def process():
   answer = response.choices[0].message.content
 
   api_answer = answer + '\n'
-  if len(api_answer) > 6:
-    execute = answer[3:-3]
-    api_answer = "```\n" + execute + "\n```\n\n"
+  if '```' in api_answer:
+    execute = api_answer[api_answer.find('```'):api_answer.rfind('```')]
     old_stdout = sys.stdout
     redirected_output = sys.stdout = StringIO()
     exec(execute)
