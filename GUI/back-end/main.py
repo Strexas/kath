@@ -12,8 +12,7 @@ from data_collection import *
 from router import router_bp
 
 
-
-prime_prompt_text = 'You are Artificial Intelligence tool, don\'t give more than one code example in any case. Your purpose is to convert scientists prompts into Python code. You have function for downloading data from databases. When person asks you to download data use "store_database_for_eys_gene" Python function. store_database function download data from GnomAd, Clinvar and LOVD. To download data pass name of database in lowercase. Examples: store_database_for_eys_gene(\'clinvar\'), store_database_for_eys_gene(\'gnomad\'), store_database_for_eys_gene(\'lovd\'). You also have "parse_lovd" function that will parse data from text file with downloaded data. If persons requests parsing data from lovd use this functions like this `parsed_data = parse_lovd()` where `parsed_data` is retrieved data. After you retrieve data from parse function you can print it, if user ask to print parsed data provide `print(parsed_data)` where `parsed_data` is data you got from `parse_lovd` funciton. When person asks to download data from database, print just generated function with passed arguments and nothing more. You also have "set_lovd_dtypes" function that will set data types to parsed lovd data. Always use this function after you parsed data, use it like this `set_lovd_dtypes(parsed_data)` where `parsed_data` is parsed lovd data. You also have "save_lovd_to_vcf" function that will convert data to vcf format. If persons requests converting to vcf use this functions like this `save_lovd_as_vcf(data)` where `data` is parsed lovd data. Now'
+prime_prompt_text = "You are KATH tool. Your purpose is to convert scientists prompts into Python code. You have function for downloading data from databases. When person asks you to download data use \"store_database\" Python function. store_database function download data from GnomAd, Clinvar and LOVD. To download data pass name of database in lowercase. Examples: store_database('clinvar'), store_database('gnomad'), store_database('lovd'). When person asks to download data from database, print just generated function with passed arguments and nothing more. You have \"merge_lovd_with_clinvar\" and \"merge_lovd_with_gnomad\" functions. If persons requests merging of data use this function without parameters. You also have \"convert_to_vcf\" function that will convert data to vcf format. If persons requests converting to vcf use this functionsn without parameters. You also have \"process_with_splcice_ai\" funciton to process data with SpliceAI tool. It returns processed data. When you use this function provide variable to save data. Example, \"processed_data = process_with_splice_ai\". Returned object has \"display\" method. Use it to display data when person asks to display processed data. Now download data from clinvar and lovd. Merge data, convert to vcf format and pass to SpliceAI. Display results."
 
 # Determine the environment
 environment = os.getenv('ENVIRONMENT', 'development')
@@ -62,12 +61,13 @@ def process():
   api_answer = answer + '\n\n'
   if '```' in api_answer and '```python' in api_answer:
     execute = 'from data_collection import *\n\n' + api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = StringIO()
-    exec(execute)
-    sys.stdout = old_stdout
-
-    api_answer += redirected_output.getvalue()
+    # old_stdout = sys.stdout
+    # redirected_output = sys.stdout = StringIO()
+    # exec(execute)
+    # sys.stdout = old_stdout
+    #
+    # api_answer += redirected_output.getvalue()
+    api_answer = execute
   return api_answer.replace('\n', '\n\n')
 
 
