@@ -48,7 +48,7 @@ def process():
   with open("key") as f:
     openai.api_key = f.readline().strip()
 
-  discussions = [{"role": "system", "content": "I guessed number 5"}]
+  discussions = [{"role": "system", "content": prime_prompt_text}]
   discussions.append({"role": "user", "content": request_data})
 
   response = openai.chat.completions.create(
