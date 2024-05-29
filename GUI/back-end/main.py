@@ -61,7 +61,7 @@ def process():
 
   api_answer = answer + '\n\n'
   if '```' in api_answer and '```python' in api_answer:
-    execute = api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
+    execute = 'from data_collection import *\n\n' + api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
     old_stdout = sys.stdout
     redirected_output = sys.stdout = StringIO()
     exec(execute)
