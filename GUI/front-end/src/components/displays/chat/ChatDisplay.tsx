@@ -38,11 +38,9 @@ export const ChatDisplay: React.FC<Props> = () => {
 		const responseResult = await sendRequest.mutateAsync(content);
 		setIsInputDisabled(false);
 
-		const formatedResponse = responseResult.replace(/(?:\r\n|\r|\n)/g, '<br>');
-
 		setChatInstances((prevInstances) => [
 			...prevInstances,
-			<ChatInstance icon={<KathLogo />} author={applicationContext.name} content={formatedResponse} />,
+			<ChatInstance icon={<KathLogo />} author={applicationContext.name} content={responseResult} />,
 		]);
 
 		// Temporary mock up response
