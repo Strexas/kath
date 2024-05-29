@@ -60,7 +60,7 @@ def process():
   answer = response.choices[0].message.content
 
   api_answer = answer + '\n'
-  if '```' in api_answer:
+  if '```' in api_answer and '```python' in api_answer:
     execute = api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
     # old_stdout = sys.stdout
     # redirected_output = sys.stdout = StringIO()
@@ -68,6 +68,7 @@ def process():
     # sys.stdout = old_stdout
 
     # api_answer += redirected_output.getvalue()
+    api_answer = execute
   else:
     api_answer += 'nothing to execute'
   return api_answer
