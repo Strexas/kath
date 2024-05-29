@@ -20,21 +20,20 @@ def set_lovd_dtypes(df_dict):
         for column in frame.columns:
             if column not in LOVD_TABLES_DATA_TYPES[table_name]:
                 raise ValueError(f"Column {column} is undefined in LOVD_TABLES_DATA_TYPES")
-
-            match LOVD_TABLES_DATA_TYPES[table_name][column]:
-                case "Date":
-                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
-                case "Boolean":
-                    frame[column] = frame[column].map({"0": False, "1": True})
-                case "String":
-                    frame[column] = frame[column].astype('string')
-                case "Integer":
-                    frame[column] = pd.to_numeric(frame[column]).astype('Int64')
-                case "Double":
-                    frame[column] = pd.to_numeric(frame[column]).astype('float')
-                case _:
-                    raise ValueError(f"Undefined data type: "
-                                     f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
+            var = LOVD_TABLES_DATA_TYPES[table_name][column]
+            if var == "Date":
+                frame[column] = pd.to_datetime(frame[column], errors='coerce')
+            elif var == "Boolean":
+                frame[column] = frame[column].map({"0": False, "1": True})
+            elif var == "String":
+                frame[column] = frame[column].astype('string')
+            elif var == "Integer":
+                frame[column] = pd.to_numeric(frame[column]).astype('Int64')
+            elif var == "Double":
+                frame[column] = pd.to_numeric(frame[column]).astype('float')
+            else:
+                raise ValueError(f"Undefined data type: "
+                                 f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
 
 
 def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
