@@ -62,12 +62,12 @@ def process():
   api_answer = answer + '\n'
   if '```' in api_answer:
     execute = api_answer[api_answer.find('```python') + 9:api_answer.rfind('```')]
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = StringIO()
-    exec(execute)
-    sys.stdout = old_stdout
+    # old_stdout = sys.stdout
+    # redirected_output = sys.stdout = StringIO()
+    # exec(execute)
+    # sys.stdout = old_stdout
 
-    api_answer += redirected_output.getvalue()
+    # api_answer += redirected_output.getvalue()
   else:
     api_answer += 'nothing to execute'
   return api_answer
