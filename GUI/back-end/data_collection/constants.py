@@ -21,7 +21,7 @@ CLINVAR_FILE_URL_EYS = ("https://drive.usercontent.google.com/u/0/uc?id=1RK5XBK3
 # paths
 DATA_PATH = os.path.join(__file__[:__file__.index("kath") + 4], "data/")
 
-LOVD_PATH = os.path.join(DATA_PATH, "lovd/")
+LOVD_PATH = os.path.join(DATA_PATH, "lovd")
 GNOMAD_PATH = os.path.join(DATA_PATH, "gnomad/")
 CLINVAR_PATH = os.path.join(DATA_PATH, "clinvar/")
 
