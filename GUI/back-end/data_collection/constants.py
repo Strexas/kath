@@ -232,7 +232,7 @@ DATABASES_DOWNLOAD_PATHS = {
     },
     "lovd": {
         "url": LOVD_FILE_URL_EYS,
-        "store_as": "../data/lovd/lovd_data.txt",
+        "store_as": LOVD_PATH + "/lovd_data.txt",
         "function": "download_lovd_database_for_eys_gene"
     }
 }
