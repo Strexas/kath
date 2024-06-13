@@ -1,22 +1,13 @@
 import React, { useEffect } from 'react';
 import { Box, useTheme } from '@mui/material';
-import { useGetUsers } from '../../hooks';
 import { ExtensionDisplay, ChatDisplay } from '../../components/displays';
 import BaseLayout from '../layout/BaseLayout';
 import HeaderLayout from '../layout/HeaderLayout';
 import '../../css/app/App.css';
 
 function App() {
-	/// THESE LINES ARE ONLY FOR EXAMPLE PURPOSES ///
-
-	const { data } = useGetUsers();
-	useEffect(() => {
-		console.log(data);
-	}, [data]);
-
-	/////////////////////////////////////////////////
 	
-	const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+	const [isDrawerOpen, setIsDrawerOpen] = React.useState(true);
 	const Theme = useTheme();
 
 	useEffect(() => {
@@ -60,8 +51,7 @@ function App() {
 					}}
 				>
 					{/* Up - header */}
-					{/* TODO: set to isDrawerOpen */}
-					<HeaderLayout open={false} onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
+					<HeaderLayout open={isDrawerOpen} onClick={() => setIsDrawerOpen(!isDrawerOpen)} />
 
 					{/* Chat display */}
 					<Box
