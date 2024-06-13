@@ -35,6 +35,9 @@ app.register_blueprint(router_bp('/api/v1'))
 # Configurations
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
+# Setup base workspace dir
+if not os.path.exists(constants.PATH_TO_WORKSPACE):
+  os.mkdir(constants.PATH_TO_WORKSPACE)
 
 @app.route('/api/v1/request', methods=['POST'])
 def process():
