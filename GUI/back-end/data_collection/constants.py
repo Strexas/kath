@@ -238,3 +238,4 @@ DATABASES_DOWNLOAD_PATHS = {
 }
 
 PATH_TO_WORKSPACE = "workspaces"
+FILENAME_REGEX = r'^[^<>:"/\\|?*\n]+\.txt$'

@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response
 import os
-from data_collection.constants import PATH_TO_WORKSPACE
+from data_collection.constants import PATH_TO_WORKSPACE, FILENAME_REGEX
+import re
 
 route_workspace_bp = Blueprint('workspace', __name__)
 
@@ -53,6 +54,9 @@ def upload_file(workspace):
   if file.filename == '':
     return make_response(jsonify({'message': 'No file selected for uploading'}), 400)
   
+  if not re.match(FILENAME_REGEX, file.filename):
+    return make_response(jsonify({'message': 'Invalid file name!'}), 400)
+  
   if not os.path.exists(f"{PATH_TO_WORKSPACE}/{workspace}"):
     return make_response(jsonify({'message': 'Workspace not found!'}), 404)
   
@@ -66,6 +70,10 @@ def upload_file(workspace):
 @route_workspace_bp.route('/workspace/<workspace>/file', methods=['DELETE'])
 def delete_file(workspace):
   file_name = request.json.get('file_name')
+
+  if not re.match(FILENAME_REGEX, file_name):
+    return make_response(jsonify({'message': 'Invalid file name!'}), 400)
+
   path = f"{PATH_TO_WORKSPACE}/{workspace}/{file_name}"
   if os.path.exists(path) and os.path.isfile(path):
     os.remove(path)
