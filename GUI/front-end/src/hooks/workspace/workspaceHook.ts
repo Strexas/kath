@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { createWorkspace, getWorkspaces, getWorkspaceFiles, deleteWorkspace } from "../../services";
+import { createWorkspace, getWorkspaces, getWorkspaceFiles, deleteWorkspace, uploadFile, deleteFile } from "../../services";
 
 export const useCreateWorkspace = () => {
     const queryClient = useQueryClient();
@@ -40,3 +40,25 @@ export const useDeleteWorkspace = () => {
         },
     });
 };
+
+export const useUploadFile = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: uploadFile,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaceFiles'] });
+        },
+    });
+}
+
+export const useDeleteFile = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deleteFile,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaceFiles'] });
+        },
+    });
+}
