@@ -43,22 +43,26 @@ def delete_workspace(workspace):
   else:
     return make_response(jsonify({'message': 'Workspace not found!'}), 404)
 
-@route_workspace_bp.route('/workspace/<workspace>/file', methods=['POST'])
-def upload_file(workspace):
+@route_workspace_bp.route('/workspace/file/upload', methods=['POST'])
+def upload_file():
+  workspace = request.form.get('workspace')
+  filename = request.form.get('file_name')
 
   if 'file' not in request.files:
     return make_response(jsonify({'message': 'No file part in the request'}), 400)
 
   file = request.files['file']
 
-  if file.filename == '':
+  if filename == '':
     return make_response(jsonify({'message': 'No file selected for uploading'}), 400)
   
-  if not re.match(FILENAME_REGEX, file.filename):
+  if not re.match(FILENAME_REGEX, filename):
     return make_response(jsonify({'message': 'Invalid file name!'}), 400)
   
   if not os.path.exists(f"{PATH_TO_WORKSPACE}/{workspace}"):
     return make_response(jsonify({'message': 'Workspace not found!'}), 404)
+  
+  file.filename = filename
   
   if file and file.filename.endswith('.txt'):
     path = f"{PATH_TO_WORKSPACE}/{workspace}/{file.filename}"
@@ -67,9 +71,10 @@ def upload_file(workspace):
 
   return make_response(jsonify({'message': 'File must be a .txt file'}), 400)
   
-@route_workspace_bp.route('/workspace/<workspace>/file', methods=['DELETE'])
-def delete_file(workspace):
+@route_workspace_bp.route('/workspace/file/delete', methods=['DELETE'])
+def delete_file():
   file_name = request.json.get('file_name')
+  workspace = request.json.get('workspace')
 
   if not re.match(FILENAME_REGEX, file_name):
     return make_response(jsonify({'message': 'Invalid file name!'}), 400)
