@@ -45,6 +45,9 @@ const FileInstance: React.FC = () => {
         data.append('file_name', fileName);
 
         await createFile.mutateAsync(data);
+
+        setFile(null);
+        setFileName('');
     }
 
     const dataURLtoBlob = (file : string | ArrayBuffer | null) => {
@@ -82,7 +85,16 @@ const FileInstance: React.FC = () => {
                         px: '10px',
                     }}
                 >
+                    <Box 
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                        }}>
                     <FileInput onFileSelect={onFileSelect} />
+                    {file && fileName && (fileName)}
+                    </Box>
                     <Button
                         variant="contained"
                         sx={{
@@ -91,12 +103,15 @@ const FileInstance: React.FC = () => {
                             borderRadius: '10px',
                             height: '40px',
                             px: '10px',
+                            marginBottom: '10px',
+                            marginTop: '10px',
                         }}
+                        fullWidth
+                        disabled={!file || !fileName}
                         onClick={() => createNewFile()}
                     >
                         {languageContext.language === 'en' ? 'Upload file' : 'Įkelti failą'}
                     </Button>
-                    {file && fileName && (fileName)}
                     {
                         files?.length > 0 ? (
                             files.map((file) => (
@@ -115,7 +130,7 @@ const FileInstance: React.FC = () => {
                                             await deleteFile.mutateAsync(data);
                                         }}
                                     >
-                                        <DeleteForeverIcon sx={{ height: '40px' }} />
+                                        <DeleteForeverIcon sx={{ height: '30px' }} />
                                     </IconButton>
                                 </Typography>
                             ))
