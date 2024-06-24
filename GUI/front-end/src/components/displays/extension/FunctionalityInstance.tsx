@@ -2,6 +2,7 @@ import { ArrowDropDown as ArrowDropDownIcon } from '@mui/icons-material/';
 import { Box, MenuItem, Select, Typography, styled, useTheme } from '@mui/material';
 import { useLanguageContext, useToolContext } from '../../../contexts';
 import React from 'react';
+import WorkspaceInstance from './WorkspaceInstance';
 
 interface Props {}
 
@@ -44,6 +45,8 @@ const FunctionalityInstance: React.FC<Props> = () => {
 					</MenuItem>
 				))}
 			</Select>
+			<Typography>{languageContext.language === 'en' ? 'Workspace' : 'Darbo aplinka'}</Typography>
+			<WorkspaceInstance />
 		</Box>
 	);
 };

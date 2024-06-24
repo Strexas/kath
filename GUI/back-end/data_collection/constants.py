@@ -236,3 +236,6 @@ DATABASES_DOWNLOAD_PATHS = {
         "function": "download_lovd_database_for_eys_gene"
     }
 }
+
+PATH_TO_WORKSPACE = "workspaces"
+FILENAME_REGEX = r'^[^<>:"/\\|?*\n]+\.txt$'

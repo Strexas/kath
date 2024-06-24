@@ -6,3 +6,4 @@ export { ApplicationContextProvider } from './application/ApplicationContextProv
 export { useApplicationContext } from './application/UseApplicationContext';
 export { ToolContextProvider } from './tool/ToolContextProvider';
 export { useToolContext } from './tool/UseToolContext';
+export { WorkspaceContextProvider, WorkspaceContext } from './tool/WorkspaceContextProvider';
