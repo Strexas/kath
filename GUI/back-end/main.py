@@ -41,7 +41,10 @@ if not os.path.exists(constants.PATH_TO_WORKSPACE):
 
 @app.route('/api/v1/request', methods=['POST'])
 def process():
-  request_data = request.get_json()
+  request_data = request.json.get('content')
+  request_workspace = request.json.get('workspace')
+  print(request_data)
+  print(request_workspace)
   print("Got data")
   logging.info(request_data)
   if not request_data:
@@ -75,4 +78,5 @@ def process():
 
 # Run the app
 if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0', port=8080)
+  # app.run(debug=True, host='0.0.0.0', port=8080)
+  app.run(debug=True, port=8080)

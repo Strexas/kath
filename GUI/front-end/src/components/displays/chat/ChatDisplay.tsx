@@ -6,6 +6,7 @@ import { AccountCircle as AccountCircleIcon } from '@mui/icons-material';
 import { useApplicationContext } from '../../../contexts';
 import { KathLogo } from '../../svgs';
 import { useSendRequest } from '../../../hooks';
+import { useWorkspaceContext } from '../../../contexts/tool/UseWorkspaceContext';
 
 interface Props {}
 
@@ -14,6 +15,7 @@ export const ChatDisplay: React.FC<Props> = () => {
 	const [isInputDisabled, setIsInputDisabled] = React.useState(false);
 
 	const applicationContext = useApplicationContext();
+	const workspaceContext = useWorkspaceContext();
 	const sendRequest = useSendRequest();
 
 	const handleSubmit = async (content: string) => {
@@ -23,7 +25,12 @@ export const ChatDisplay: React.FC<Props> = () => {
 			<ChatInstance icon={<AccountCircleIcon />} author='User' content={content} />,
 		]);
 
-		const responseResult = await sendRequest.mutateAsync(content);
+		const data = {
+			content: content,
+			workspace: workspaceContext.workspace,
+		}
+
+		const responseResult = await sendRequest.mutateAsync(data);
 		setIsInputDisabled(false);
 
 		setChatInstances((prevInstances) => [
