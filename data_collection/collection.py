@@ -4,12 +4,10 @@ import glob
 import logging
 import os
 import time
-from contextlib import contextmanager
 
 import requests
 from requests import RequestException
 
-import selenium.common
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -176,29 +174,6 @@ def download_database_for_eys_gene(database_name, override=False):
     os.rename(latest_file, os_path)
 
 
-@contextmanager
-def handle_exceptions():
-    """
-    context manager to handle custom exceptions
-    """
-    try:
-        yield
-    except TimeoutError as e:
-        print(f"Error: {e}")
-    except selenium.common.InvalidArgumentException as e:
-        print(f"Error: {e}")
-    except selenium.common.exceptions.WebDriverException as e:
-        print(f"Error: {e}")
-    except ValueError as e:
-        print(f"Error:{e}")
-    except IndexError as e:
-        print(f"Error:{e}")
-    except BadResponseException as e:
-        print(f"Error:{e}")
-    except DownloadError as e:
-        print(f"Error:{e}")
-
-
 def store_database_for_eys_gene(database_name, override=False):
     """
     Calls a function to download a database.
@@ -207,10 +182,8 @@ def store_database_for_eys_gene(database_name, override=False):
     """
     if database_name not in DATABASES_DOWNLOAD_PATHS:
         raise IndexError(f"Requested {database_name} database is not supported")
-
-    with handle_exceptions():
-        if database_name == "lovd":
-            download_lovd_database_for_eys_gene(database_name, override)
-        else:
-            download_database_for_eys_gene(database_name, override)
+    if database_name == "lovd":
+        download_lovd_database_for_eys_gene(database_name, override)
+    else:
+        download_database_for_eys_gene(database_name, override)
 
