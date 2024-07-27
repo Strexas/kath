@@ -15,7 +15,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from .constants import (LOVD_FILE_URL,
                         LOVD_PATH,
-                        DATABASES_DOWNLOAD_PATHS, LOVD_FILE_URL_EYS, STORE_AS_LOVD)
+                        DATABASES_DOWNLOAD_PATHS,
+                        LOVD_FILE_URL_EYS,
+                        STORE_AS_LOVD)
 
 
 # EXCEPTIONS
@@ -179,10 +181,11 @@ def store_database_for_eys_gene(database_name, override=False):
     :param database_name: the name of the database that should be downloaded
     :param override: should be already existing file be overwritten
     """
-    if database_name.lower not in DATABASES_DOWNLOAD_PATHS:
+    database_name = database_name.lower()
+    if database_name not in DATABASES_DOWNLOAD_PATHS:
         raise IndexError(f"Requested {database_name} database is not supported")
-    if database_name.lower == "lovd":
+    if database_name == "lovd":
         download_lovd_database_for_eys_gene(override)
     else:
-        download_database_for_eys_gene(database_name.lower, override)
+        download_database_for_eys_gene(database_name, override)
 

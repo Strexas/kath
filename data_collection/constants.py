@@ -228,5 +228,6 @@ DATABASES_DOWNLOAD_PATHS = {
         "url": GNOMAD_URL_EYS,
         "store_as": "gnomad_data.csv",
         "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
-    }
+    },
+    "lovd": {}
 }
