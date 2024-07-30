@@ -4,14 +4,14 @@ Package for data collection purposes provides both collection and refactoring fu
 Data from LOVD, ClinVar and GnomAd databases can be downloaded using this package. GnomAd and
 ClinVar are limited with EYS gene, but it is possible to download data for any gene in LOVD.
 
-All necessary functionality can be imported directly from data_collection without
+All necessary functionality can be imported directly from data without
 specifying the module.
 
 data collection pipeline example is established for project's specific usage.
 """
 
 # CONSTANTS IMPORT
-from .constants import (
+from .data.constants import (
   # URLs for LOVD database
   LOVD_URL, LOVD_URL_EYS, LOVD_FILE_URL, LOVD_FILE_URL_EYS,
 
@@ -32,7 +32,7 @@ from .constants import (
 )
 
 # DATA COLLECTION IMPORT
-from .collection import (
+from .data.collection import (
     # Custom exceptions
     BadResponseException,
     DownloadError,
@@ -50,8 +50,8 @@ from .collection import (
 )
 
 # DATA REFACTORING IMPORT
-from .refactoring import (
-  # Functions for refactoring data
+from .data.refactoring import (
+    # Functions for refactoring data
     set_lovd_dtypes,
     parse_lovd,
     from_clinvar_name_to_cdna_position

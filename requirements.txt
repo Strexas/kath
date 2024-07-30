@@ -3,5 +3,4 @@ pandas
 selenium
 spliceai
 tensorflow
-openai
 flask

@@ -1,0 +1,11 @@
+# project
+.idea
+.venv
+__pycache__
+
+# specific folders
+data/*
+tests/*
+
+# large gene reference files
+*.fa
