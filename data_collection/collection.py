@@ -8,7 +8,6 @@ import time
 import requests
 from requests import RequestException
 
-import selenium.common
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,7 +15,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from .constants import (LOVD_FILE_URL,
                         LOVD_PATH,
-                        DATABASES_DOWNLOAD_PATHS)
+                        DATABASES_DOWNLOAD_PATHS,
+                        LOVD_FILE_URL_EYS,
+                        STORE_AS_LOVD)
 
 
 # EXCEPTIONS
@@ -64,16 +65,15 @@ def get_file_from_url(url, save_to, override=False):
         f.write(response.content)
 
 
-def download_lovd_database_for_eys_gene(database_name, override=False):
+def download_lovd_database_for_eys_gene(override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
-    :param str database_name: database to download
     :param bool override: needs override
     """
 
-    url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
-    save_to = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
+    url = LOVD_FILE_URL_EYS
+    save_to = STORE_AS_LOVD
 
     # check if directory exists, if not - create
     save_to_dir = os.path.dirname(save_to)
@@ -177,29 +177,15 @@ def download_database_for_eys_gene(database_name, override=False):
 
 def store_database_for_eys_gene(database_name, override=False):
     """
-    calls a function to download a database
+    Calls a function to download a database.
     :param database_name: the name of the database that should be downloaded
     :param override: should be already existing file be overwritten
     """
+    database_name = database_name.lower()
+    if database_name not in DATABASES_DOWNLOAD_PATHS:
+        raise IndexError(f"Requested {database_name} database is not supported")
+    if database_name == "lovd":
+        download_lovd_database_for_eys_gene(override)
+    else:
+        download_database_for_eys_gene(database_name, override)
 
-    try:
-        if database_name not in DATABASES_DOWNLOAD_PATHS:
-            raise IndexError(f"Requested {database_name} database is not supported")
-
-        # pylint: disable=eval-used
-        eval(DATABASES_DOWNLOAD_PATHS[database_name]["function"])(database_name, override)
-
-    except TimeoutError as e:
-        print(f"Error: {e}")
-    except selenium.common.InvalidArgumentException as e:
-        print(f"Error: {e}")
-    except selenium.common.exceptions.WebDriverException as e:
-        print(f"Error: {e}")
-    except ValueError as e:
-        print(f"Error:{e}")
-    except IndexError as e:
-        print(f"Error:{e}")
-    except BadResponseException as e:
-        print(f"Error:{e}")
-    except DownloadError as e:
-        print(f"Error:{e}")

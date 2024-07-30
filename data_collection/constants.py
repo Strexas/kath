@@ -7,6 +7,7 @@ LOVD_URL = "https://databases.lovd.nl/shared/genes"
 LOVD_URL_EYS = LOVD_URL + "EYS"
 LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/"
 LOVD_FILE_URL_EYS = LOVD_FILE_URL + "EYS"
+STORE_AS_LOVD = "../data/lovd/lovd_data.txt"
 
 GNOMAD_URL = "https://gnomad.broadinstitute.org/gene"
 GNOMAD_URL_EYS = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
@@ -220,7 +221,6 @@ DATABASES_DOWNLOAD_PATHS = {
         "store_as": "clinvar_data.txt",
         "clickable": "/html/body/div[1]/div[1]/form/div[1]/div[5]/div/div[2]/"
                      "div[2]/div[1]/div/div[1]/a[3]",
-        "function": "download_database_for_eys_gene"
     },
     "gnomad": {
         "button": "document.getElementsByClassName"
@@ -228,11 +228,6 @@ DATABASES_DOWNLOAD_PATHS = {
         "url": GNOMAD_URL_EYS,
         "store_as": "gnomad_data.csv",
         "clickable": "/html/body/div[1]/div[3]/div[2]/div/div[7]/div[4]/div[2]/button[1]",
-        "function": "download_database_for_eys_gene"
     },
-    "lovd": {
-        "url": LOVD_FILE_URL_EYS,
-        "store_as": "../data/lovd/lovd_data.txt",
-        "function": "download_lovd_database_for_eys_gene"
-    }
+    "lovd": {}
 }
