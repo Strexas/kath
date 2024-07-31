@@ -82,8 +82,9 @@ def main():
                                    "Germline classification(clinvar)",
                                    "Accession(clinvar)",
                                    "GRCh38Location(clinvar)"]]
-    clinvar["VariantOnTranscript/DNA"] = clinvar["Name(clinvar)"].apply(from_clinvar_name_to_cdna_position)
 
+    clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
+                                          apply(from_clinvar_name_to_cdna_position))
     main_frame = pd.merge(main_frame,
                           clinvar,
                           how="outer",
