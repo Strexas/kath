@@ -6,13 +6,14 @@ import pandas as pd
 from .collection import store_database_for_eys_gene
 from .refactoring import parse_lovd, set_lovd_dtypes, from_clinvar_name_to_cdna_position
 from .constants import (DATA_PATH,
-                       LOVD_PATH,
-                       GNOMAD_PATH,
-                       CLINVAR_PATH)
+                        LOVD_PATH,
+                        GNOMAD_PATH,
+                        CLINVAR_PATH)
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S")
+                    datefmt="%Y-%m-%d %H:%M:%S")
+
 
 def calculate_max_frequency(row):
     """
@@ -79,14 +80,30 @@ def main():
     # Merging Clinvar
     clinvar = clinvar_data.copy()[["Name(clinvar)",
                                    "Germline classification(clinvar)",
-                                   "Accession(clinvar)"]]
-    clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
-                                          apply(from_clinvar_name_to_cdna_position))
+                                   "Accession(clinvar)",
+                                   "GRCh38Location(clinvar)"]]
+    clinvar["VariantOnTranscript/DNA"] = clinvar["Name(clinvar)"].apply(from_clinvar_name_to_cdna_position)
 
     main_frame = pd.merge(main_frame,
                           clinvar,
                           how="outer",
                           on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
+
+    start_merge = pd.merge(main_frame,
+                           clinvar,
+                           how="outer",
+                           left_on="position_g_start",
+                           right_on="GRCh38Location(clinvar)").drop(["Name(clinvar)", "GRCh38Location(clinvar)"],
+                                                                    axis=1)
+
+    end_merge = pd.merge(main_frame,
+                         clinvar,
+                         how="outer",
+                         left_on="position_g_end",
+                         right_on="GRCh38Location(clinvar)").drop(["Name(clinvar)", "GRCh38Location(clinvar)"],
+                                                                  axis=1)
+
+    main_frame = start_merge.combine_first(end_merge)
 
     # MERGING GnomAd
     main_frame = (pd.merge(main_frame,
