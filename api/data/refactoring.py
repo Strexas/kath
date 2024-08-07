@@ -160,94 +160,116 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
             f.write("\n")
 
 
-def request_clinvar_api_data(gene_id: str):
+def get_variant_ids_from_clinvar_name_api(name: str, count: int = 100):
     """
-    Requests ClinVar API for data about variant with given id.\n
-    Converts it to pandas dataframe.
+    Extracts variant ids from ClinVar `name` variable. /n
+    key of dictionary is the size of the list of ids.
 
-    :param str gene_id: id of variant (may be multiple)
-    :returns: dataframe from ClinVar API
-    :rtype: dataframe
+    :param str name: name of variant
+    :param int count: number of ids to extract
+    :returns: ids of variants
+    :rtype: str
     """
 
-    path = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id={gene_id}&retmode=json"
+    result = {}
 
-    request = requests.get(path)
+    separator = ","
+    clinvar_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term={name}&retmode=json&retmax={count}"
+
+    request = requests.get(clinvar_url)
 
     if request.status_code != 200:
         raise ValueError(f"Request failed with status code {request.status_code}")
 
     data = request.json()
 
-    # Extract the 'result' part of the JSON
+    ids = data['esearchresult']['idlist']
+
+    result['idlist'] = ids
+    result['count'] = data['esearchresult']['count']
+
+    return result
+
+
+def request_clinvar_api_data(gene_id: str):
+    """
+    Requests ClinVar API for data about variant with given id.
+    Converts it to pandas dataframe.
+
+    :param str gene_id: id of variant (may be multiple)
+    :returns: dataframe from ClinVar API
+    :rtype: dataframe
+    """
+    clinvar_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id={gene_id}&retmode=json"
+
+    request = requests.get(clinvar_url)
+
+    if request.status_code != 200:
+        raise ValueError(f"Request failed with status code {request.status_code}")
+
+    data = request.json()
+
     results = data['result']
 
-    # Extract the 'uids' part of the JSON
     flattened_data = []
 
     for uid in results['uids']:
         entry = results[uid]
 
-        # Using pd.json_normalize to flatten the JSON data
         flattened_entry = pd.json_normalize(entry, sep='_')
 
-        flattened_variation_set = pd.json_normalize(flattened_entry['variation_set'][0], sep='_')
-        flattened_variation_xrefs = pd.json_normalize(flattened_variation_set['variation_xrefs'][0], sep='_')
+        variation_set = flattened_entry.at[0, 'variation_set']
+        for idx, var_set in enumerate(variation_set):
+            flat_var_set = pd.json_normalize(var_set, sep='_')
+            flat_var_set = flat_var_set.add_prefix(f'variation_set_{idx}_')
 
-        variation_loc_size = len(flattened_variation_set['variation_loc'][0])
-        for i in range(variation_loc_size):
-            flattened_variation_loc = pd.json_normalize(flattened_variation_set['variation_loc'][0][i], sep='_')
-            flattened_variation_loc = flattened_variation_loc.add_prefix(f'{i}_')
-            flattened_variation_set = pd.concat([flattened_variation_set, flattened_variation_loc], axis=1)
+            variation_loc = var_set.get('variation_loc', [])
+            for loc_idx, loc in enumerate(variation_loc):
+                flat_loc = pd.json_normalize(loc, sep='_')
+                flat_loc = flat_loc.add_prefix(f'variation_set_{idx}_loc_{loc_idx}_')
+                flat_var_set = flat_var_set.join(flat_loc, rsuffix=f'_{idx}_{loc_idx}_vl')
 
-        allele_freq_set_size = len(flattened_variation_set['allele_freq_set'][0])
-        for i in range(allele_freq_set_size):
-            flattened_allele_freq_set = pd.json_normalize(flattened_variation_set['allele_freq_set'][0][i], sep='_')
-            flattened_allele_freq_set = flattened_allele_freq_set.add_prefix(f'{i}_')
-            flattened_variation_set = pd.concat([flattened_variation_set, flattened_allele_freq_set], axis=1)
+            var_xrefs = var_set.get('variation_xrefs', [])
+            for var_xrefs_idx, var_xref in enumerate(var_xrefs):
+                flat_var_xrefs = pd.json_normalize(var_xref, sep='_')
+                flat_var_xrefs = flat_var_xrefs.add_prefix(f'variation_set_{idx}_var_xrefs_{var_xrefs_idx}_')
+                flat_var_set = flat_var_set.join(flat_var_xrefs, rsuffix=f'_{idx}_{var_xrefs_idx}_vx')
 
-        gene_size = len(flattened_entry['genes'][0])
-        for i in range(gene_size):
-            flattened_genes = pd.json_normalize(flattened_entry['genes'][0][i], sep='_')
-            flattened_genes = flattened_genes.add_prefix(f'{i}_')
-            flattened_entry = pd.concat([flattened_entry, flattened_genes], axis=1)
+            allele_freq = var_set.get('allele_freq_set', [])
+            for allele_freq_idx, allele in enumerate(allele_freq):
+                flat_allele = pd.json_normalize(allele, sep='_')
+                flat_allele = flat_allele.add_prefix(f'variation_set_{idx}_allele_freq_{allele_freq_idx}_')
+                flat_var_set = flat_var_set.join(flat_allele, rsuffix=f'_{idx}_{allele_freq_idx}_af')
 
-        gremline_classification_trait_set_size = len(flattened_entry['germline_classification_trait_set'][0])
-        for i in range(gremline_classification_trait_set_size):
-            flattened_germline_classification_trait_set = pd.json_normalize(
-                flattened_entry['germline_classification_trait_set'][0][i], sep='_')
-            flattened_germline_classification_trait_set = flattened_germline_classification_trait_set.add_prefix(
-                f'{i}_')
+            flat_var_set = flat_var_set.drop(
+                columns=[f'variation_set_{idx}_variation_loc', f'variation_set_{idx}_variation_xrefs',
+                         f'variation_set_{idx}_allele_freq_set'])
+            flattened_entry = flattened_entry.join(flat_var_set, rsuffix=f'_{idx}_vs')
 
-            trait_xrefs_size = len(flattened_germline_classification_trait_set[f'{i}_trait_xrefs'][0])
-            for j in range(trait_xrefs_size):
-                flattened_trait_xrefs = pd.json_normalize(
-                    flattened_germline_classification_trait_set[f'{i}_trait_xrefs'][0][j], sep='_')
-                flattened_trait_xrefs = flattened_trait_xrefs.add_prefix(f'{j}_')
+        genes = flattened_entry.at[0, 'genes']
+        for idx, gene in enumerate(genes):
+            flat_genes = pd.json_normalize(gene, sep='_')
+            flat_genes = flat_genes.add_prefix(f'gene_{idx}_')
+            flattened_entry = flattened_entry.join(flat_genes, rsuffix=f'_{idx}_g')
 
-                flattened_germline_classification_trait_set = pd.concat(
-                    [flattened_germline_classification_trait_set, flattened_trait_xrefs], axis=1)
+        germline_classification_trait_set = flattened_entry.at[0, 'germline_classification_trait_set']
+        for idx, germline_set in enumerate(germline_classification_trait_set):
+            flat_germline_set = pd.json_normalize(germline_set, sep='_')
+            flat_germline_set = flat_germline_set.add_prefix(f'germline_set_{idx}_')
 
-            flattened_germline_classification_trait_set = flattened_germline_classification_trait_set.drop(
-                columns=[f'{i}_trait_xrefs'], axis=1)
-            flattened_entry = pd.concat([flattened_entry, flattened_germline_classification_trait_set], axis=1)
+            trait_xrefs = flat_germline_set.at[0, f'germline_set_{idx}_trait_xrefs']
+            for jdx, trait_xref in enumerate(trait_xrefs):
+                flat_trait_xrefs = pd.json_normalize(trait_xref, sep='_')
+                flat_trait_xrefs = flat_trait_xrefs.add_prefix(f'trait_xref_{jdx}_')
+                flat_germline_set = flat_germline_set.join(flat_trait_xrefs, rsuffix=f'_{idx}_{jdx}_tx')
 
-        # dropping extracted nests
-        flattened_entry = flattened_entry.drop(columns=['variation_set', 'genes', 'germline_classification_trait_set'],
-                                               axis=1)
-        flattened_variation_set = flattened_variation_set.drop(
-            columns=['variation_xrefs', 'variation_loc', 'allele_freq_set'], axis=1)
+            flat_germline_set = flat_germline_set.drop(columns=[f'germline_set_{idx}_trait_xrefs'])
+            flattened_entry = flattened_entry.join(flat_germline_set, rsuffix=f'_{idx}_gls')
 
-        flattened_variation_set = pd.concat([flattened_variation_set, flattened_variation_xrefs], axis=1)
-        flattened_variation_set = pd.concat([flattened_variation_set, flattened_allele_freq_set], axis=1)
+        flattened_entry = flattened_entry.drop(columns=['variation_set', 'genes', 'germline_classification_trait_set'])
 
-        flattened_entry = pd.concat([flattened_entry, flattened_variation_set], axis=1)
-        flattened_entry = pd.concat([flattened_entry, flattened_germline_classification_trait_set], axis=1)
-
-        # Append the flattened entry to the list
         flattened_data.append(flattened_entry)
 
-        # Concatenate all flattened entries into a single DataFrame
     df = pd.concat(flattened_data, ignore_index=True)
 
     return df
