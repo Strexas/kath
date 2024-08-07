@@ -52,37 +52,6 @@ def calculate_max_frequency(row):
     return pd.Series([max_freq, max_pop], index=['PopMax', 'PopMax population'])
 
 
-def merge_lovd_clinvar(lovd, clinvar):
-    """
-        merge LOVD and ClinVar dataframes on genomic positions.
-
-        parameters:
-        lovd :  LOVD dataframe.
-        clinvar : ClinVar dataframe.
-
-        returns:
-        pd.DataFrame: merged dataframe with combined information from `lovd` and `clinvar`.
-
-        """
-    start_merge = pd.merge(lovd,
-                           clinvar,
-                           how="outer",
-                           left_on="position_g_start",
-                           right_on="GRCh38Location_clinvar").drop(["Name_clinvar", "GRCh38Location_clinvar"],
-                                                                   axis=1)
-
-    end_merge = pd.merge(lovd,
-                         clinvar,
-                         how="outer",
-                         left_on="position_g_end",
-                         right_on="GRCh38Location_clinvar").drop(["Name_clinvar", "GRCh38Location_clinvar"],
-                                                                 axis=1)
-
-    main_frame = start_merge.combine_first(end_merge)
-
-    return main_frame
-
-
 def main():
     """
     Main function implementing pipeline for data collection and merging of data from
@@ -103,29 +72,23 @@ def main():
 
     # renaming databases' columns
     gnomad_data.columns += "(gnomad)"
-    clinvar_data.columns += "_clinvar"
+    clinvar_data.columns += "(clinvar)"
 
-    variants_on_genome = lovd_data["Variants_On_Genome"].copy()
-
-    variants_on_genome['position_g_start'] = variants_on_genome['position_g_start'].astype(str)
-    variants_on_genome['position_g_end'] = variants_on_genome['position_g_end'].astype(str)
-
-    # merge Variants_On_Transcripts with Variants_On_Genome to add position_g_start and position_g_end
-    main_frame = pd.merge(lovd_data["Variants_On_Transcripts"],
-                          variants_on_genome[['id', 'position_g_start', 'position_g_end']],
-                          on='id',
-                          how='left')
+    # Reading main working table
+    main_frame = lovd_data["Variants_On_Transcripts"][0].copy()
 
     # Merging Clinvar
-    clinvar = clinvar_data.copy()[["Name_clinvar",
-                                   "Germline classification_clinvar",
-                                   "Accession_clinvar",
-                                   "GRCh38Location_clinvar"]]
+    clinvar = clinvar_data.copy()[["Name(clinvar)",
+                                   "Germline classification(clinvar)",
+                                   "Accession(clinvar)"]]
+    clinvar["VariantOnTranscript/DNA"] = (clinvar["Name(clinvar)"].
+                                          apply(from_clinvar_name_to_cdna_position))
 
-    clinvar["VariantOnTranscript/DNA_clinvar"] = (clinvar["Name_clinvar"].
-                                                  apply(from_clinvar_name_to_cdna_position))
+    main_frame = pd.merge(main_frame,
+                          clinvar,
+                          how="outer",
+                          on=["VariantOnTranscript/DNA"]).drop("Name(clinvar)", axis=1)
 
-    main_frame = merge_lovd_clinvar(main_frame, clinvar)
     # MERGING GnomAd
     main_frame = (pd.merge(main_frame,
                            gnomad_data,
