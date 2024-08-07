@@ -54,5 +54,8 @@ from .data.refactoring import (
     # Functions for refactoring data
     set_lovd_dtypes,
     parse_lovd,
-    from_clinvar_name_to_cdna_position
+    from_clinvar_name_to_cdna_position,
+    save_lovd_as_vcf,
+    request_clinvar_api_data,
+    get_variant_ids_from_clinvar_name_api,
 )
