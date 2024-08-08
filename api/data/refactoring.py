@@ -8,6 +8,7 @@ from pandas import DataFrame
 
 from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH
 
+
 def set_lovd_dtypes(df_dict):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
@@ -102,31 +103,6 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
     return d
 
 
-def from_clinvar_name_to_cdna_position(name):
-    """
-    Custom cleaner to extract cDNA position from Clinvar `name` variable.
-
-    :param str name:
-    :returns: extracted cDNA
-    :rtype: str
-    """
-
-    start = name.find(":") + 1
-    ends = {'del', 'delins', 'dup', 'ins', 'inv', 'subst'}
-
-    if "p." in name:
-        name = name[:name.index("p.") - 1].strip()
-
-    end = len(name)
-
-    for i in ends:
-        if i in name:
-            end = name.index(i) + len(i)
-            break
-
-    return name[start:end]
-
-
 def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
     """
     Gets hg38 variants from LOVD and saves as VCF file.
@@ -154,3 +130,39 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
 
             f.write("\t".join(record))
             f.write("\n")
+
+
+def merge_lovd_clinvar(lovd, clinvar):
+    """
+        merge LOVD and ClinVar dataframes on genomic positions.
+
+        parameters:
+        lovd :  LOVD dataframe.
+        clinvar : ClinVar dataframe.
+
+        returns:
+        pd.DataFrame: merged dataframe with combined information from `lovd` and `clinvar`.
+
+        """
+
+    start_merge = pd.merge(lovd,
+                           clinvar,
+                           how="outer",
+                           left_on="position_g_start",
+                           right_on="GRCh38Location").drop(["Name", "GRCh38Location"],
+                                                                   axis=1)
+
+    end_merge = pd.merge(lovd,
+                         clinvar,
+                         how="outer",
+                         left_on="position_g_end",
+                         right_on="GRCh38Location").drop(["Name", "GRCh38Location"],
+                                                                 axis=1)
+
+    main_frame = start_merge.combine_first(end_merge)
+
+    main_frame = main_frame.rename(columns={
+        "Germline classification": "Germline classification_clinvar",
+        "Accession": "Accession_clinvar",
+    })
+    return main_frame
