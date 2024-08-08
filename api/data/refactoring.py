@@ -103,31 +103,6 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
     return d
 
 
-def from_clinvar_name_to_cdna_position(name):
-    """
-    Custom cleaner to extract cDNA position from Clinvar `name` variable.
-
-    :param str name:
-    :returns: extracted cDNA
-    :rtype: str
-    """
-
-    start = name.find(":") + 1
-    ends = {'del', 'delins', 'dup', 'ins', 'inv', 'subst'}
-
-    if "p." in name:
-        name = name[:name.index("p.") - 1].strip()
-
-    end = len(name)
-
-    for i in ends:
-        if i in name:
-            end = name.index(i) + len(i)
-            break
-
-    return name[start:end]
-
-
 def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
     """
     Gets hg38 variants from LOVD and saves as VCF file.
