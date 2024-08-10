@@ -134,32 +134,36 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
 
 def merge_lovd_clinvar(lovd, clinvar):
     """
-        merge LOVD and ClinVar dataframes on genomic positions.
+    merge LOVD and ClinVar dataframes on genomic positions.
 
-        parameters:
-        lovd :  LOVD dataframe.
-        clinvar : ClinVar dataframe.
+    parameters:
+    lovd : pd.DataFrame
+        LOVD dataframe.
+    clinvar : pd.DataFrame
+        ClinVar dataframe.
 
-        returns:
-        pd.DataFrame: merged dataframe with combined information from `lovd` and `clinvar`.
+    returns:
+    pd.DataFrame
+        merged dataframe with combined information from LOVD and ClinVar.
+    """
 
-        """
+    clinvar[['GRCh38Location_start', 'GRCh38Location_end']] = clinvar['GRCh38Location'].str.split(' - ', expand=True)
 
-    start_merge = pd.merge(lovd,
-                           clinvar,
-                           how="outer",
-                           left_on="position_g_start",
-                           right_on="GRCh38Location").drop(["Name", "GRCh38Location"],
-                                                                   axis=1)
+    start_merge = pd.merge(
+        lovd,
+        clinvar,
+        how="outer",
+        left_on="position_g_start",
+        right_on="GRCh38Location_start").drop(["Name", "GRCh38Location"], axis=1, errors='ignore')
 
-    end_merge = pd.merge(lovd,
-                         clinvar,
-                         how="outer",
-                         left_on="position_g_end",
-                         right_on="GRCh38Location").drop(["Name", "GRCh38Location"],
-                                                                 axis=1)
+    end_merge = pd.merge(
+        lovd,
+        clinvar,
+        how="outer",
+        left_on="position_g_end",
+        right_on="GRCh38Location_end").drop(["Name", "GRCh38Location"], axis=1, errors='ignore')
 
-    main_frame = start_merge.combine_first(end_merge)
+    main_frame = end_merge.combine_first(start_merge)
 
     main_frame = main_frame.rename(columns={
         "Germline classification": "Germline classification_clinvar",
