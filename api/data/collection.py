@@ -137,6 +137,14 @@ def download_database_for_eys_gene(database_name, override=False):
     :param override: should an existing file be overriden with a new one
     """
 
+    save_as = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
+    os_path = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
+
+    if os.path.exists(os_path) and override:
+        os.remove(os_path)
+    elif os.path.exists(os_path) and not override:
+        return
+
     url = DATABASES_DOWNLOAD_PATHS[database_name]["url"]
     button_location = DATABASES_DOWNLOAD_PATHS[database_name]["button"]
     clickable = DATABASES_DOWNLOAD_PATHS[database_name]["clickable"]
@@ -162,14 +170,6 @@ def download_database_for_eys_gene(database_name, override=False):
     time.sleep(30)
     driver.quit()
 
-    save_as = DATABASES_DOWNLOAD_PATHS[database_name]["store_as"]
-    os_path = os.path.join(os.getcwd(), "..", "data", database_name, save_as)
-
-    if os.path.exists(os_path) and override:
-        os.remove(os_path)
-    elif os.path.exists(os_path) and not override:
-        print("File already exists")
-        return
     list_of_files = glob.glob(os.path.join(os.getcwd(), "..", "data", database_name, '*'))
     latest_file = max(list_of_files, key=os.path.getctime)
     os.rename(latest_file, os_path)
