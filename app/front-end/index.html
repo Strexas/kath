@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/Kath_OnlyLogo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kath</title>
+  </head>
+  <body style="margin: 0;">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+			// Retrieve color mode from localStorage
+			const colorMode = localStorage.getItem('color-mode');
+
+			// Function to set background color based on color mode
+			function setBackgroundColor(colorMode) {
+				if (colorMode === 'dark') {
+					document.body.style.backgroundColor = '#203238'; // Dark background color
+				} else {
+					document.body.style.backgroundColor = '#4C7380'; // Light background color
+				}
+			}
+
+			// Check if color mode is stored in localStorage
+			if (colorMode) {
+				setBackgroundColor(colorMode);
+			} else {
+				// Retrieve system's preferred color mode using matchMedia
+				const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+				// Set color mode based on system preference
+				const systemColorMode = prefersDarkMode ? 'dark' : 'light';
+
+				// Store the system color mode in localStorage
+				localStorage.setItem('color-mode', systemColorMode);
+
+				// Set background color based on system color mode
+				setBackgroundColor(systemColorMode);
+			}
+		</script>
+  </body>
+</html>
