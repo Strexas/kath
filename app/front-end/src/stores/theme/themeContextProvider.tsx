@@ -80,9 +80,23 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
           },
           background: {
             default: mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark,
+            paper: mode === 'light' ? Colors.backgroundSecondaryLight : Colors.backgroundSecondaryDark,
           },
           action: {
             hover: mode === 'light' ? Colors.secondaryLight : Colors.secondaryDark,
+            selected: mode === 'light' ? Colors.backgroundActiveLight : Colors.backgroundActiveDark,
+          },
+          error: {
+            main: Colors.error,
+          },
+          success: {
+            main: Colors.success,
+          },
+          warning: {
+            main: Colors.warning,
+          },
+          info: {
+            main: Colors.info,
           },
         },
         components: {
