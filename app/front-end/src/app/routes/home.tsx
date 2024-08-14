@@ -33,11 +33,12 @@ export const Home = () => {
       <Box
         sx={{
           width: '20%',
-          height: '100%',
+          height: '90%',
           display: 'flex',
           flexDirection: 'column',
           bgcolor: Theme.palette.secondary.main,
           borderRadius: '0.625rem 0 0 0.625rem',
+          margin: '1rem',
         }}
       >
         <Hierarchy />
