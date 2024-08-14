@@ -149,24 +149,48 @@ def merge_lovd_clinvar(lovd, clinvar):
 
     clinvar[['GRCh38Location_start', 'GRCh38Location_end']] = clinvar['GRCh38Location'].str.split(' - ', expand=True)
 
+    clinvar['GRCh38Location_start'] = clinvar['GRCh38Location_start'].astype(pd.Int64Dtype())
+    clinvar['GRCh38Location_end'] = clinvar['GRCh38Location_end'].astype(pd.Int64Dtype())
+
     start_merge = pd.merge(
         lovd,
         clinvar,
         how="outer",
         left_on="position_g_start",
-        right_on="GRCh38Location_start").drop(["Name", "GRCh38Location"], axis=1, errors='ignore')
+        right_on="GRCh38Location_start").drop(["Name", "GRCh38Location"], axis=1, errors='raise')
 
     end_merge = pd.merge(
         lovd,
         clinvar,
         how="outer",
         left_on="position_g_end",
-        right_on="GRCh38Location_end").drop(["Name", "GRCh38Location"], axis=1, errors='ignore')
+        right_on="GRCh38Location_end").drop(["Name", "GRCh38Location"], axis=1, errors='raise')
 
-    main_frame = end_merge.combine_first(start_merge)
+    main_frame = start_merge.combine_first(end_merge)
 
     main_frame = main_frame.rename(columns={
         "Germline classification": "Germline classification_clinvar",
         "Accession": "Accession_clinvar",
     })
     return main_frame
+
+
+def filter_clinvar_for_eys(clinvar_data):
+    """
+    filters the ClinVar dataframe.
+
+    parameters:
+    clinvar_data : pd.DataFrame
+        ClinVar dataframe.
+
+    returns:
+    pd.DataFrame
+        Filtered dataframe.
+    """
+    eys_mask = clinvar_data['Name'].str.contains('EYS', case=False, na=False)
+    no_del_or_dup_mask = ~clinvar_data['Name'].str.contains('del|dup', case=False, na=False)
+
+    combined_mask = eys_mask & no_del_or_dup_mask
+    filtered_clinvar = clinvar_data[combined_mask]
+
+    return filtered_clinvar
