@@ -1,4 +1,4 @@
-import { Console, Editor, Filebar, Hierarchy, Toolbar } from '@/features/editor/components';
+import { Console, Editor, Filebar, FileTreeView, Toolbar } from '@/features/editor/components';
 import { Box, useTheme } from '@mui/material';
 
 /**
@@ -41,7 +41,7 @@ export const Home = () => {
           margin: '1rem',
         }}
       >
-        <Hierarchy />
+        <FileTreeView />
       </Box>
       <Box sx={{ width: '80%', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <Box
