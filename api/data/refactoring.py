@@ -148,9 +148,12 @@ def merge_lovd_clinvar(lovd, clinvar):
     """
 
     clinvar[['GRCh38Location_start', 'GRCh38Location_end']] = clinvar['GRCh38Location'].str.split(' - ', expand=True)
+    clinvar['Protein_clinvar'] = clinvar['Name'].str.extract(r'\((p\.[^\)]+)\)')
+    clinvar['c.position_clinvar'] = clinvar['Name'].str.extract(r'(c\.[^\s\)]+)')
 
     clinvar['GRCh38Location_start'] = clinvar['GRCh38Location_start'].astype(pd.Int64Dtype())
     clinvar['GRCh38Location_end'] = clinvar['GRCh38Location_end'].astype(pd.Int64Dtype())
+
 
     start_merge = pd.merge(
         lovd,
@@ -188,7 +191,7 @@ def filter_clinvar_for_eys(clinvar_data):
         Filtered dataframe.
     """
     eys_mask = clinvar_data['Name'].str.contains('EYS', case=False, na=False)
-    no_del_or_dup_mask = ~clinvar_data['Name'].str.contains('del|dup', case=False, na=False)
+    no_del_or_dup_mask = ~clinvar_data['Name'].str.contains('del|dup|ins', case=False, na=False)
 
     combined_mask = eys_mask & no_del_or_dup_mask
     filtered_clinvar = clinvar_data[combined_mask]
