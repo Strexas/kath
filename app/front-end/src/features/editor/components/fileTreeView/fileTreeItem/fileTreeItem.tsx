@@ -1,4 +1,6 @@
+import { useWorkspaceContext } from '@/features/editor/hooks';
 import { getIconFromFileType, isExpandable } from '@/features/editor/utils';
+import { FileTypes } from '@/types';
 import FolderRounded from '@mui/icons-material/FolderRounded';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
@@ -70,6 +72,40 @@ interface FileTreeItemProps
   extends Omit<UseTreeItem2Parameters, 'rootRef'>,
     Omit<React.HTMLAttributes<HTMLLIElement>, 'onFocus'> {}
 
+/**
+ * FileTreeItem component renders a custom tree item for use within a hierarchical file tree view.
+ *
+ * @description This component represents an individual item in a file tree, using Material-UI's `TreeItem2` components for
+ * rendering and behavior. It integrates with the `useTreeItem2` hook for managing item state and interactions. The item can
+ * display different icons based on whether it's expandable or represents a specific file type. It also includes support for
+ * drag-and-drop functionality and a custom collapse transition.
+ *
+ * The item uses styled components for custom styling and provides visual feedback on selection, focus, and hover states.
+ * The `FileTreeItem` component also handles click events to update the workspace context with the item's details.
+ *
+ * @component
+ *
+ * @example
+ * // Example usage of the FileTreeItem component
+ * return (
+ *   <FileTreeItem
+ *     id="item-1"
+ *     itemId="item-1"
+ *     label="Example Item"
+ *     fileType={FileTypes.FILE}
+ *   />
+ * );
+ *
+ * @param {Object} props - The props for the FileTreeItem component.
+ * @param {string} props.id - The unique identifier for the tree item.
+ * @param {string} props.itemId - The item ID used for tree item management.
+ * @param {string} props.label - The display label for the tree item.
+ * @param {boolean} [props.disabled] - Optional flag to disable the item.
+ * @param {React.ReactNode} [props.children] - Optional child elements to render inside the tree item.
+ * @param {Object} [props.other] - Additional props to be passed to the root element.
+ *
+ * @returns {JSX.Element} The rendered tree item with custom styles, icons, and behavior.
+ */
 export const FileTreeItem = React.forwardRef(function CustomTreeItem(
   props: FileTreeItemProps,
   ref: React.Ref<HTMLLIElement>
@@ -97,21 +133,28 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     icon = getIconFromFileType(item.fileType);
   }
 
-  const handleClick = (fileName: string, fileID: string) => {
-    console.log(`Clicked on ${fileName} (${fileID})`); // TODO: implement file fetching from back-end
+  const Workspace = useWorkspaceContext();
+
+  const handleClick = (newId: string, newLabel: string, newType: FileTypes) => {
+    Workspace.update(newId, newLabel, newType);
   };
 
   return (
     <TreeItem2Provider itemId={itemId}>
-      <StyledFileTreeItemRoot {...getRootProps(other)} onClick={() => handleClick(item.label, item.id)}>
+      <StyledFileTreeItemRoot {...getRootProps(other)}>
         <StyledFileTreeItemContent
           {...getContentProps({
+            onClick: (event) => {
+              if (getContentProps().onClick) getContentProps().onClick(event);
+              handleClick(item.id, item.label, item.fileType);
+            },
             className: clsx('content', {
               'Mui-expanded': status.expanded,
               'Mui-selected': status.selected,
               'Mui-focused': status.focused,
               'Mui-disabled': status.disabled,
             }),
+            status: status,
           })}
         >
           <TreeItem2IconContainer {...getIconContainerProps()}>

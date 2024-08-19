@@ -1,17 +1,18 @@
-import { Paths } from '@/types/constants/paths';
+import { Paths } from '@/types';
 import { useMemo } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 /**
- * AppRouter component sets up routing for the application using React Router.
+ * `AppRouter` component sets up the routing for the application using `createBrowserRouter` from `react-router-dom`.
  *
- * @description This component configures the application's routes and uses lazy loading
- * for route components. It employs `createBrowserRouter` to define the routes and `RouterProvider`
- * to provide the router context to the application.
+ * @description This component defines the routes for the application and configures lazy loading for route components.
+ * It uses the `createBrowserRouter` function to set up routing, with the paths and associated components being loaded
+ * asynchronously. The router configuration includes:
+ * - A route for the home page, which is lazily loaded from `./routes/home`.
+ * - A catch-all route for 404 pages, which is lazily loaded from `./routes/notFound`.
  *
- * The routes are configured as follows:
- * - `Paths.HOME`: Lazy loads the `Home` component from `./routes/home`.
- * - `Paths.NOTFOUND`: Lazy loads the `NotFound` component from `./routes/notFound` for unmatched routes.
+ * The component uses `RouterProvider` to provide the router to the application, ensuring that routing is managed
+ * throughout the app.
  *
  * @component
  *
@@ -21,7 +22,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
  *   <AppRouter />
  * );
  *
- * @returns {JSX.Element} The rendered RouterProvider component with configured routes.
+ * @returns {JSX.Element} The RouterProvider component with the configured browser router.
  */
 export const AppRouter = () => {
   const router = useMemo(

@@ -1,1 +1,0 @@
-export { FileTreeViewMockData } from './fileTreeViewMockData';

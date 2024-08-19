@@ -1,5 +1,10 @@
-import { FileTreeViewMockData } from '@/features/editor/mockData';
+import { FileTreeViewItemProps } from '@/features/editor/types';
+import { axios } from '@/lib';
+import { Endpoints } from '@/types';
+import { Box, LinearProgress } from '@mui/material';
+import { TreeViewBaseItem } from '@mui/x-tree-view';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
+import { useEffect, useState } from 'react';
 import { FileTreeItem } from './fileTreeItem';
 
 declare module 'react' {
@@ -10,15 +15,14 @@ declare module 'react' {
 }
 
 /**
- * FileTreeView component renders a tree view with sample file structure data using Material-UI components.
+ * FileTreeView component displays a hierarchical tree view of files and directories.
  *
- * @description This component displays a `RichTreeView` that is populated with mock file structure data provided by
- * `FileTreeViewMockData`. It leverages the `FileTreeItem` component to render each item in the tree view, allowing for
- * custom rendering and behavior of tree nodes. The tree view's layout is styled with the `sx` prop, ensuring it is responsive
- * and scrollable.
+ * @description This component renders a `RichTreeView` with items fetched from the workspace endpoint. It displays a loading
+ * indicator while the data is being fetched and presents the tree view when the data is loaded. The tree view uses `FileTreeItem`
+ * to represent each item. The component handles asynchronous data fetching and provides visual feedback using `LinearProgress`.
  *
- * The component sets up a tree view with a dynamic height based on its content, grows within its flex container,
- * and allows vertical scrolling when the content overflows.
+ * The `RichTreeView` component from Material-UI's TreeView package is utilized to render the hierarchical structure, with
+ * a custom `item` slot for rendering each tree node via the `FileTreeItem` component.
  *
  * @component
  *
@@ -28,14 +32,42 @@ declare module 'react' {
  *   <FileTreeView />
  * );
  *
- * @returns {JSX.Element} The rendered RichTreeView component containing the file tree structure.
+ * @returns {JSX.Element} The rendered tree view component, displaying either a loading indicator or the file tree.
  */
 export const FileTreeView: React.FC = () => {
+  const [fileTreeViewData, setFileTreeViewData] = useState<TreeViewBaseItem<FileTreeViewItemProps>[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const getWorkspace = async () => {
+      setIsLoading(true);
+
+      try {
+        const response = await axios.get(Endpoints.WORKSPACE);
+        setFileTreeViewData(response.data);
+      } catch (error) {
+        console.error('Failed to fetch workspace data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getWorkspace();
+  }, []);
+
   return (
-    <RichTreeView
-      items={FileTreeViewMockData}
-      sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
-      slots={{ item: FileTreeItem }}
-    />
+    <>
+      {isLoading ? (
+        <Box sx={{ width: '100%' }}>
+          <LinearProgress />
+        </Box>
+      ) : (
+        <RichTreeView
+          items={fileTreeViewData}
+          sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
+          slots={{ item: FileTreeItem }}
+        />
+      )}
+    </>
   );
 };

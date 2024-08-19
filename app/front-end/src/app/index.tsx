@@ -1,13 +1,16 @@
 import '@/app/index.css';
-import { AppProvider } from './provider';
-import { AppRouter } from './router';
+import { AppProvider } from '@/app/provider';
+import { AppRouter } from '@/app/router';
 
 /**
- * App component serves as the main entry point for the application.
+ * `App` component is the root component of the application, setting up the provider and routing.
  *
- * @description This component integrates the `AppProvider` and `AppRouter` components.
- * It uses `AppProvider` to wrap the application in a Suspense boundary for handling lazy-loaded components,
- * and `AppRouter` to configure and render the application's routes.
+ * @description This component serves as the entry point of the application. It wraps the `AppRouter` component with the
+ * `AppProvider` to ensure that context providers and layout are applied throughout the application. The `AppRouter`
+ * component handles routing and lazy loading of pages.
+ *
+ * The `AppProvider` provides necessary context and layout, while the `AppRouter` sets up the application's routing logic.
+ * This structure ensures that all components within the application have access to the context and are properly routed.
  *
  * @component
  *
@@ -17,7 +20,7 @@ import { AppRouter } from './router';
  *   <App />
  * );
  *
- * @returns {JSX.Element} The rendered AppProvider component containing the AppRouter.
+ * @returns {JSX.Element} The `AppProvider` component containing the `AppRouter` component.
  */
 export const App = () => {
   return (
