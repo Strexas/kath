@@ -73,7 +73,7 @@ export const EditorView: React.FC = () => {
     };
 
     getWorkspaceFile();
-  }, [Workspace]);
+  }, [Workspace.fileId, Workspace.fileType]);
 
   const handleSave = () => {
     const header = gridApiRef.current
