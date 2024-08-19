@@ -1,6 +1,6 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import { useThemeContext } from '@/hooks/theme/useThemeContext';
-import { Colors } from '@/types/enums/colors';
+import { useThemeContext } from '@/hooks';
+import { Colors } from '@/types';
 import { AutoMode, DarkMode, Home, LightMode, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
 

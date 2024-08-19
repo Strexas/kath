@@ -1,5 +1,5 @@
+export { Console } from './console';
+export { EditorView } from './editorView';
+export { Filebar } from './filebar';
 export { FileTreeView } from './fileTreeView/fileTreeView';
 export { Toolbar } from './toolbar';
-export { Editor } from './editor';
-export { Filebar } from './filebar';
-export { Console } from './console';

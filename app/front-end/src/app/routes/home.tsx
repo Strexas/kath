@@ -1,5 +1,4 @@
-import { Console, Editor, Filebar, FileTreeView, Toolbar } from '@/features/editor/components';
-import { Box, useTheme } from '@mui/material';
+import { Editor } from '@/features/editor';
 
 /**
  * Home component provides the main layout structure of the application.
@@ -27,70 +26,5 @@ import { Box, useTheme } from '@mui/material';
  * @returns {JSX.Element} The rendered layout of the Home component.
  */
 export const Home = () => {
-  const Theme = useTheme();
-  return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}>
-      <Box
-        sx={{
-          width: '20%',
-          height: '90%',
-          display: 'flex',
-          flexDirection: 'column',
-          bgcolor: Theme.palette.secondary.main,
-          borderRadius: '0.625rem 0 0 0.625rem',
-          margin: '1rem',
-        }}
-      >
-        <FileTreeView />
-      </Box>
-      <Box sx={{ width: '80%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
-            width: '100%',
-            height: '15%',
-            display: 'flex',
-            flexDirection: 'row',
-            bgcolor: Theme.palette.action.selected,
-            borderRadius: '0 0.625rem 0 0',
-          }}
-        >
-          <Toolbar />
-        </Box>
-        <Box
-          sx={{
-            width: '100%',
-            height: '60%',
-            display: 'flex',
-            flexDirection: 'column',
-            bgcolor: Theme.palette.background.default,
-          }}
-        >
-          <Editor />
-        </Box>
-        <Box
-          sx={{
-            width: '100%',
-            height: '5%',
-            display: 'flex',
-            flexDirection: 'row',
-            bgcolor: Theme.palette.action.selected,
-          }}
-        >
-          <Filebar />
-        </Box>
-        <Box
-          sx={{
-            width: '100%',
-            height: '20%',
-            display: 'flex',
-            flexDirection: 'column',
-            bgcolor: Theme.palette.background.paper,
-            borderRadius: '0 0 0.625rem 0',
-          }}
-        >
-          <Console />
-        </Box>
-      </Box>
-    </Box>
-  );
+  return <Editor />;
 };

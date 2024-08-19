@@ -1,4 +1,4 @@
-import { Colors } from '@/types/enums/colors';
+import { Colors } from '@/types';
 import { Box, IconButton, Typography } from '@mui/material';
 
 interface Props {

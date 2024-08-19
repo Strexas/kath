@@ -1,5 +1,5 @@
 import { BaseLayout } from '@/components/layouts/baseLayout';
-import { ThemeContextProvider } from '@/stores/theme/themeContextProvider';
+import { ThemeContextProvider } from '@/stores';
 import { CircularProgress } from '@mui/material';
 import React from 'react';
 
@@ -8,14 +8,18 @@ type AppProviderProps = {
 };
 
 /**
- * AppProvider component wraps its children with React's Suspense to handle lazy-loaded components,
- * while also providing theme context and layout structure.
+ * `AppProvider` component provides the application with a theme context and layout, and handles lazy loading with a fallback spinner.
  *
- * @description This component uses React's `Suspense` to manage the loading state of lazy-loaded components,
- * displaying a Material-UI `CircularProgress` spinner as a fallback during loading. Additionally, it provides
- * a consistent layout through `BaseLayout` and theme context via `ThemeContextProvider` to all its children.
+ * @description This component wraps its children with the `ThemeContextProvider` to provide theming capabilities
+ * and `BaseLayout` to apply a consistent layout structure. It also utilizes `React.Suspense` to manage lazy-loaded
+ * components, displaying a `CircularProgress` spinner as a fallback while components are loading.
+ *
+ * The `CircularProgress` spinner is centered within its container to ensure visibility and a smooth user experience during loading.
  *
  * @component
+ *
+ * @param {AppProviderProps} props - The props for the component.
+ * @param {React.ReactNode} props.children - The child components to be rendered within the provider and layout.
  *
  * @example
  * // Example usage of the AppProvider component
@@ -25,12 +29,7 @@ type AppProviderProps = {
  *   </AppProvider>
  * );
  *
- * @param {AppProviderProps} props - The props for the component.
- * @param {React.ReactNode} props.children - The child elements to be rendered within the Suspense boundary,
- * and wrapped with theme context and layout structure.
- *
- * @returns {JSX.Element} The rendered React.Suspense component with a fallback loading spinner,
- * providing theme context and layout to its children.
+ * @returns {JSX.Element} The `React.Suspense` component wrapping the `ThemeContextProvider` and `BaseLayout`.
  */
 export const AppProvider = ({ children }: AppProviderProps) => {
   return (
