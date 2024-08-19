@@ -147,29 +147,14 @@ def merge_lovd_clinvar(lovd, clinvar):
         merged dataframe with combined information from LOVD and ClinVar.
     """
 
-    clinvar[['GRCh38Location_start', 'GRCh38Location_end']] = clinvar['GRCh38Location'].str.split(' - ', expand=True)
-    clinvar['Protein_clinvar'] = clinvar['Name'].str.extract(r'\((p\.[^\)]+)\)')
-    clinvar['c.position_clinvar'] = clinvar['Name'].str.extract(r'(c\.[^\s\)]+)')
-
-    clinvar['GRCh38Location_start'] = clinvar['GRCh38Location_start'].astype(pd.Int64Dtype())
-    clinvar['GRCh38Location_end'] = clinvar['GRCh38Location_end'].astype(pd.Int64Dtype())
-
-
-    start_merge = pd.merge(
+    clinvar['Genomic Notation'] = clinvar['Canonical SPDI'].apply(spdi_to_genomic)
+    clinvar_copy = clinvar.copy()
+    main_frame = pd.merge(
         lovd,
-        clinvar,
+        clinvar_copy,
         how="outer",
-        left_on="position_g_start",
-        right_on="GRCh38Location_start").drop(["Name", "GRCh38Location"], axis=1, errors='raise')
-
-    end_merge = pd.merge(
-        lovd,
-        clinvar,
-        how="outer",
-        left_on="position_g_end",
-        right_on="GRCh38Location_end").drop(["Name", "GRCh38Location"], axis=1, errors='raise')
-
-    main_frame = start_merge.combine_first(end_merge)
+        left_on="VariantOnGenome/DNA/hg38",
+        right_on="Genomic Notation").drop(["Name"], axis=1, errors='raise')
 
     main_frame = main_frame.rename(columns={
         "Germline classification": "Germline classification_clinvar",
@@ -197,3 +182,44 @@ def filter_clinvar_for_eys(clinvar_data):
     filtered_clinvar = clinvar_data[combined_mask]
 
     return filtered_clinvar
+
+
+def filter_lovd_for_eys(lovd_data):
+    """
+    filters the LOVD dataframe.
+
+    parameters:
+    lovd_data : pd.DataFrame
+        LOVD dataframe.
+
+    returns:
+    pd.DataFrame
+        Filtered dataframe.
+    """
+    no_del_or_dup_mask = ~lovd_data['VariantOnGenome/DNA/hg38'].str.contains('del|dup', case=False, na=False)
+    combined_mask = no_del_or_dup_mask
+    filtered_lovd = lovd_data[combined_mask]
+
+    return filtered_lovd
+
+
+def spdi_to_genomic(spdi):
+    """
+    transforms from SPDI notation to genomic notation.
+
+    args:
+    spdi (str): SPDI notation string
+
+    returns:
+    str: Genomic notation string
+    """
+    try:
+        parts = spdi.split(':')
+        position = int(parts[1])
+        ref_allele = parts[2]
+        var_allele = parts[3]
+        one_based_position = position + 1
+        genomic_notation = f"g.{one_based_position}{ref_allele}>{var_allele}"
+        return genomic_notation
+    except Exception as e:
+        return spdi
