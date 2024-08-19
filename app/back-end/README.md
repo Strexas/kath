@@ -9,8 +9,8 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 ## Step 1: Install WSL
 
-1. **Open PowerShell as Administrator**:
-   - Search for `PowerShell` in the Start menu, right-click, and select `Run as administrator`.
+1. **Open PowerShell**:
+   - Search for `PowerShell` in the Start menu, right-click, and select `Open`.
 
 2. **Install WSL**:
    ```powershell
@@ -24,8 +24,8 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 ## Step 2: Running WSL
 
-1. **Open PowerShell as Administrator**:
-   - Search for `PowerShell` in the Start menu, right-click, and select `Run as administrator`.
+1. **Open PowerShell**:
+   - Search for `PowerShell` in the Start menu, right-click, and select `Open`.
 
 2. **Run WSL**:
    ```powershell
