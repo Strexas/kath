@@ -58,4 +58,5 @@ from .refactoring import (
     save_lovd_as_vcf,
     request_clinvar_api_data,
     get_variant_ids_from_clinvar_name_api,
+    extract_nested_json,
 )

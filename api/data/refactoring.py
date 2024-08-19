@@ -3,7 +3,6 @@
 import os
 import logging
 
-import pandas
 import requests
 
 import pandas as pd
@@ -160,7 +159,7 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
             f.write("\n")
 
 
-def get_variant_ids_from_clinvar_name_api(name: str, count: int = 100):
+def get_variant_ids_from_clinvar_name_api(name, count=100):
     """
     Extracts variant ids from ClinVar `name` variable. /n
     key of dictionary is the size of the list of ids.
@@ -172,9 +171,8 @@ def get_variant_ids_from_clinvar_name_api(name: str, count: int = 100):
     """
 
     result = {}
-
-    separator = ","
-    clinvar_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term={name}&retmode=json&retmax={count}"
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=clinvar&term="
+    clinvar_url = f"{base_url}{name}&retmode=json&retmax={count}"
 
     request = requests.get(clinvar_url)
 
@@ -183,33 +181,46 @@ def get_variant_ids_from_clinvar_name_api(name: str, count: int = 100):
 
     data = request.json()
 
-    ids = data['esearchresult']['idlist']
-
-    result['idlist'] = ids
+    result['idlist'] = data['esearchresult']['idlist']
     result['count'] = data['esearchresult']['count']
 
     return result
 
 
-def request_clinvar_api_data(gene_id: str):
+def extract_nested_json(flat_parsed, parsed_from, required_column, prefix, join_prefix):
+    """
+    Extracts nested JSON data from dictionary.
+
+    :param DataFrame parsed_from: normalised JSON data
+    :param str required_column: column to extract
+    :param str prefix: prefix for extracted columns
+    """
+
+    data_set = parsed_from.get(required_column, [])
+    for idx, data in enumerate(data_set):
+        flat_data = pd.json_normalize(data, sep='_')
+        flat_data = flat_data.add_prefix(f'{prefix}_{idx}_')
+        flat_parsed = flat_parsed.join(flat_data, rsuffix=f'_{idx}_{join_prefix}')
+
+
+def request_clinvar_api_data(gene_id):
     """
     Requests ClinVar API for data about variant with given id.
     Converts it to pandas dataframe.
 
     :param str gene_id: id of variant (may be multiple)
-    :returns: dataframe from ClinVar API
-    :rtype: dataframe
+    :returns: DataFrame from ClinVar API
+    :rtype: DataFrame
     """
-    clinvar_url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id={gene_id}&retmode=json"
+    base_url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=clinvar&id="
+    clinvar_url = f"{base_url}{gene_id}&retmode=json"
 
     request = requests.get(clinvar_url)
 
     if request.status_code != 200:
         raise ValueError(f"Request failed with status code {request.status_code}")
 
-    data = request.json()
-
-    results = data['result']
+    results = request.json()['result']
 
     flattened_data = []
 
@@ -223,28 +234,17 @@ def request_clinvar_api_data(gene_id: str):
             flat_var_set = pd.json_normalize(var_set, sep='_')
             flat_var_set = flat_var_set.add_prefix(f'variation_set_{idx}_')
 
-            variation_loc = var_set.get('variation_loc', [])
-            for loc_idx, loc in enumerate(variation_loc):
-                flat_loc = pd.json_normalize(loc, sep='_')
-                flat_loc = flat_loc.add_prefix(f'variation_set_{idx}_loc_{loc_idx}_')
-                flat_var_set = flat_var_set.join(flat_loc, rsuffix=f'_{idx}_{loc_idx}_vl')
-
-            var_xrefs = var_set.get('variation_xrefs', [])
-            for var_xrefs_idx, var_xref in enumerate(var_xrefs):
-                flat_var_xrefs = pd.json_normalize(var_xref, sep='_')
-                flat_var_xrefs = flat_var_xrefs.add_prefix(f'variation_set_{idx}_var_xrefs_{var_xrefs_idx}_')
-                flat_var_set = flat_var_set.join(flat_var_xrefs, rsuffix=f'_{idx}_{var_xrefs_idx}_vx')
-
-            allele_freq = var_set.get('allele_freq_set', [])
-            for allele_freq_idx, allele in enumerate(allele_freq):
-                flat_allele = pd.json_normalize(allele, sep='_')
-                flat_allele = flat_allele.add_prefix(f'variation_set_{idx}_allele_freq_{allele_freq_idx}_')
-                flat_var_set = flat_var_set.join(flat_allele, rsuffix=f'_{idx}_{allele_freq_idx}_af')
+            extract_nested_json(flat_var_set, var_set, 'variation_loc', f'variation_set_{idx}_loc', 'loc')
+            extract_nested_json(flat_var_set, var_set, 'variation_xrefs', f'variation_set_{idx}_xrefs', 'xrefs')
+            extract_nested_json(flat_var_set, var_set, 'allele_freq_set', f'variation_set_{idx}_allele_freq', 'allele_freq')
 
             flat_var_set = flat_var_set.drop(
-                columns=[f'variation_set_{idx}_variation_loc', f'variation_set_{idx}_variation_xrefs',
+                columns=[f'variation_set_{idx}_variation_loc',
+                         f'variation_set_{idx}_variation_xrefs',
                          f'variation_set_{idx}_allele_freq_set'])
             flattened_entry = flattened_entry.join(flat_var_set, rsuffix=f'_{idx}_vs')
+
+        # this extraction is different from the previous ones
 
         genes = flattened_entry.at[0, 'genes']
         for idx, gene in enumerate(genes):
@@ -252,21 +252,20 @@ def request_clinvar_api_data(gene_id: str):
             flat_genes = flat_genes.add_prefix(f'gene_{idx}_')
             flattened_entry = flattened_entry.join(flat_genes, rsuffix=f'_{idx}_g')
 
-        germline_classification_trait_set = flattened_entry.at[0, 'germline_classification_trait_set']
+        germline_classification_trait_set = flattened_entry.at[0,
+        'germline_classification_trait_set']
         for idx, germline_set in enumerate(germline_classification_trait_set):
             flat_germline_set = pd.json_normalize(germline_set, sep='_')
             flat_germline_set = flat_germline_set.add_prefix(f'germline_set_{idx}_')
 
-            trait_xrefs = flat_germline_set.at[0, f'germline_set_{idx}_trait_xrefs']
-            for jdx, trait_xref in enumerate(trait_xrefs):
-                flat_trait_xrefs = pd.json_normalize(trait_xref, sep='_')
-                flat_trait_xrefs = flat_trait_xrefs.add_prefix(f'trait_xref_{jdx}_')
-                flat_germline_set = flat_germline_set.join(flat_trait_xrefs, rsuffix=f'_{idx}_{jdx}_tx')
+            extract_nested_json(flat_germline_set, germline_set, 'trait_xrefs', f'germline_set_{idx}_trait_xrefs', 'trait_xrefs')
 
             flat_germline_set = flat_germline_set.drop(columns=[f'germline_set_{idx}_trait_xrefs'])
             flattened_entry = flattened_entry.join(flat_germline_set, rsuffix=f'_{idx}_gls')
 
-        flattened_entry = flattened_entry.drop(columns=['variation_set', 'genes', 'germline_classification_trait_set'])
+        flattened_entry = flattened_entry.drop(columns=['variation_set',
+                                                        'genes',
+                                                        'germline_classification_trait_set'])
 
         flattened_data.append(flattened_entry)
 
