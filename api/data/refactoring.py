@@ -60,7 +60,7 @@ def set_gnomad_dtypes(df):
             case "Double":
                 df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
             case _:
-                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[table_name][column]}")
+                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[column]}")
 
 
 def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
