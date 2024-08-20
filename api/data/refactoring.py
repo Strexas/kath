@@ -45,25 +45,22 @@ def set_gnomad_dtypes(df):
     :param DataFrame df: DataFrame containing gnomAD data
     """
 
-    table_name = "gnomad_data"
-
     for column in df.columns:
-        if column not in GNOMAD_TABLES_DATA_TYPES[table_name]:
+        if column not in GNOMAD_TABLES_DATA_TYPES:
             raise ValueError(f"Column {column} is undefined in GNOMAD_TABLES_DATA_TYPES")
-
-        match GNOMAD_TABLES_DATA_TYPES[table_name][column]:
-            case "Date":
-                df[column] = pd.to_datetime(df[column], errors='coerce')
-            case "Boolean":
-                df[column] = df[column].map({"0": False, "1": True})
-            case "String":
-                df[column] = df[column].astype('string')
-            case "Integer":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('Int64')
-            case "Double":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
-            case _:
-                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[table_name][column]}")
+        data_type = GNOMAD_TABLES_DATA_TYPES[column]
+        if data_type == "Date":
+            df[column] = pd.to_datetime(df[column], errors='coerce')
+        elif data_type == "Boolean":
+            df[column] = df[column].map({"0": False, "1": True})
+        elif data_type == "String":
+            df[column] = df[column].astype('string')
+        elif data_type == "Integer":
+            df[column] = pd.to_numeric(df[column], errors='coerce').astype('Int64')
+        elif data_type == "Double":
+            df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
+        else:
+            raise ValueError(f"Undefined data type: {data_type}")
 
 
 def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
@@ -131,7 +128,7 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
     return d
 
 
-def parse_gnomad(path=GNOMAD_PATH+'/gnomad_data.csv'):
+def parse_gnomad(path=GNOMAD_PATH + '/gnomad_data.csv'):
     """
     Parses data from a gnomAD format text file into a pandas DataFrame.
 
@@ -143,15 +140,13 @@ def parse_gnomad(path=GNOMAD_PATH+'/gnomad_data.csv'):
     # Check if the file exists
     if not os.path.exists(path):
         raise FileNotFoundError(f"The file at {path} does not exist.")
-
     logging.info("Parsing file %s using parse_gnomad.", path)
     try:
         gnomad_data = pd.read_csv(path, sep=',', encoding='UTF-8')
         return gnomad_data
-
     except Exception as e:
         logging.error("Error parsing gnomAD data: %s", str(e))
-        raise
+        raise e
 
 
 def from_clinvar_name_to_cdna_position(name):
