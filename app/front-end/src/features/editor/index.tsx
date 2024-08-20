@@ -14,7 +14,7 @@ import { Box, useTheme } from '@mui/material';
  * The layout is structured as follows:
  * - A sidebar on the left (`20%` width) containing the `FileTreeView` component.
  * - A main content area on the right (`80%` width) that includes:
- *   - A `Toolbar` at the top (`15%` height).
+ *   - A `ToolbarView` at the top (`15%` height).
  *   - An `EditorView` below the toolbar (`60%` height).
  *   - A `Filebar` at the bottom (`5%` height).
  *   - A `Console` component at the bottom (`20%` height) with rounded bottom corners.

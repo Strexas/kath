@@ -1,10 +1,30 @@
-import { SvgIconComponent } from '@mui/icons-material';
-import { Box, Button, List, useTheme } from '@mui/material';
+import { List, useTheme } from '@mui/material';
 
 export interface ToolbarGroupProps {
   children: React.ReactNode;
 }
 
+/**
+ * ToolbarGroup component renders a container for a group of toolbar items.
+ *
+ * @description This component uses the Material-UI `List` component to arrange toolbar items in a flexible, scrollable
+ * container. The list is styled with a background color, padding, and flexbox properties to wrap items and handle overflow.
+ * It allows children elements to be passed and displayed within the container.
+ *
+ * @component
+ *
+ * @example
+ * // Example usage of the ToolbarGroup component
+ * return (
+ *   <ToolbarGroup>
+ *     <ToolbarGroupItem group="group1" icon={SomeIcon} label="Item 1" onClick={handleClick} />
+ *     <ToolbarGroupItem group="group1" icon={AnotherIcon} label="Item 2" onClick={handleClick} />
+ *   </ToolbarGroup>
+ * );
+ *
+ * @param {React.ReactNode} children - The child elements to be displayed inside the list.
+ * @returns {JSX.Element} The rendered List component.
+ */
 export const ToolbarGroup: React.FC<ToolbarGroupProps> = ({ children }) => {
   const Theme = useTheme();
 
@@ -24,36 +44,5 @@ export const ToolbarGroup: React.FC<ToolbarGroupProps> = ({ children }) => {
     >
       {children}
     </List>
-  );
-};
-
-export interface ToolbarGroupItemProps {
-  group: string;
-  icon: SvgIconComponent;
-  label: string;
-  onClick: () => void;
-}
-
-export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, label, onClick }) => {
-  const Theme = useTheme();
-
-  return (
-    <Box sx={{ height: '40%', alignContent: 'center' }}>
-      <Button
-        startIcon={<Icon sx={{ color: Theme.palette.text.primary }} />}
-        onClick={() => onClick()}
-        sx={{
-          color: Theme.palette.text.primary,
-          bgcolor: Theme.palette.background.default,
-          borderRadius: '0.625rem',
-          px: '1rem',
-          '&:hover': {
-            bgcolor: Theme.palette.action.hover,
-          },
-        }}
-      >
-        {label}
-      </Button>
-    </Box>
   );
 };
