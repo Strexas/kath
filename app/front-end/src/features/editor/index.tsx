@@ -1,4 +1,4 @@
-import { Console, EditorView, Filebar, FileTreeView, Toolbar } from '@/features/editor/components';
+import { Console, EditorView, Filebar, FileTreeView, ToolbarView } from '@/features/editor/components';
 import { WorkspaceContextProvider } from '@/features/editor/stores';
 import { Box, useTheme } from '@mui/material';
 
@@ -56,12 +56,12 @@ export const Editor = () => {
               width: '100%',
               height: '15%',
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: 'column',
               bgcolor: Theme.palette.action.selected,
               borderRadius: '0 0.625rem 0 0',
             }}
           >
-            <Toolbar />
+            <ToolbarView />
           </Box>
           <Box
             sx={{
