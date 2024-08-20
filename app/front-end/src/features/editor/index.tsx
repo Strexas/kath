@@ -1,4 +1,4 @@
-import { Console, EditorView, FilebarView, FileTreeView, Toolbar } from '@/features/editor/components';
+import { Console, EditorView, FilebarView, FileTreeView, ToolbarView } from '@/features/editor/components';
 import { WorkspaceContextProvider } from '@/features/editor/stores';
 import { Box, useTheme } from '@mui/material';
 
@@ -14,7 +14,7 @@ import { Box, useTheme } from '@mui/material';
  * The layout is structured as follows:
  * - A sidebar on the left (`20%` width) containing the `FileTreeView` component.
  * - A main content area on the right (`80%` width) that includes:
- *   - A `Toolbar` at the top (`15%` height).
+ *   - A `ToolbarView` at the top (`15%` height).
  *   - An `EditorView` below the toolbar (`60%` height).
  *   - A `FilebarView` above the console (`3%` height).
  *   - A `Console` component at the bottom (`22%` height) with rounded bottom corners.
@@ -57,12 +57,12 @@ export const Editor = () => {
               width: '100%',
               height: '15%',
               display: 'flex',
-              flexDirection: 'row',
+              flexDirection: 'column',
               bgcolor: Theme.palette.action.selected,
               borderRadius: '0 0.625rem 0 0',
             }}
           >
-            <Toolbar />
+            <ToolbarView />
           </Box>
           <Box
             sx={{
