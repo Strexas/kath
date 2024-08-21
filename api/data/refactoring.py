@@ -183,7 +183,7 @@ def add_g_position_to_gnomad(gnomad):
         gnomAD dataframe. This function modifies it in-place.
     """
     gnomad[['chromosome', 'position', 'ref', 'alt']] = gnomad['gnomAD ID'].str.split('-', expand=True)
-    gnomad['hg38_gnomAD'] = 'g.' + gnomad['position'] + gnomad['ref'] + '>' + gnomad['alt']
+    gnomad['hg38'] = 'g.' + gnomad['position'] + gnomad['ref'] + '>' + gnomad['alt']
     gnomad.drop(columns=['chromosome', 'position', 'ref', 'alt'], inplace=True)
 
 
@@ -203,14 +203,14 @@ def merge_gnomad_lovd(lovd, gnomad):
     """
 
     add_g_position_to_gnomad(gnomad)
-    gnomad.columns = [col + '_gnomad' if col != 'hg38_gnomAD' else col for col in gnomad.columns]
+    gnomad.columns = [col + '_gnomad' for col in gnomad.columns]
 
     main_frame = pd.merge(
         lovd,
         gnomad,
         how="outer",
         left_on="VariantOnGenome/DNA/hg38",
-        right_on="hg38_gnomAD")
+        right_on="hg38_gnomad")
 
     return main_frame
 
