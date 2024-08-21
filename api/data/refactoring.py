@@ -174,6 +174,53 @@ def from_clinvar_name_to_cdna_position(name):
     return name[start:end]
 
 
+def create_gnomad_columns(gnomad):
+    """
+    Create new columns 'chromosome', 'position', 'ref', 'alt', and 'HGVS g.' from 'gnomAD ID'.
+
+    Parameters:
+    gnomad : pd.DataFrame
+        gnomAD dataframe.
+
+    Returns:
+    pd.DataFrame
+        gnomAD dataframe with new columns.
+    """
+
+    gnomad[['chromosome', 'position', 'ref', 'alt']] = gnomad['gnomAD ID'].str.split('-', expand=True)
+    gnomad['hg38_gnomAD'] = 'g.' + gnomad['position'] + gnomad['ref'] + '>' + gnomad['alt']
+    gnomad.drop(columns=['chromosome', 'position', 'ref', 'alt'], inplace=True)
+
+    return gnomad
+
+
+def merge_gnomad_lovd(lovd, gnomad):
+    """
+    merge LOVD and gnomAD dataframes on genomic positions.
+
+    parameters:
+    lovd : pd.DataFrame
+        LOVD dataframe.
+    gnomAD : pd.DataFrame
+        gnomAD dataframe.
+
+    returns:
+    pd.DataFrame
+        merged dataframe with combined information from LOVD and gnomAD.
+    """
+
+    gnomad = create_gnomad_columns(gnomad)
+
+    main_frame = pd.merge(
+        lovd,
+        gnomad,
+        how="outer",
+        left_on="VariantOnGenome/DNA/hg38",
+        right_on="hg38_gnomAD")
+
+    return main_frame
+
+
 def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
     """
     Gets hg38 variants from LOVD and saves as VCF file.
