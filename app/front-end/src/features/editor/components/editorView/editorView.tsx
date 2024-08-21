@@ -1,7 +1,7 @@
 import { EditorToolbar } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { axios, socket } from '@/lib';
-import { Endpoints, FileTypes } from '@/types';
+import { Endpoints } from '@/types';
 import { getUUID } from '@/utils';
 import { DataGrid, GridColDef, GridRowsProp, useGridApiRef } from '@mui/x-data-grid';
 import Papa from 'papaparse';
@@ -40,7 +40,11 @@ export const EditorView: React.FC = () => {
 
   useEffect(() => {
     const getWorkspaceFile = async () => {
-      if (Workspace.fileType === FileTypes.FOLDER) return;
+      if (!Workspace.fileId) {
+        setRows([]);
+        setColumns([]);
+        return;
+      }
 
       setIsLoading(true);
 

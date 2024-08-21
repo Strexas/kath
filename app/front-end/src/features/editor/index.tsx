@@ -1,13 +1,13 @@
-import { Console, EditorView, Filebar, FileTreeView, ToolbarView } from '@/features/editor/components';
+import { Console, EditorView, FilebarView, FileTreeView, ToolbarView } from '@/features/editor/components';
 import { WorkspaceContextProvider } from '@/features/editor/stores';
 import { Box, useTheme } from '@mui/material';
 
 /**
- * Editor component sets up the main layout for the editor application, integrating various UI components within a responsive
+ * `Editor` component sets up the main layout for the editor application, integrating various UI components within a responsive
  * flexbox layout.
  *
  * @description This component uses Material-UI's `Box` component to create a flexible layout for the editor interface. It
- * integrates multiple sub-components, including `FileTreeView`, `Toolbar`, `EditorView`, `Filebar`, and `Console`, each
+ * integrates multiple sub-components, including `FileTreeView`, `Toolbar`, `EditorView`, `FilebarView`, and `Console`, each
  * occupying a specific region of the layout. The component also provides a context for workspace management using
  * `WorkspaceContextProvider`.
  *
@@ -16,10 +16,11 @@ import { Box, useTheme } from '@mui/material';
  * - A main content area on the right (`80%` width) that includes:
  *   - A `ToolbarView` at the top (`15%` height).
  *   - An `EditorView` below the toolbar (`60%` height).
- *   - A `Filebar` at the bottom (`5%` height).
- *   - A `Console` component at the bottom (`20%` height) with rounded bottom corners.
+ *   - A `FilebarView` above the console (`3%` height).
+ *   - A `Console` component at the bottom (`22%` height) with rounded bottom corners.
  *
- * The layout is styled using the current theme's colors and responsive design principles.
+ * The layout is styled using the current theme's colors and responsive design principles. The theme controls the background
+ * colors, border-radius, and other styling aspects, making the layout adapt to light and dark modes seamlessly.
  *
  * @component
  *
@@ -77,18 +78,18 @@ export const Editor = () => {
           <Box
             sx={{
               width: '100%',
-              height: '5%',
+              height: '3%',
               display: 'flex',
               flexDirection: 'row',
               bgcolor: Theme.palette.action.selected,
             }}
           >
-            <Filebar />
+            <FilebarView />
           </Box>
           <Box
             sx={{
               width: '100%',
-              height: '20%',
+              height: '22%',
               display: 'flex',
               flexDirection: 'column',
               bgcolor: Theme.palette.background.paper,

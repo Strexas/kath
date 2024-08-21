@@ -136,6 +136,8 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
   const Workspace = useWorkspaceContext();
 
   const handleClick = (newId: string, newLabel: string, newType: FileTypes) => {
+    if (newType === FileTypes.FOLDER) return;
+
     Workspace.update(newId, newLabel, newType);
   };
 
