@@ -1,31 +1,36 @@
 """
-This package provides utilities for handling Socket.IO events and managing workspace directory structures.
+This package provides utilities for handling Socket.IO events and managing workspace directory
+structures.
 
 Functions:
 - socketio_emit_to_user_session: Sends a Socket.IO event to a specific user session. The event data 
     is augmented with a timestamp indicating the current time.
 - build_workspace_structure: Recursively builds a dictionary representation of a directory structure 
-    for a given workspace. It includes metadata about files and directories and provides a hierarchical 
-    view of the workspace.
+    for a given workspace. It includes metadata about files and directories and provides a
+    hierarchical view of the workspace.
 
 Dependencies:
 - os: Provides a way to interact with the operating system, including filesystem operations.
 - datetime: Supplies classes for manipulating dates and times.
-- src.setup.extensions: Contains `socketio` and `socket_manager` used for emitting events and managing 
-    user sessions in Socket.IO.
+- src.setup.extensions: Contains `socketio` and `socket_manager` used for emitting events and
+    managing user sessions in Socket.IO.
 
 Details:
-- `socketio_emit_to_user_session` emits an event to a specific user session identified by UUID and session ID (SID).
-- `build_workspace_structure` generates a nested dictionary structure representing the directories and 
-    files within a workspace, providing metadata such as labels and types.
+- `socketio_emit_to_user_session` emits an event to a specific user session identified by UUID
+    and session ID (SID).
+- `build_workspace_structure` generates a nested dictionary structure representing the directories
+    and files within a workspace, providing metadata such as labels and types.
 
 Usage:
 - Use `socketio_emit_to_user_session` to communicate with specific user sessions through Socket.IO.
-- Use `build_workspace_structure` to construct a detailed, recursive view of a directory structure for 
-    applications requiring hierarchical data representation.
+- Use `build_workspace_structure` to construct a detailed, recursive view of a directory structure
+    for applications requiring hierarchical data representation.
 
-No classes or modules are directly exposed by this package, only the utility functions defined above.
+No classes or modules are directly exposed by this package, only the utility functions defined
+above.
 """
+
+# pylint: disable=import-error
 
 import os
 from datetime import datetime
@@ -82,8 +87,10 @@ def build_workspace_structure(path, user_workspace_dir):
         dict: A dictionary representing the directory structure. Each entry contains:
             - "id" (str): # The relative path of the item from the `user_workspace_dir`.
             - "label" (str): # The name of the file or directory.
-            - "fileType" (str): # The type of the item, either "folder" for directories or "csv" for files.
-            - "children" (list): # A list of child items, which is empty for files and populated with nested dictionaries for directories.
+            - "fileType" (str): # The type of the item, either "folder" for directories or "csv"
+                for files.
+            - "children" (list): # A list of child items, which is empty for files and populated
+                with nested dictionaries for directories.
     """
     workspace_structure = {
         "id": os.path.relpath(path, user_workspace_dir),

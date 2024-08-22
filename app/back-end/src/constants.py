@@ -7,11 +7,14 @@ It sets up:
 - Workspace directory paths, including a template directory.
 - Base API route and specific routes for various functionalities.
 
-These constants are typically used for file handling, directory management, and routing in the Flask application.
+These constants are typically used for file handling, directory management, and routing in the
+Flask application.
 
 Dependencies:
 - os: Used for interacting with the operating system to manage file and directory paths.
 """
+
+# pylint: disable=import-error
 
 import os
 
