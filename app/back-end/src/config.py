@@ -11,6 +11,8 @@ Dependencies:
 - dotenv: Used for loading environment variables from a `.env` file.
 """
 
+# pylint: disable=import-error
+
 import os
 from dotenv import load_dotenv
 

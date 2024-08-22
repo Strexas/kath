@@ -7,9 +7,13 @@ This module provides configuration settings for Gunicorn, including:
 - Number of worker processes based on the number of CPU cores.
 
 Dependencies:
-- multiprocessing: Used to determine the number of CPU cores for configuring the number of Gunicorn workers.
-- src.setup.env.Env: The class responsible for retrieving environment settings such as host and port.
+- multiprocessing: Used to determine the number of CPU cores for configuring the
+    number of Gunicorn workers.
+- src.setup.env.Env: The class responsible for retrieving environment settings such
+    as host and port.
 """
+
+# pylint: disable=invalid-name
 
 import multiprocessing
 

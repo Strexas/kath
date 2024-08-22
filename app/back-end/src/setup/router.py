@@ -2,13 +2,16 @@
 This module defines the router setup for the Flask application.
 
 It is responsible for:
-- Creating a main blueprint (`router_bp`) that serves as the central point for registering other route blueprints.
+- Creating a main blueprint (`router_bp`) that serves as the central point for registering
+    other route blueprints.
 - Registering all the individual route blueprints with a specified URL prefix.
 
 Dependencies:
 - flask.Blueprint: Used to create the main router blueprint.
 - src.routes.workspace_route: Contains the blueprint for workspace-related routes.
 """
+
+# pylint: disable=import-error
 
 from flask import Blueprint
 

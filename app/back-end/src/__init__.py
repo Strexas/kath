@@ -11,7 +11,8 @@ The module is responsible for:
 Dependencies:
 - Flask: The core web framework.
 - gevent.monkey: Provides monkey patches to enable cooperative multitasking.
-- src.setup.extensions: Contains initialization for Flask extensions like compression, Socket.IO, and CORS.
+- src.setup.extensions: Contains initialization for Flask extensions like compression, Socket.IO,
+    and CORS.
 - src.setup.router: Defines and manages application routing through blueprints.
 - src.setup.eventer: Sets up event handlers for application events.
 - src.constants: Provides constants used in configuration, such as BASE_ROUTE.
@@ -19,6 +20,8 @@ Dependencies:
 Returns:
     Flask: A fully configured Flask application instance with all extensions and routes initialized.
 """
+
+# pylint: disable=import-error
 
 import gevent.monkey
 from flask import Flask

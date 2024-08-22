@@ -10,8 +10,11 @@ The module performs the following tasks:
 Dependencies:
 - src.create_app: The function that sets up and returns the configured Flask app instance.
 - src.socketio: The Socket.IO instance initialized in the application setup.
-- src.setup.env.Env: The class responsible for managing environment variables, including retrieving the host and port settings.
+- src.setup.env.Env: The class responsible for managing environment variables, including
+    retrieving the host and port settings.
 """
+
+# pylint: disable=import-error
 
 from src import create_app, socketio, env
 

@@ -1,7 +1,7 @@
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { getIconFromFileType, isExpandable } from '@/features/editor/utils';
 import { FileTypes } from '@/types';
-import FolderRounded from '@mui/icons-material/FolderRounded';
+import { FolderRounded as FolderRoundedIcon } from '@mui/icons-material';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
 import { TransitionProps } from '@mui/material/transitions';
@@ -128,7 +128,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
   const expandable = isExpandable(children);
   let icon;
   if (expandable) {
-    icon = FolderRounded;
+    icon = FolderRoundedIcon;
   } else if (item.fileType) {
     icon = getIconFromFileType(item.fileType);
   }

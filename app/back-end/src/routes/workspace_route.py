@@ -7,7 +7,8 @@ Endpoints include:
 
 Dependencies:
 - os: For file and directory operations, such as checking existence and copying directories.
-- shutil: For copying directory trees, ensuring that user-specific directories are properly initialized.
+- shutil: For copying directory trees, ensuring that user-specific directories are properly
+    initialized.
 - flask.Blueprint: To create and organize route blueprints for modular route management in Flask.
 - flask.request: To handle incoming HTTP requests and extract headers and parameters.
 - flask.jsonify: To create JSON responses for API endpoints.
@@ -15,9 +16,13 @@ Dependencies:
 
 Extensions:
 - src.setup.extensions.compress: Used for compressing responses to optimize data transfer.
-- src.setup.extensions.logger: Provides logging functionalities for capturing and recording events and errors.
-- src.setup.constants: Contains constants for directory paths and routes used in the workspace management.
+- src.setup.extensions.logger: Provides logging functionalities for capturing and recording events
+    and errors.
+- src.setup.constants: Contains constants for directory paths and routes used in the workspace
+    management.
 """
+
+# pylint: disable=import-error
 
 import os
 import shutil
@@ -25,6 +30,7 @@ from flask import Blueprint, request, jsonify, send_file
 
 from src.setup.extensions import compress, logger
 from src.utils.helpers import socketio_emit_to_user_session, build_workspace_structure
+from src.utils.exceptions import UnexpectedError
 from src.constants import (
     WORKSPACE_DIR,
     WORKSPACE_TEMPLATE_DIR,
@@ -40,13 +46,14 @@ def get_workspace():
     """
     Retrieve the structure of the workspace directory.
 
-    This endpoint provides a JSON representation of the user's workspace directory structure. If the directory
-    does not exist, it copies a template directory to the user's workspace. The structure includes metadata
-    about files and folders in the workspace.
+    This endpoint provides a JSON representation of the user's workspace directory structure. If the
+    directory does not exist, it copies a template directory to the user's workspace. The structure
+    includes metadata about files and folders in the workspace.
 
     Process:
         - Extracts the UUID and SID from request headers to identify the user session.
-        - Ensures that the user-specific workspace directory exists; if not, copies a template directory.
+        - Ensures that the user-specific workspace directory exists; if not, copies a template
+            directory.
         - Builds the directory structure as a nested JSON object.
         - Emits feedback to the user's console about the status of the workspace retrieval process.
 
@@ -55,7 +62,8 @@ def get_workspace():
 
     Returns:
         Response: A Flask response object with the following possible outcomes:
-            - `200 OK`: If the workspace structure is successfully retrieved, returns a JSON representation of the directory structure.
+            - `200 OK`: If the workspace structure is successfully retrieved, returns a JSON
+                representation of the directory structure.
             - `400 Bad Request`: If the UUID or SID header is missing in the request.
             - `403 Forbidden`: If there is a permission issue accessing the workspace directory.
             - `404 Not Found`: If the workspace directory or files are not found.
@@ -64,9 +72,11 @@ def get_workspace():
     Errors and Feedback:
         - If the `uuid` or `sid` headers are missing, returns a `400 Bad Request` response.
         - On successful retrieval, a success message is emitted to the user's console.
-        - In case of errors, appropriate feedback is emitted to the user's console and an error response is returned:
+        - In case of errors, appropriate feedback is emitted to the user's console and an error
+            response is returned:
             - `FileNotFoundError`: Indicates that the directory or file was not found.
-            - `PermissionError`: Indicates permission issues while accessing the workspace directory.
+            - `PermissionError`: Indicates permission issues while accessing the workspace
+                directory.
             - Other exceptions: Logs and reports unexpected errors.
     """
 
@@ -99,9 +109,7 @@ def get_workspace():
 
         # Build and return the workspace structure as a JSON object
         workspace_structure = [
-            build_workspace_structure(
-                os.path.join(user_workspace_dir, child), user_workspace_dir
-            )
+            build_workspace_structure(os.path.join(user_workspace_dir, child), user_workspace_dir)
             for child in os.listdir(user_workspace_dir)
         ]
 
@@ -117,7 +125,7 @@ def get_workspace():
         return jsonify(workspace_structure)
 
     except FileNotFoundError as e:
-        logger.error(f"FileNotFoundError: {e} while accessing {user_workspace_dir}")
+        logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -130,7 +138,7 @@ def get_workspace():
         )
         return jsonify({"error": "Requested file not found"}), 404
     except PermissionError as e:
-        logger.error(f"PermissionError: {e} while accessing {user_workspace_dir}")
+        logger.error("PermissionError: %s while accessing %s", e, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -142,14 +150,14 @@ def get_workspace():
             sid,
         )
         return jsonify({"error": "Permission denied"}), 403
-    except Exception as e:
-        logger.error(f"Unexpected error while serving workspace for UUID '{uuid}': {e}")
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while accessing %s", e.message, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"Unexpected error while serving workspace for UUID '{uuid}': {e}",
+                "message": f"UnexpectedError: {e.message} while accessing {user_workspace_dir}",
             },
             uuid,
             sid,
@@ -165,8 +173,8 @@ def get_workspace_file(relative_path):
 
     This endpoint serves files from the user's workspace directory. If the directory does not exist,
     it copies a template directory to the user's workspace. The file specified by `relative_path`
-    is then served for download. Feedback about the file retrieval process is sent to the user's console
-    via Socket.IO.
+    is then served for download. Feedback about the file retrieval process is sent to the user's
+    console via Socket.IO.
 
     Args:
         relative_path (str): The path to the file within the user's workspace directory.
@@ -182,7 +190,8 @@ def get_workspace_file(relative_path):
     Errors and Feedback:
         - If the `uuid` or `sid` headers are missing, a `400 Bad Request` response is returned.
         - On successful file retrieval, a success message is emitted to the user's console.
-        - On errors, appropriate feedback is emitted to the user's console and an error response is returned:
+        - On errors, appropriate feedback is emitted to the user's console and an error response is
+            returned:
             - `FileNotFoundError`: Indicates the requested file was not found.
             - `PermissionError`: Indicates permission issues while accessing the file.
             - Other exceptions: Logs and reports unexpected errors.
@@ -231,7 +240,7 @@ def get_workspace_file(relative_path):
         return send_file(file_path, as_attachment=False)
 
     except FileNotFoundError as e:
-        logger.error(f"FileNotFoundError: {e} while accessing {file_path}")
+        logger.error("FileNotFoundError: %s while accessing %s", e, file_path)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -244,7 +253,7 @@ def get_workspace_file(relative_path):
         )
         return jsonify({"error": "Requested file not found"}), 404
     except PermissionError as e:
-        logger.error(f"PermissionError: {e} while accessing {file_path}")
+        logger.error("PermissionError: %s while accessing %s", e, file_path)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -256,16 +265,14 @@ def get_workspace_file(relative_path):
             sid,
         )
         return jsonify({"error": "Permission denied"}), 403
-    except Exception as e:
-        logger.error(
-            f"Unexpected error while serving file '{relative_path}' for UUID '{uuid}': {e}"
-        )
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while accessing %s", e.message, file_path)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"Unexpected error while serving file '{relative_path}' for UUID '{uuid}': {e}",
+                "message": f"UnexpectedError: {e.message} while accessing {file_path}",
             },
             uuid,
             sid,
