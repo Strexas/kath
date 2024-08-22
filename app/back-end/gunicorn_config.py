@@ -13,10 +13,8 @@ Dependencies:
 
 import multiprocessing
 
-from src.setup.env import Env
-
 # Bind to specified host and port
-bind = Env.get_flask_run_host() + ":" + str(Env.get_flask_run_port())
+bind = "0.0.0.0:8080"
 
 # Use Gevent worker class for handling asynchronous requests with WebSocket support
 worker_class = "geventwebsocket.gunicorn.workers.GeventWebSocketWorker"

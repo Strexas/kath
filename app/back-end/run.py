@@ -13,16 +13,15 @@ Dependencies:
 - src.setup.env.Env: The class responsible for managing environment variables, including retrieving the host and port settings.
 """
 
-from src import create_app, socketio
-from src.setup.env import Env
+from src import create_app, socketio, env
 
 # Initialize the Flask app
 app = create_app()
 
 if __name__ == "__main__":
     # Retrieve Flask server host and port from environment variables
-    host = Env.get_flask_run_host()
-    port = Env.get_flask_run_port()
+    host = env.get_flask_run_host()
+    port = env.get_flask_run_port()
 
     # Run the app with Socket.IO support
     socketio.run(app, debug=True, host=host, port=port)

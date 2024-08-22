@@ -25,3 +25,6 @@ WORKSPACE_TEMPLATE_DIR = os.path.join(WORKSPACE_DIR, "template")
 # Routes
 BASE_ROUTE = "/api/v1"
 WORKSPACE_ROUTE = "/workspace"
+
+# Events
+CONSOLE_FEEDBACK_EVENT = "console_feedback"

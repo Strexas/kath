@@ -1,56 +1,56 @@
 """
 This module sets up and configures a Flask application with various extensions and routing.
 
-The module handles:
-- Applying gevent monkey patches to make the standard library cooperative.
-- Loading and managing environment variables.
-- Configuring application settings such as compression and CORS.
-- Initializing Flask extensions, including compression, Socket.IO, CORS, and logging.
+The module is responsible for:
+- Applying gevent monkey patches to enable cooperative multitasking with the standard library.
+- Loading environment variables to configure app settings.
+- Configuring application settings such as compression and CORS policies.
+- Initializing Flask extensions including compression, Socket.IO, and CORS.
 - Registering application routes and event handlers.
 
 Dependencies:
-- Flask
-- gevent.monkey
-- src.setup.env.Env: Handles environment variable loading and retrieval.
-- src.setup.extensions: Contains the initialized Flask extensions.
-- src.setup.router: Manages application routing.
-- src.setup.eventer: Registers application events.
-- src.setup.constants: Contains application constants like BASE_ROUTE.
+- Flask: The core web framework.
+- gevent.monkey: Provides monkey patches to enable cooperative multitasking.
+- src.setup.extensions: Contains initialization for Flask extensions like compression, Socket.IO, and CORS.
+- src.setup.router: Defines and manages application routing through blueprints.
+- src.setup.eventer: Sets up event handlers for application events.
+- src.constants: Provides constants used in configuration, such as BASE_ROUTE.
 
 Returns:
-    Flask: A fully configured Flask application instance.
+    Flask: A fully configured Flask application instance with all extensions and routes initialized.
 """
 
 import gevent.monkey
 from flask import Flask
 
-from src.setup.env import Env
-from src.setup.extensions import compress, socketio, cors
+from src.setup.extensions import compress, socketio, cors, env
 from src.setup.router import router
 from src.setup.eventer import eventer
-from src.setup.constants import BASE_ROUTE
+from src.constants import BASE_ROUTE
 
 
 def create_app():
     """
     Create and configure the Flask application.
 
-    This function sets up the Flask app by applying necessary monkey patches for gevent,
-    loading environment variables, configuring app settings, and initializing various
-    Flask extensions such as compression, Socket.IO, CORS, and logging. It also registers
-    the application's main routes and event handlers.
+    This function initializes a Flask application with necessary configurations and extensions.
+    It applies gevent monkey patches for cooperative multitasking, sets up application settings
+    for compression and CORS, and integrates various Flask extensions such as compression,
+    Socket.IO, and CORS. Additionally, it registers the main application routes and sets up
+    event handlers.
+
+    Configuration Details:
+    - Compression: Enabled for `text/csv` MIME types using gzip with a compression level of 6.
+    - Socket.IO: Configured with gevent as the async mode, CORS allowed origins from environment,
+        and a Redis message queue.
+    - CORS: Applied with origins specified from the environment.
 
     Returns:
-        Flask: A fully configured Flask application instance.
+        Flask: A fully configured Flask application instance with extensions initialized,
+        routes registered, and event handlers set up.
     """
     # Apply monkey patches for gevent
     gevent.monkey.patch_all()
-
-    # Load environment variables
-    Env.load_env()
-
-    # Set environment variables
-    origins = Env.get_origins()
 
     # Create Flask app instance
     app = Flask(__name__)
@@ -66,15 +66,16 @@ def create_app():
     socketio.init_app(
         app,
         async_mode="gevent",
-        cors_allowed_origins=origins,
+        cors_allowed_origins=env.get_origins(),
+        message_queue=env.get_redis_url(),
         max_http_buffer_size=50 * 1024 * 1024,
     )
-    cors.init_app(app, resources={r"*": {"origins": origins}})
-
-    # Register main application routes
-    app.register_blueprint(router(BASE_ROUTE))
+    cors.init_app(app, resources={r"*": {"origins": env.get_origins()}})
 
     # Set up event handlers
     eventer()
+
+    # Register main application routes
+    app.register_blueprint(router(BASE_ROUTE))
 
     return app

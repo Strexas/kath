@@ -85,3 +85,15 @@ class Env:
         """
         origins = cls.get("ORIGINS", "*")
         return origins.split(",")
+
+    @classmethod
+    def get_redis_url(cls):
+        """
+        Get the Redis URL from environment variables.
+
+        This is used for connecting to the Redis server.
+
+        Returns:
+            str: The Redis URL, defaulting to "redis://localhost:6379/0".
+        """
+        return cls.get("REDIS_URL", "redis://localhost:6379/0")

@@ -1,6 +1,6 @@
 # Development Server Setup Guide
 
-This guide provides instructions on setting up and running a Flask-based development server using Gunicorn, Gevent, Socket.IO, and CORS on a Windows operating system with WSL (Windows Subsystem for Linux).
+This guide provides instructions on setting up and running a Flask-based development server using Gunicorn, Gevent, Socket.IO, CORS and Redis on a Windows operating system with WSL (Windows Subsystem for Linux).
 
 ## Prerequisites
 
@@ -45,14 +45,14 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Update Package List:**
    ```bash
-   sudo apt update
+   sudo apt-get update
    ```
 
    Wait for the system to update.
 
 3. **Install Required Packages:**
    ```bash
-   sudo apt install python3 python3-pip python3-venv
+   sudo apt-get install python3 python3-pip python3-venv redis
    ```
 
    With any prompts type `y` and press `enter`.
@@ -127,6 +127,34 @@ This guide provides instructions on setting up and running a Flask-based develop
       - Open `/mnt/c/Users/YourUsername/Path/To/Project/app/back-end/.venv/bin/python3.10`
 
 ## Step 6: Run the Development Server
+
+1. **Test if Redis is running:**
+   ```bash
+   redis-cli
+   ```
+
+   Test the connect with the `ping` command.
+   ```powershell
+   127.0.0.1:6379> ping
+   PONG
+   ```
+
+   If you get this response `Could not connect to Redis at 127.0.0.1:6379: Connection refused`, exit out of the connection and start the Redis server.
+   ```bash
+   sudo systemctl start redis
+   ```
+
+   Now test it again.
+   
+   #
+   
+   ```bash
+   sudo systemctl stop redis
+   ```
+   
+   This will stop the Redis server.
+
+2. **Run the application**
    ```powershell
    gunicorn -c gunicorn_config.py run:app
    ```

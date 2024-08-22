@@ -13,7 +13,7 @@ Dependencies:
 import os
 
 from src.setup.extensions import socketio
-from src.setup.constants import WORKSPACE_DIR
+from src.constants import WORKSPACE_DIR
 
 
 @socketio.on("workspace_file_update")
