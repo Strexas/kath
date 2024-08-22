@@ -274,9 +274,9 @@ def request_clinvar_api_data(gene_id):
     return df
 
 
-def request_gnomad_api_data(to_file=True):
+def request_gnomad_api_data(gene_name, to_file=True):
     """
-    Requests gnomAD API for data about EYS gene containing:
+    Requests gnomAD API for data about a specific gene containing:
     - variant_id
     - cDNA change
     - protein change
@@ -285,17 +285,18 @@ def request_gnomad_api_data(to_file=True):
     - popmax
     - popmax population
 
+    :param str gene_name: name of gene
     :param bool to_file: if True, saves data to variants.csv
     :returns: DataFrame from gnomAD API
     :rtype: DataFrame
     """
 
     url = 'https://gnomad.broadinstitute.org/api'
-    query = """
-    query{
-      gene(gene_id: "ENSG00000188107", reference_genome: GRCh38) {
+    query = f"""
+    query{{
+      gene(gene_symbol: "{gene_name}", reference_genome: GRCh38) {{
         variants(dataset: gnomad_r4)
-        {
+        {{
           variant_id
           chrom
           pos
@@ -303,33 +304,34 @@ def request_gnomad_api_data(to_file=True):
           hgvsc
           hgvsp
           alt
-          exome {
+          exome {{
           ac
           an
           ac_hom
             populations
-            {
+            {{
               id
               ac
               an
-            }
-          }
+            }}
+          }}
           genome
-          {
+          {{
             ac
             an
             ac_hom
             populations
-            {
+            {{
               id
               ac
               an
-            }
-          }
-        }
-      }
-    }
+            }}
+          }}
+        }}
+      }}
+    }}
     """
+
     response = requests.post(url, json={'query': query})
     if response.status_code == 200:
         data = response.json()['data']['gene']['variants']
