@@ -59,4 +59,5 @@ from .refactoring import (
     request_clinvar_api_data,
     get_variant_ids_from_clinvar_name_api,
     extract_nested_json,
+    request_gnomad_api_data,
 )

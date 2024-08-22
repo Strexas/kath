@@ -272,3 +272,130 @@ def request_clinvar_api_data(gene_id):
     df = pd.concat(flattened_data, ignore_index=True)
 
     return df
+
+
+def request_gnomad_api_data(to_file=True):
+    """
+    Requests gnomAD API for data about EYS gene containing:
+    - variant_id
+    - cDNA change
+    - protein change
+    - allele frequency
+    - homozygote count
+    - popmax
+    - popmax population
+
+    :param bool to_file: if True, saves data to variants.csv
+    :returns: DataFrame from gnomAD API
+    :rtype: DataFrame
+    """
+
+    url = 'https://gnomad.broadinstitute.org/api'
+    query = """
+    query{
+      gene(gene_id: "ENSG00000188107", reference_genome: GRCh38) {
+        variants(dataset: gnomad_r4)
+        {
+          variant_id
+          chrom
+          pos
+          ref
+          hgvsc
+          hgvsp
+          alt
+          exome {
+          ac
+          an
+          ac_hom
+            populations
+            {
+              id
+              ac
+              an
+            }
+          }
+          genome
+          {
+            ac
+            an
+            ac_hom
+            populations
+            {
+              id
+              ac
+              an
+            }
+          }
+        }
+      }
+    }
+    """
+    response = requests.post(url, json={'query': query})
+    if response.status_code == 200:
+        data = response.json()['data']['gene']['variants']
+
+        df = pd.json_normalize(data)
+
+        df['total_ac'] = df['exome.ac'].fillna(0) + df['genome.ac'].fillna(0)
+        df['total_an'] = df['exome.an'].fillna(0) + df['genome.an'].fillna(0)
+
+        df['cDNA change'] = df['hgvsc'].fillna(0)
+        df['Protein change'] = df['hgvsp'].fillna(0)
+
+        df['Allele Frequency'] = df['total_ac'] / df['total_an']
+        df['Homozygote Count'] = df['exome.ac_hom'].fillna(0) + df['genome.ac_hom'].fillna(0)
+        exome_populations = df['exome.populations']
+        genome_populations = df['genome.populations']
+        ids = ['afr', 'eas', 'asj', 'sas', 'nfe', 'fin', 'mid', 'amr', 'ami', 'remaining']
+
+        def process_population_data(pop_data, name, pop_ids, index):
+            for pop_id in pop_ids:
+                df.loc[index, f'{name}_ac_{pop_id}'] = 0
+                df.loc[index, f'{name}_an_{pop_id}'] = 0
+            if type(pop_data) == list:
+                for pop in pop_data:
+                    id = pop['id']
+                    df.loc[index, f'{name}_ac_{id}'] = pop['ac']
+                    df.loc[index, f'{name}_an_{id}'] = pop['an']
+
+        for i in range(len(exome_populations)):
+            exome_pop = exome_populations[i]
+            process_population_data(exome_pop, 'exome', ids, i)
+            genome_pop = genome_populations[i]
+            process_population_data(genome_pop, 'genome', ids, i)
+
+        for id in ids:
+            df[f'Allele_Frequency_{id}'] = (df[f'exome_ac_{id}'].fillna(0) + df[f'genome_ac_{id}'].fillna(0)) / (
+                        df[f'exome_an_{id}'].fillna(0) + df[f'genome_an_{id}'].fillna(0))
+        population_mapping = {
+            'afr': 'African/African American',
+            'eas': 'East Asian',
+            'asj': 'Ashkenazi Jew',
+            'sas': 'South Asian',
+            'nfe': 'European (non-Finnish)',
+            'fin': 'European (Finnish)',
+            'mid': 'Middle Eastern',
+            'amr': 'Admixed American',
+            'ami': "Amish",
+            'remaining': 'Remaining',
+            '': ''
+        }
+        for i in range(len(df)):
+            max = 0
+            maxid = ''
+            for id in ids:
+                if df.loc[i, f'Allele_Frequency_{id}'] > max:
+                    max = df.loc[i, f'Allele_Frequency_{id}']
+                    maxid = id
+            df.loc[i, 'Popmax'] = max
+            df.loc[i, 'Popmax population'] = population_mapping[maxid]
+        not_to_drop = ['Popmax', 'Popmax population', 'Homozygote Count', 'Allele Frequency', 'variant_id',
+                       'cDNA change', 'Protein change']
+        df = df.drop([col for col in df.columns if col not in not_to_drop], axis=1)
+        if to_file:
+            df.to_csv('variants.csv', index=True)
+
+    else:
+        print('Error:', response.status_code)
+
+    return df
