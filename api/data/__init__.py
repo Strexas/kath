@@ -56,8 +56,5 @@ from .refactoring import (
     parse_lovd,
     from_clinvar_name_to_cdna_position,
     save_lovd_as_vcf,
-    request_clinvar_api_data,
-    get_variant_ids_from_clinvar_name_api,
-    extract_nested_json,
     request_gnomad_api_data,
 )
