@@ -33,3 +33,15 @@ export function getUUID() {
 
   return uuid;
 }
+
+/**
+ * Retrieves the session ID (SID) from session storage.
+ *
+ * @description This function fetches the 'sid' (session ID) from the browser's `sessionStorage`. If the 'sid' is not found,
+ * it returns an empty string. The SID is typically used for maintaining session state in web applications.
+ *
+ * @returns {string} The session ID retrieved from `sessionStorage`, or an empty string if not found.
+ */
+export function getSID() {
+  return sessionStorage.getItem('sid') || '';
+}

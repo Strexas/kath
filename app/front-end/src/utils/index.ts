@@ -1,1 +1,1 @@
-export { getUUID } from './helpers';
+export { getSID, getUUID } from './helpers';

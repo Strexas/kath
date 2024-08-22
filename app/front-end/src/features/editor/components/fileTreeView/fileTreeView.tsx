@@ -1,4 +1,5 @@
 import { FileTreeViewItemProps } from '@/features/editor/types';
+import { useSessionContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
 import { Box, LinearProgress } from '@mui/material';
@@ -35,6 +36,8 @@ declare module 'react' {
  * @returns {JSX.Element} The rendered tree view component, displaying either a loading indicator or the file tree.
  */
 export const FileTreeView: React.FC = () => {
+  const { connected } = useSessionContext();
+
   const [fileTreeViewData, setFileTreeViewData] = useState<TreeViewBaseItem<FileTreeViewItemProps>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -52,8 +55,8 @@ export const FileTreeView: React.FC = () => {
       }
     };
 
-    getWorkspace();
-  }, []);
+    if (connected) getWorkspace();
+  }, [connected]);
 
   return (
     <>
