@@ -1,4 +1,4 @@
-import { Console, EditorView, FilebarView, FileTreeView, ToolbarView } from '@/features/editor/components';
+import { ConsoleView, EditorView, FilebarView, FileTreeView, ToolbarView } from '@/features/editor/components';
 import { WorkspaceContextProvider } from '@/features/editor/stores';
 import { Box, useTheme } from '@mui/material';
 
@@ -17,7 +17,7 @@ import { Box, useTheme } from '@mui/material';
  *   - A `ToolbarView` at the top (`15%` height).
  *   - An `EditorView` below the toolbar (`60%` height).
  *   - A `FilebarView` above the console (`3%` height).
- *   - A `Console` component at the bottom (`22%` height) with rounded bottom corners.
+ *   - A `ConsoleView` component at the bottom (`22%` height) with rounded bottom corners.
  *
  * The layout is styled using the current theme's colors and responsive design principles. The theme controls the background
  * colors, border-radius, and other styling aspects, making the layout adapt to light and dark modes seamlessly.
@@ -96,7 +96,7 @@ export const Editor = () => {
               borderRadius: '0 0 0.625rem 0',
             }}
           >
-            <Console />
+            <ConsoleView />
           </Box>
         </Box>
       </Box>
