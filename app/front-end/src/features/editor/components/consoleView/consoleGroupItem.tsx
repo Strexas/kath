@@ -63,17 +63,13 @@ export const ConsoleGroupItem = React.forwardRef<HTMLDivElement, ConsoleGroupIte
             px: '0.625rem',
             py: '0.25rem',
             color:
-              (index === length - 1 && feedback.type === ConsoleFeedbackTypes.INFO) ||
-              feedback.type === ConsoleFeedbackTypes.ERROR ||
-              feedback.type === ConsoleFeedbackTypes.WARNING
-                ? Theme.palette.text.primary
-                : Theme.palette.text.secondary,
-            bgcolor:
               feedback.type === ConsoleFeedbackTypes.ERROR
                 ? Theme.palette.error.main
                 : feedback.type === ConsoleFeedbackTypes.WARNING
                   ? Theme.palette.warning.main
-                  : 'none',
+                  : index === length - 1 && feedback.type === ConsoleFeedbackTypes.INFO
+                    ? Theme.palette.text.primary
+                    : Theme.palette.text.secondary,
           }}
         >
           [{feedback.timestamp}] - [{feedback.type.toUpperCase()}] - {feedback.message}
