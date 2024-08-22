@@ -8,7 +8,8 @@ import requests
 import pandas as pd
 from pandas import DataFrame
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH
+from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH
+
 
 
 def set_lovd_dtypes(df_dict):
@@ -38,6 +39,31 @@ def set_lovd_dtypes(df_dict):
                 case _:
                     raise ValueError(f"Undefined data type: "
                                      f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
+
+
+def set_gnomad_dtypes(df):
+    """
+    Convert data from gnomAD format table to desired data format based on specified data types.
+
+    :param DataFrame df: DataFrame containing gnomAD data
+    """
+
+    for column in df.columns:
+        if column not in GNOMAD_TABLES_DATA_TYPES:
+            raise ValueError(f"Column {column} is undefined in GNOMAD_TABLES_DATA_TYPES")
+        match GNOMAD_TABLES_DATA_TYPES[column]:
+            case "Date":
+                df[column] = pd.to_datetime(df[column], errors='coerce')
+            case "Boolean":
+                df[column] = df[column].map({"0": False, "1": True})
+            case "String":
+                df[column] = df[column].astype('string')
+            case "Integer":
+                df[column] = pd.to_numeric(df[column], errors='coerce').astype('Int64')
+            case "Double":
+                df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
+            case _:
+                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[column]}")
 
 
 def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
@@ -105,6 +131,27 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
     return d
 
 
+def parse_gnomad(path=GNOMAD_PATH + '/gnomad_data.csv'):
+    """
+    Parses data from a gnomAD format text file into a pandas DataFrame.
+
+    :param str path: path to the gnomAD data file
+    :returns: pandas DataFrame containing gnomAD data
+    :rtype: pd.DataFrame
+    """
+
+    # Check if the file exists
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"The file at {path} does not exist.")
+    logging.info("Parsing file %s using parse_gnomad.", path)
+    try:
+        gnomad_data = pd.read_csv(path, sep=',', encoding='UTF-8')
+        return gnomad_data
+    except Exception as e:
+        logging.error("Error parsing gnomAD data: %s", str(e))
+        raise e
+
+
 def from_clinvar_name_to_cdna_position(name):
     """
     Custom cleaner to extract cDNA position from Clinvar `name` variable.
@@ -128,6 +175,47 @@ def from_clinvar_name_to_cdna_position(name):
             break
 
     return name[start:end]
+
+
+def add_g_position_to_gnomad(gnomad):
+    """
+    Create new column 'hg38_gnomAD' from 'gnomAD ID' in the gnomAD dataframe.
+
+    Parameters:
+    gnomad : pd.DataFrame
+        gnomAD dataframe. This function modifies it in-place.
+    """
+    gnomad[['chromosome', 'position', 'ref', 'alt']] = gnomad['gnomAD ID'].str.split('-', expand=True)
+    gnomad['hg38'] = 'g.' + gnomad['position'] + gnomad['ref'] + '>' + gnomad['alt']
+    gnomad.drop(columns=['chromosome', 'position', 'ref', 'alt'], inplace=True)
+
+
+def merge_gnomad_lovd(lovd, gnomad):
+    """
+    merge LOVD and gnomAD dataframes on genomic positions.
+
+    parameters:
+    lovd : pd.DataFrame
+        LOVD dataframe.
+    gnomAD : pd.DataFrame
+        gnomAD dataframe.
+
+    returns:
+    pd.DataFrame
+        merged dataframe with combined information from LOVD and gnomAD.
+    """
+
+    add_g_position_to_gnomad(gnomad)
+    gnomad.columns = [col + '_gnomad' for col in gnomad.columns]
+
+    main_frame = pd.merge(
+        lovd,
+        gnomad,
+        how="outer",
+        left_on="VariantOnGenome/DNA/hg38",
+        right_on="hg38_gnomad")
+
+    return main_frame
 
 
 def save_lovd_as_vcf(data, save_to="./lovd.vcf"):

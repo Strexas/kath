@@ -1,0 +1,33 @@
+/* For light theme */
+:root {
+	--scrollbar-bg: rgba(0, 0, 0, 0.1);
+	--scrollbar-thumb: #aaa;
+	--scrollbar-thumb-hover: #555;
+}
+
+/* For dark theme */
+body.dark-theme {
+	--scrollbar-bg: rgba(255, 255, 255, 0.1);
+	--scrollbar-thumb: #a7acbb;
+	--scrollbar-thumb-hover: #888;
+}
+
+/* This applies to all scrollable elements */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--scrollbar-bg);
+	border-radius: 1rem;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--scrollbar-thumb);
+	border-radius: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--scrollbar-thumb-hover);
+}
