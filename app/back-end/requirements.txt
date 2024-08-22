@@ -1,3 +1,4 @@
+async-timeout==4.0.3
 bidict==0.23.1
 blinker==1.8.2
 Brotli==1.1.0
@@ -21,9 +22,10 @@ pycparser==2.22
 python-dotenv==1.0.1
 python-engineio==4.9.1
 python-socketio==5.11.3
+redis==5.0.8
 simple-websocket==1.0.0
 Werkzeug==3.0.3
 wsproto==1.2.0
 zope.event==5.0
 zope.interface==7.0.1
-zstandard==0.23.0
+zstandard==0.23.0 

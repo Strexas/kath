@@ -1,5 +1,6 @@
 import { EditorToolbar } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
+import { useSessionContext } from '@/hooks';
 import { axios, socket } from '@/lib';
 import { Endpoints } from '@/types';
 import { getUUID } from '@/utils';
@@ -32,8 +33,10 @@ import { useEffect, useState } from 'react';
  * @returns {JSX.Element} The rendered DataGrid component populated with data from the workspace file.
  */
 export const EditorView: React.FC = () => {
+  const { connected } = useSessionContext();
   const gridApiRef = useGridApiRef();
   const Workspace = useWorkspaceContext();
+
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [columns, setColumns] = useState<GridColDef[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -76,8 +79,8 @@ export const EditorView: React.FC = () => {
       }
     };
 
-    getWorkspaceFile();
-  }, [Workspace.fileId, Workspace.fileType]);
+    if (connected) getWorkspaceFile();
+  }, [connected, Workspace.fileId, Workspace.fileType]);
 
   const handleSave = () => {
     const header = gridApiRef.current
@@ -112,7 +115,7 @@ export const EditorView: React.FC = () => {
 
   return (
     <DataGrid
-      sx={{ height: '100%' }}
+      sx={{ height: '100%', border: 'none' }}
       loading={isLoading}
       rows={rows}
       columns={columns}
