@@ -35,14 +35,14 @@ from flask import request
 from src.setup.extensions import socketio, logger, socket_manager
 
 # Import all event modules here
-# TODO - Import the workspace_event module to register its event handlers
-import src.events.workspace_event
+from src.events.workspace_event import workspace_event_handler
 
 
 def eventer():
     """
     Register all event handlers including connect and disconnect events.
     """
+    workspace_event_handler(socketio)
 
     @socketio.on("connect")
     def handle_connect():
@@ -72,7 +72,7 @@ def eventer():
         uuid = request.args.get("uuid")
         if uuid:
             socket_manager.register_user_session(uuid, request.sid)
-            logger.info(f"User {uuid} connected with socket ID {request.sid}")
+            logger.info("User %s connected with socket ID %s", uuid, request.sid)
         else:
             logger.error("No uuid provided during connection")
 
@@ -104,6 +104,6 @@ def eventer():
         uuid = request.args.get("uuid")
         if uuid:
             socket_manager.remove_user_session(uuid, request.sid)
-            logger.info(f"User {uuid} disconnected with socket ID {request.sid}")
+            logger.info("User %s disconnected with socket ID %s", uuid, request.sid)
         else:
             logger.error("No uuid provided during disconnection")
