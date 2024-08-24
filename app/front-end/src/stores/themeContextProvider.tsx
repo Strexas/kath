@@ -62,7 +62,7 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
           mode: mode as PaletteMode,
           primary: {
             main: mode === 'light' ? Colors.primaryLight : Colors.primaryDark,
-            contrastText: Colors.contrastTextLight,
+            contrastText: mode === 'light' ? Colors.contrastTextLight : Colors.contrastTextDark,
           },
           secondary: {
             main: mode === 'light' ? Colors.secondaryLight : Colors.secondaryDark,

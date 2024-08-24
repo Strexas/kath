@@ -71,15 +71,17 @@
 export enum Colors {
   // Light mode
   mainNavigationBackgroundLight = '#4C7380',
-  primaryLight = '#4C7380',
+  primaryLight = '#336e82',
   secondaryLight = '#D8E4E8',
 
   textPrimaryLight = '#404040',
-  textSecondaryLight = '#999999',
+  textSecondaryLight = '#525252',
 
   backgroundPrimaryLight = '#F9FBFB',
   backgroundSecondaryLight = '#EDEDED',
   backgroundActiveLight = '#CDCDCD',
+
+  contrastTextLight = '#F9FBFB',
 
   // Dark mode
   mainNavigationBackgroundDark = '#1C2427',
@@ -91,10 +93,11 @@ export enum Colors {
 
   backgroundPrimaryDark = '#292929',
   backgroundSecondaryDark = '#252525',
-  backgroundActiveDark = '#313131',
+  backgroundActiveDark = '#333333',
+
+  contrastTextDark = '#F9FBFB',
 
   // Global
-  contrastTextLight = '#F9FBFB',
   error = '#FF6961',
   success = '#77DD77',
   warning = '#FFB347',

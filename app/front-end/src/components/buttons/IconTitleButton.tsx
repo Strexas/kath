@@ -42,7 +42,7 @@ export const IconTitleButton: React.FC<Props> = ({ icon, title, width, height, b
           transition: 'background-color 0.5s ease',
           ':hover': {
             backgroundColor: alpha(Theme.palette.primary.contrastText, 0.2),
-          }, // TODO: fix this to be responsive to theme
+          },
         }}
         onClick={onClick}
       >
