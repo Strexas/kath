@@ -28,7 +28,14 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
   const ThemeContext = useThemeContext();
   return (
-    <Box sx={{ width: 'calc(100vw - 5px)', height: 'calc(100vh - 5px)', bgcolor: Theme.palette.primary.main }}>
+    <Box
+      sx={{
+        width: 'calc(100vw - 5px)',
+        height: 'calc(100vh - 5px)',
+        bgcolor:
+          Theme.palette.mode === 'light' ? Colors.mainNavigationBackgroundLight : Colors.mainNavigationBackgroundDark,
+      }}
+    >
       <Box sx={{ width: '100%', height: 'max(4%, 2.5rem)', display: 'flex', flexDirection: 'row' }}>
         <Box
           sx={{

@@ -33,7 +33,7 @@ const StyledFileTreeItemContent = styled(TreeItem2Content)(({ theme }) => ({
   fontWeight: 500,
   ['&.Mui-expanded ']: {
     '&:not(.Mui-focused, .Mui-selected, .Mui-selected.Mui-focused) .labelIcon': {
-      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.dark,
+      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.main,
     },
     '&::before': {
       content: '""',

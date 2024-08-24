@@ -62,6 +62,7 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
           mode: mode as PaletteMode,
           primary: {
             main: mode === 'light' ? Colors.primaryLight : Colors.primaryDark,
+            contrastText: Colors.contrastTextLight,
           },
           secondary: {
             main: mode === 'light' ? Colors.secondaryLight : Colors.secondaryDark,
@@ -75,7 +76,6 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
             paper: mode === 'light' ? Colors.backgroundSecondaryLight : Colors.backgroundSecondaryDark,
           },
           action: {
-            hover: mode === 'light' ? Colors.secondaryLight : Colors.secondaryDark,
             selected: mode === 'light' ? Colors.backgroundActiveLight : Colors.backgroundActiveDark,
           },
           error: {
