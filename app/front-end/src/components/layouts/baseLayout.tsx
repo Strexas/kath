@@ -1,7 +1,12 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import SettingsDialog from '@/components/modals/settingsDialog/settingsDialog';
+import { SettingsDialog } from '@/components/dialogs/settingsDialog';
 import { Colors } from '@/types';
-import { AutoMode, Home, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
+import {
+  AutoMode as AutoModeIcon,
+  Home as HomeIcon,
+  SettingsOutlined as SettingsOutlinedIcon,
+  SwitchAccessShortcut as SwitchAccessShortcutIcon,
+} from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
 import { useState } from 'react';
 
@@ -37,7 +42,14 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ width: 'calc(100vw - 5px)', height: 'calc(100vh - 5px)', bgcolor: Theme.palette.primary.main }}>
+    <Box
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        bgcolor:
+          Theme.palette.mode === 'light' ? Colors.mainNavigationBackgroundLight : Colors.mainNavigationBackgroundDark,
+      }}
+    >
       <Box sx={{ width: '100%', height: 'max(4%, 2.5rem)', display: 'flex', flexDirection: 'row' }}>
         <Box
           sx={{
@@ -87,7 +99,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           Version 1.0.02 {/* TODO: add application context provider to get values of it */}
         </Typography>
       </Box>
-      <Box sx={{ width: '100%', height: '96%', display: 'flex', flexDirection: 'row' }}>
+      <Box sx={{ width: '100%', height: 'calc(100vh - max(4%, 2.5rem))', display: 'flex', flexDirection: 'row' }}>
         <Box sx={{ width: 'max(4%, 4.688rem) ', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box
             sx={{
@@ -101,11 +113,11 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
             }}
           >
             <IconTitleButton
-              icon={<Home sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
+              icon={<HomeIcon sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
               title={'Home'}
             />
             <IconTitleButton
-              icon={<AutoMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
+              icon={<AutoModeIcon sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
               title={'Macros'}
             />
           </Box>
@@ -122,13 +134,15 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           >
             <IconTitleButton
               icon={
-                <SettingsOutlined sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />
+                <SettingsOutlinedIcon
+                  sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
+                />
               }
               onClick={handleOptionsMenuOpen}
             />
             <IconTitleButton
               icon={
-                <SwitchAccessShortcut
+                <SwitchAccessShortcutIcon
                   sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
                 />
               }
@@ -136,9 +150,9 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           </Box>
         </Box>
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
-          <SettingsDialog open={isOptionsMenuOpen} handleClose={handleOptionsMenuClose} />
           {children}
         </Box>
+        <SettingsDialog open={isOptionsMenuOpen} handleClose={handleOptionsMenuClose} />
       </Box>
     </Box>
   );

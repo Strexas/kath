@@ -1,5 +1,5 @@
 import { SvgIconComponent } from '@mui/icons-material';
-import { Box, Button, useTheme } from '@mui/material';
+import { alpha, Box, Button, useTheme } from '@mui/material';
 
 export interface ToolbarGroupItemProps {
   group: string;
@@ -44,11 +44,11 @@ export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, 
         onClick={() => onClick()}
         sx={{
           color: Theme.palette.text.primary,
-          bgcolor: Theme.palette.background.default,
+          backgroundColor: alpha(Theme.palette.action.selected, 0.5),
           borderRadius: '0.625rem',
           px: '1rem',
           '&:hover': {
-            bgcolor: Theme.palette.action.hover,
+            backgroundColor: Theme.palette.action.selected,
           },
         }}
       >

@@ -1,5 +1,5 @@
 import { Colors } from '@/types';
-import { Box, IconButton, Typography } from '@mui/material';
+import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 
 interface Props {
   icon: React.ReactNode;
@@ -30,6 +30,7 @@ interface Props {
  * @returns {JSX.Element} The `IconTitleButton` component rendering an icon button and an optional title.
  */
 export const IconTitleButton: React.FC<Props> = ({ icon, title, width, height, borderRadius, onClick }) => {
+  const Theme = useTheme();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <IconButton
@@ -39,7 +40,9 @@ export const IconTitleButton: React.FC<Props> = ({ icon, title, width, height, b
           height: height || '3rem',
           borderRadius: borderRadius || '1rem',
           transition: 'background-color 0.5s ease',
-          ':hover': { backgroundColor: 'rgba(216, 228, 232, 0.5)' }, // TODO: fix this to be responsive to theme
+          ':hover': {
+            backgroundColor: alpha(Theme.palette.primary.contrastText, 0.2),
+          },
         }}
         onClick={onClick}
       >

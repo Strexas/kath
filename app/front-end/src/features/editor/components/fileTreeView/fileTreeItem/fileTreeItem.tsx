@@ -16,7 +16,8 @@ import React from 'react';
 import { FileTreeItemLabel } from '.';
 
 const StyledFileTreeItemRoot = styled(TreeItem2Root)(({ theme }) => ({
-  color: theme.palette.mode === 'light' ? theme.palette.grey[800] : theme.palette.grey[400],
+  //color: theme.palette.mode === 'light' ? theme.palette.grey[800] : theme.palette.grey[400],
+  color: theme.palette.text.secondary,
   position: 'relative',
   [`& .${treeItemClasses.groupTransition}`]: {
     marginLeft: theme.spacing(3.5),
@@ -33,7 +34,7 @@ const StyledFileTreeItemContent = styled(TreeItem2Content)(({ theme }) => ({
   fontWeight: 500,
   ['&.Mui-expanded ']: {
     '&:not(.Mui-focused, .Mui-selected, .Mui-selected.Mui-focused) .labelIcon': {
-      color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.dark,
+      color: theme.palette.primary.main,
     },
     '&::before': {
       content: '""',
@@ -43,15 +44,16 @@ const StyledFileTreeItemContent = styled(TreeItem2Content)(({ theme }) => ({
       top: '44px',
       height: 'calc(100% - 48px)',
       width: '1.5px',
-      backgroundColor: theme.palette.mode === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
+      backgroundColor: theme.palette.secondary.main,
     },
   },
   '&:hover': {
     backgroundColor: alpha(theme.palette.primary.main, 0.1),
-    color: theme.palette.mode === 'light' ? theme.palette.primary.main : 'white',
+    color: theme.palette.primary.main,
   },
   ['&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused']: {
-    backgroundColor: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.primary.dark,
+    backgroundColor:
+      theme.palette.mode === 'light' ? alpha(theme.palette.primary.main, 0.7) : alpha(theme.palette.primary.main, 0.5),
     color: theme.palette.primary.contrastText,
   },
 }));
