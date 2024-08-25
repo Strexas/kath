@@ -1,8 +1,9 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import { useThemeContext } from '@/hooks';
+import SettingsDialog from '@/components/modals/settingsDialog/settingsDialog';
 import { Colors } from '@/types';
-import { AutoMode, DarkMode, Home, LightMode, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
+import { AutoMode, Home, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
+import { useState } from 'react';
 
 interface Props {
   children?: React.ReactNode;
@@ -26,7 +27,15 @@ interface Props {
  */
 export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
-  const ThemeContext = useThemeContext();
+
+  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
+  const handleOptionsMenuOpen = () => {
+    setIsOptionsMenuOpen(true);
+  };
+  const handleOptionsMenuClose = () => {
+    setIsOptionsMenuOpen(false);
+  };
+
   return (
     <Box sx={{ width: 'calc(100vw - 5px)', height: 'calc(100vh - 5px)', bgcolor: Theme.palette.primary.main }}>
       <Box sx={{ width: '100%', height: 'max(4%, 2.5rem)', display: 'flex', flexDirection: 'row' }}>
@@ -115,6 +124,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
               icon={
                 <SettingsOutlined sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />
               }
+              onClick={handleOptionsMenuOpen}
             />
             <IconTitleButton
               icon={
@@ -123,20 +133,10 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
                 />
               }
             />
-            {ThemeContext.mode === 'light' ? (
-              <IconTitleButton
-                icon={<DarkMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
-                onClick={() => ThemeContext.update()}
-              />
-            ) : (
-              <IconTitleButton
-                icon={<LightMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
-                onClick={() => ThemeContext.update()}
-              />
-            )}
           </Box>
         </Box>
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
+          <SettingsDialog open={isOptionsMenuOpen} handleClose={handleOptionsMenuClose} />
           {children}
         </Box>
       </Box>
