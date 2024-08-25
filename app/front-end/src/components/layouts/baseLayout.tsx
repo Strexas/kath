@@ -1,8 +1,10 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
+import ShortcutsDialog from '@/components/modals/shortcutsDialog/shortcutsDialog';
 import { useThemeContext } from '@/hooks';
 import { Colors } from '@/types';
 import { AutoMode, DarkMode, Home, LightMode, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
+import { useState } from 'react';
 
 interface Props {
   children?: React.ReactNode;
@@ -27,6 +29,15 @@ interface Props {
 export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
   const ThemeContext = useThemeContext();
+
+  const [isShortcutsMenuOpen, setIsShortcutsMenuOpen] = useState(false);
+  const handleShortcutsMenuOpen = () => {
+    setIsShortcutsMenuOpen(true);
+  };
+  const handleShortcutsMenuClose = () => {
+    setIsShortcutsMenuOpen(false);
+  };
+
   return (
     <Box sx={{ width: 'calc(100vw - 5px)', height: 'calc(100vh - 5px)', bgcolor: Theme.palette.primary.main }}>
       <Box sx={{ width: '100%', height: 'max(4%, 2.5rem)', display: 'flex', flexDirection: 'row' }}>
@@ -122,6 +133,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
                   sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
                 />
               }
+              onClick={handleShortcutsMenuOpen}
             />
             {ThemeContext.mode === 'light' ? (
               <IconTitleButton
@@ -137,6 +149,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           </Box>
         </Box>
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
+          <ShortcutsDialog open={isShortcutsMenuOpen} handleClose={handleShortcutsMenuClose} />
           {children}
         </Box>
       </Box>
