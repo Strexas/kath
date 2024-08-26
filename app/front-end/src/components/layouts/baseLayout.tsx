@@ -152,7 +152,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
           {children}
         </Box>
-        <SettingsDialog open={isSettingsDialogOpen} handleClose={handleSettingsDialogClose} />
+        <SettingsDialog open={isSettingsDialogOpen} onClose={handleSettingsDialogClose} />
       </Box>
     </Box>
   );
