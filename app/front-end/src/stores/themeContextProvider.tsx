@@ -102,6 +102,42 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               },
             },
           },
+          MuiSelect: {
+            styleOverrides: {
+              root: {
+                fontFamily: 'Nunito',
+                borderRadius: '1rem',
+                color: mode === 'light' ? Colors.textPrimaryLight : Colors.textPrimaryDark,
+                '& fieldset.MuiOutlinedInput-notchedOutline': {
+                  borderColor: mode === 'light' ? Colors.textSecondaryLight : Colors.textSecondaryDark,
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: mode === 'light' ? Colors.primaryLight : Colors.primaryDark,
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: mode === 'light' ? Colors.primaryLight : Colors.primaryDark,
+                },
+              },
+            },
+          },
+          MuiMenu: {
+            styleOverrides: {
+              paper: {
+                borderRadius: '1rem',
+              },
+              list: {
+                backgroundColor: mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark,
+              },
+            },
+          },
+          MuiMenuItem: {
+            styleOverrides: {
+              root: {
+                fontFamily: 'Nunito',
+                fontSize: '0.9rem',
+              },
+            },
+          },
         },
       }),
     [mode]

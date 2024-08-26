@@ -1,8 +1,14 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import { useThemeContext } from '@/hooks';
+import { SettingsDialog } from '@/components/dialogs/settingsDialog';
 import { Colors } from '@/types';
-import { AutoMode, DarkMode, Home, LightMode, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';
+import {
+  AutoMode as AutoModeIcon,
+  Home as HomeIcon,
+  SettingsOutlined as SettingsOutlinedIcon,
+  SwitchAccessShortcut as SwitchAccessShortcutIcon,
+} from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
+import { useState } from 'react';
 
 interface Props {
   children?: React.ReactNode;
@@ -26,7 +32,15 @@ interface Props {
  */
 export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
-  const ThemeContext = useThemeContext();
+
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const handleSettingsDialogOpen = () => {
+    setIsSettingsDialogOpen(true);
+  };
+  const handleSettingsDialogClose = () => {
+    setIsSettingsDialogOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -99,11 +113,11 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
             }}
           >
             <IconTitleButton
-              icon={<Home sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
+              icon={<HomeIcon sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
               title={'Home'}
             />
             <IconTitleButton
-              icon={<AutoMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
+              icon={<AutoModeIcon sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
               title={'Macros'}
             />
           </Box>
@@ -120,32 +134,25 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           >
             <IconTitleButton
               icon={
-                <SettingsOutlined sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />
+                <SettingsOutlinedIcon
+                  sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
+                />
               }
+              onClick={handleSettingsDialogOpen}
             />
             <IconTitleButton
               icon={
-                <SwitchAccessShortcut
+                <SwitchAccessShortcutIcon
                   sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
                 />
               }
             />
-            {ThemeContext.mode === 'light' ? (
-              <IconTitleButton
-                icon={<DarkMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
-                onClick={() => ThemeContext.update()}
-              />
-            ) : (
-              <IconTitleButton
-                icon={<LightMode sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />}
-                onClick={() => ThemeContext.update()}
-              />
-            )}
           </Box>
         </Box>
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
           {children}
         </Box>
+        <SettingsDialog open={isSettingsDialogOpen} onClose={handleSettingsDialogClose} />
       </Box>
     </Box>
   );
