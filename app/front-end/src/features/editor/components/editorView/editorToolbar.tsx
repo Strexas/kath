@@ -1,5 +1,4 @@
 import { socket } from '@/lib';
-import { Colors } from '@/types';
 import { Done as DoneIcon, Error as ErrorIcon } from '@mui/icons-material';
 import { Box, Button, CircularProgress, useTheme } from '@mui/material';
 import {
@@ -78,18 +77,25 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ disabled, handleSa
           setIsSaving(true);
           handleSave();
         }}
-        disabled={disabled}
+        disabled={disabled || isSaving}
         startIcon={
           isSaving ? (
-            <CircularProgress size={16} sx={{ color: Colors.backgroundPrimaryLight }} />
+            <CircularProgress size={16} sx={{ color: Theme.palette.primary.main }} />
           ) : saveStatus ? (
-            <DoneIcon sx={{ color: Theme.palette.success.main }} />
+            <DoneIcon sx={{ color: Theme.palette.primary.main }} />
           ) : (
             <ErrorIcon sx={{ color: Theme.palette.error.main }} />
           )
         }
         size='small'
-        variant='contained'
+        variant='outlined'
+        sx={{
+          color: saveStatus === false ? Theme.palette.error.main : Theme.palette.primary.main,
+          borderColor: saveStatus === false ? Theme.palette.error.main : Theme.palette.primary.main,
+          '&:hover': {
+            borderColor: saveStatus === false ? Theme.palette.error.dark : Theme.palette.primary.dark,
+          },
+        }}
       >
         Save
       </Button>

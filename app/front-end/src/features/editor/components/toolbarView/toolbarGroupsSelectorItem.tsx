@@ -1,4 +1,5 @@
 import { Button, useTheme } from '@mui/material';
+import { alpha } from '@mui/system';
 
 export interface ToolbarGroupsSelectorItemProps {
   id: string;
@@ -42,12 +43,13 @@ export const ToolbarGroupsSelectorItem: React.FC<ToolbarGroupsSelectorItemProps>
       sx={{
         height: '100%',
         bgcolor: groupRef === id ? Theme.palette.background.paper : Theme.palette.action.selected,
-        borderRadius: '0.625rem 0.625rem 0rem 0rem',
+        borderRadius: '0rem',
         px: '3rem',
         fontWeight: 'bold',
         color: Theme.palette.text.primary,
         ':hover': {
-          backgroundColor: Theme.palette.background.paper,
+          backgroundColor:
+            groupRef === id ? Theme.palette.background.paper : alpha(Theme.palette.background.paper, 0.5),
         },
       }}
       onClick={() => onClick()}

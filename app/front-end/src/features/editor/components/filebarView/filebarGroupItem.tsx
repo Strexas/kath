@@ -1,7 +1,7 @@
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTypes } from '@/types';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { Box, IconButton, Typography, useTheme } from '@mui/material';
+import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 
 export interface FilebarGroupItemProps {
   fileId: string;
@@ -40,9 +40,12 @@ export const FilebarGroupItem: React.FC<FilebarGroupItemProps> = ({ fileId, file
         pl: '1rem',
         pr: '0.5rem',
         bgcolor: Workspace.fileId === fileId ? Theme.palette.background.default : Theme.palette.action.selected,
-        borderRadius: '0rem 0rem 0.625rem 0.625rem',
+        borderRadius: '0rem',
         ':hover': {
-          backgroundColor: Theme.palette.background.paper,
+          backgroundColor:
+            Workspace.fileId === fileId
+              ? Theme.palette.background.default
+              : alpha(Theme.palette.background.default, 0.5),
         },
         cursor: 'pointer',
         display: 'flex',

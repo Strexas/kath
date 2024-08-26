@@ -39,7 +39,14 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
   };
 
   return (
-    <Box sx={{ width: 'calc(100vw - 5px)', height: 'calc(100vh - 5px)', bgcolor: Theme.palette.primary.main }}>
+    <Box
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        bgcolor:
+          Theme.palette.mode === 'light' ? Colors.mainNavigationBackgroundLight : Colors.mainNavigationBackgroundDark,
+      }}
+    >
       <Box sx={{ width: '100%', height: 'max(4%, 2.5rem)', display: 'flex', flexDirection: 'row' }}>
         <Box
           sx={{
@@ -89,7 +96,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           Version 1.0.02 {/* TODO: add application context provider to get values of it */}
         </Typography>
       </Box>
-      <Box sx={{ width: '100%', height: '96%', display: 'flex', flexDirection: 'row' }}>
+      <Box sx={{ width: '100%', height: 'calc(100vh - max(4%, 2.5rem))', display: 'flex', flexDirection: 'row' }}>
         <Box sx={{ width: 'max(4%, 4.688rem) ', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box
             sx={{
