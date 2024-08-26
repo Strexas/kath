@@ -76,6 +76,7 @@ Errors and Feedback:
 """
 
 # pylint: disable=import-error
+# pylint: disable=too-many-locals
 
 import os
 import shutil
@@ -313,7 +314,7 @@ def get_workspace_file(relative_path):
             # Read the rows within the specified range, otherwise skip to the next row.
             # Loop ends when the end row is reached or the end of the file is reached.
             for i, row in enumerate(reader):
-                if i >= start_row and i < end_row:
+                if start_row <= i < end_row:
                     paginated_rows.append(row)
                 total_rows += 1
 
