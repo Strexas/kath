@@ -1,5 +1,5 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import { SettingsDialog } from '@/components/dialogs/settingsDialog';
+import { SettingsDialog, ShortcutsDialog } from '@/components/dialogs';
 import { Colors } from '@/types';
 import {
   AutoMode as AutoModeIcon,
@@ -32,6 +32,14 @@ interface Props {
  */
 export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
+
+  const [isShortcutsMenuOpen, setIsShortcutsMenuOpen] = useState(false);
+  const handleShortcutsMenuOpen = () => {
+    setIsShortcutsMenuOpen(true);
+  };
+  const handleShortcutsMenuClose = () => {
+    setIsShortcutsMenuOpen(false);
+  };
 
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
   const handleSettingsDialogOpen = () => {
@@ -99,8 +107,15 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           Version 1.0.02 {/* TODO: add application context provider to get values of it */}
         </Typography>
       </Box>
-      <Box sx={{ width: '100%', height: 'calc(100vh - max(4%, 2.5rem))', display: 'flex', flexDirection: 'row' }}>
-        <Box sx={{ width: 'max(4%, 4.688rem) ', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          width: 'calc(100vw - 0.5rem)',
+          height: 'calc(100vh - max(4%, 2.5rem))',
+          display: 'flex',
+          flexDirection: 'row',
+        }}
+      >
+        <Box sx={{ width: '5vw', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box
             sx={{
               width: '100%',
@@ -146,13 +161,22 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
                   sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
                 />
               }
+              onClick={handleShortcutsMenuOpen}
             />
           </Box>
         </Box>
-        <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
+        <Box
+          sx={{
+            width: '95.75%',
+            height: 'calc(100% - 0.5rem)',
+            borderRadius: '0.625rem',
+            bgcolor: Theme.palette.secondary.main,
+          }}
+        >
           {children}
         </Box>
         <SettingsDialog open={isSettingsDialogOpen} onClose={handleSettingsDialogClose} />
+        <ShortcutsDialog open={isShortcutsMenuOpen} onClose={handleShortcutsMenuClose} />
       </Box>
     </Box>
   );
