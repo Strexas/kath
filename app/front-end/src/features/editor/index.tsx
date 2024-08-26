@@ -40,8 +40,7 @@ export const Editor = () => {
       <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'row' }}>
         <Box
           sx={{
-            width: '20%',
-            height: '90%',
+            width: '20vw',
             display: 'flex',
             flexDirection: 'column',
             bgcolor: Theme.palette.secondary.main,
@@ -51,7 +50,7 @@ export const Editor = () => {
         >
           <FileTreeView />
         </Box>
-        <Box sx={{ width: '80%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ width: '75vw', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box
             sx={{
               width: '100%',

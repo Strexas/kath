@@ -108,7 +108,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
         </Typography>
       </Box>
       <Box sx={{ width: '100%', height: 'calc(100vh - max(4%, 2.5rem))', display: 'flex', flexDirection: 'row' }}>
-        <Box sx={{ width: 'max(4%, 4.688rem) ', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ width: '5vw', height: '100%', display: 'flex', flexDirection: 'column' }}>
           <Box
             sx={{
               width: '100%',
