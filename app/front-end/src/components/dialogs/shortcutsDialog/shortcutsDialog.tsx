@@ -1,6 +1,7 @@
 import { Shortcuts, ShortcutsDivider, ShortcutsLine } from '@/components/dialogs/shortcutsDialog';
 import { Close as CloseIcon } from '@mui/icons-material';
 import {
+  alpha,
   Box,
   Dialog,
   DialogContent,
@@ -25,7 +26,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
     borderRadius: '1.5rem',
     minWidth: '30%',
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.background.paper,
+    backgroundImage: 'none',
   },
 }));
 
@@ -67,7 +69,7 @@ export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => 
           </Box>
         </Grid>
       </Grid>
-      <DialogContent dividers>
+      <DialogContent sx={{ borderTop: `1px solid ${alpha(Theme.palette.text.secondary, 0.3)}` }}>
         <Grid container display='flex' alignItems='center' pb='1rem' mt='-1rem'>
           <Grid item xs={6}>
             <Typography sx={{ fontWeight: '700', fontSize: '1rem' }}>
@@ -76,7 +78,7 @@ export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => 
           </Grid>
           <Grid item xs={6} display='flex' alignItems='center' justifyContent='flex-end'>
             <Typography fontSize='1rem'>MacOS</Typography>
-            <Switch onChange={handleMacSwitch} />
+            <Switch onChange={handleMacSwitch} checked={isMac} />
           </Grid>
         </Grid>
         {Shortcuts.map((shortcut, index) => (
