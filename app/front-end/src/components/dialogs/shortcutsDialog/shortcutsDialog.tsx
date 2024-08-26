@@ -33,10 +33,10 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 interface ShortcutsDialogProps {
   open: boolean;
-  handleClose: () => void;
+  onClose: () => void;
 }
 
-export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => {
+export const ShortcutsDialog = ({ open, onClose }: ShortcutsDialogProps) => {
   const Theme = useTheme();
 
   const [isMac, setIsMac] = useState<boolean>(false);
@@ -46,7 +46,7 @@ export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => 
   };
 
   return (
-    <BootstrapDialog onClose={handleClose} open={open}>
+    <BootstrapDialog onClose={onClose} open={open}>
       <Grid container spacing={2} justifyContent='center' alignItems='center'>
         <Grid item xs={8}>
           <DialogTitle sx={{ color: Theme.palette.primary.main, pl: '1.5rem', pt: '1.5rem', fontWeight: '700' }}>
@@ -57,7 +57,7 @@ export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => 
           <Box display='flex' justifyContent='flex-end'>
             <IconButton
               aria-label='close'
-              onClick={handleClose}
+              onClick={onClose}
               sx={{
                 color: Theme.palette.primary.main,
                 mt: '0.5rem',

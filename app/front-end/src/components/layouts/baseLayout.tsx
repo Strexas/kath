@@ -162,7 +162,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           {children}
         </Box>
         <SettingsDialog open={isSettingsDialogOpen} onClose={handleSettingsDialogClose} />
-        <ShortcutsDialog open={isShortcutsMenuOpen} handleClose={handleShortcutsMenuClose} />
+        <ShortcutsDialog open={isShortcutsMenuOpen} onClose={handleShortcutsMenuClose} />
       </Box>
     </Box>
   );
