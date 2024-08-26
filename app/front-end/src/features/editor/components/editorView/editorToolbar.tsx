@@ -1,12 +1,11 @@
 import { socket } from '@/lib';
+import { Events } from '@/types';
 import { Done as DoneIcon, Error as ErrorIcon } from '@mui/icons-material';
 import { Box, Button, CircularProgress, useTheme } from '@mui/material';
 import {
   GridToolbarColumnsButton,
   GridToolbarContainer,
   GridToolbarDensitySelector,
-  GridToolbarExport,
-  GridToolbarFilterButton,
   GridToolbarProps,
   ToolbarPropsOverrides,
 } from '@mui/x-data-grid';
@@ -55,22 +54,23 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ disabled, handleSa
   const Theme = useTheme();
 
   useEffect(() => {
-    socket.on('workspace_file_update_status', (data) => {
+    const handleWorkspaceFileSaveFeedback = (data: { status: 'success' | 'error' }) => {
       setIsSaving(false);
       setSaveStatus(data.status === 'success');
-    });
+    };
+    socket.on(Events.WORKSPACE_FILE_SAVE_FEEDBACK_EVENT, handleWorkspaceFileSaveFeedback);
 
     return () => {
-      socket.off('workspace_file_update_status');
+      socket.off(Events.WORKSPACE_FILE_SAVE_FEEDBACK_EVENT);
     };
   });
 
   return (
     <GridToolbarContainer>
       <GridToolbarColumnsButton />
-      <GridToolbarFilterButton />
+      {/* <GridToolbarFilterButton /> */}
       <GridToolbarDensitySelector />
-      <GridToolbarExport />
+      {/* <GridToolbarExport /> */}
       <Box sx={{ flexGrow: 1 }} />
       <Button
         onClick={() => {
