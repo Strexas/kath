@@ -23,5 +23,8 @@ bind = "0.0.0.0:8080"
 # Use Gevent worker class for handling asynchronous requests with WebSocket support
 worker_class = "geventwebsocket.gunicorn.workers.GeventWebSocketWorker"
 
+# Maximum number of simultaneous connections
+worker_connections = 1
+
 # Number of worker processes
 workers = multiprocessing.cpu_count() * 2 + 1

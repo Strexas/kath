@@ -1,18 +1,19 @@
 """
 This module defines routes for managing workspace files and directories in a Flask application.
 
-Endpoints include:
+Endpoints:
 - `/workspace`: Retrieves the structure of the workspace directory, including files and folders.
-- `/workspace/<path:relative_path>`: Retrieves a specific file from the workspace directory.
+- `/workspace/<path:relative_path>`: Retrieves or updates a specific file in the workspace
+    directory.
 
 Dependencies:
 - os: For file and directory operations, such as checking existence and copying directories.
 - shutil: For copying directory trees, ensuring that user-specific directories are properly
     initialized.
+- csv: For handling CSV file reading and writing.
 - flask.Blueprint: To create and organize route blueprints for modular route management in Flask.
 - flask.request: To handle incoming HTTP requests and extract headers and parameters.
 - flask.jsonify: To create JSON responses for API endpoints.
-- flask.send_file: To serve files for download.
 
 Extensions:
 - src.setup.extensions.compress: Used for compressing responses to optimize data transfer.
@@ -20,6 +21,58 @@ Extensions:
     and errors.
 - src.setup.constants: Contains constants for directory paths and routes used in the workspace
     management.
+- src.utils.helpers: Provides utility functions for socket communication and workspace structure
+    building.
+- src.utils.exceptions: Defines custom exceptions used for error handling.
+
+Endpoints:
+
+1. `/workspace` (GET):
+   - **Description**: Retrieves the structure of the user's workspace directory. If the directory
+    does not exist, initializes it by copying a template directory.
+   - **Headers**: Requires `uuid` and `sid` headers to identify the user session.
+   - **Returns**:
+     - `200 OK`: JSON representation of the workspace directory structure.
+     - `400 Bad Request`: If `uuid` or `sid` headers are missing.
+     - `403 Forbidden`: If there is a permission issue accessing the workspace.
+     - `404 Not Found`: If the workspace directory or files are not found.
+     - `500 Internal Server Error`: For unexpected errors.
+
+2. `/workspace/<path:relative_path>` (GET):
+   - **Description**: Retrieves a specific file from the user's workspace directory. Supports
+    pagination for large files.
+   - **Headers**: Requires `uuid` and `sid` headers.
+   - **Query Parameters**: 
+     - `page` (int): Page number of data to retrieve (default is 0).
+     - `rowsPerPage` (int): Number of rows per page (default is 100).
+   - **Returns**:
+     - `200 OK`: JSON response containing paginated file data.
+     - `400 Bad Request`: If `uuid` or `sid` headers are missing.
+     - `403 Forbidden`: If there is a permission issue accessing the file.
+     - `404 Not Found`: If the requested file does not exist.
+     - `500 Internal Server Error`: For unexpected errors.
+
+3. `/workspace/<path:relative_path>` (PUT):
+   - **Description**: Saves or updates a file in the user's workspace directory. Supports CSV files
+    and updates rows in the specified range.
+   - **Headers**: Requires `uuid` and `sid` headers.
+   - **Request Body**:
+     - `page` (int): Current page number of data to be saved.
+     - `rowsPerPage` (int): Number of rows per page.
+     - `header` (list): Header row for the CSV file.
+     - `rows` (list): Rows of data to be saved.
+   - **Returns**:
+     - `200 OK`: Success message indicating the file was saved successfully.
+     - `400 Bad Request`: If `uuid` or `sid` headers are missing.
+     - `403 Forbidden`: If there is a permission issue while saving the file.
+     - `404 Not Found`: If the requested file does not exist.
+     - `500 Internal Server Error`: For unexpected errors.
+
+Errors and Feedback:
+- Feedback is sent to the user's console via WebSocket events about the status of workspace and file
+    operations.
+- Errors include detailed logging and console feedback for issues such as missing files, permission
+    errors, and unexpected exceptions.
 """
 
 # pylint: disable=import-error
@@ -173,30 +226,42 @@ def get_workspace_file(relative_path):
     """
     Retrieve a specific file from the workspace directory.
 
-    This endpoint serves files from the user's workspace directory. If the directory does not exist,
-    it copies a template directory to the user's workspace. The file specified by `relative_path`
-    is then served for download. Feedback about the file retrieval process is sent to the user's
-    console via Socket.IO.
+    This endpoint retrieves a file from the user's workspace directory based on the provided
+    `relative_path`. If the user's workspace directory does not exist, it initializes the workspace
+    by copying a template directory. The function supports pagination for large files, returning
+    a specified range of rows from a CSV file. Feedback about the file retrieval process is sent to
+    the user's console via WebSocket events.
 
     Args:
         relative_path (str): The path to the file within the user's workspace directory.
 
+    Headers:
+        uuid (str): The unique identifier for the user.
+        sid (str): The session identifier for the user.
+
+    Query Parameters:
+        page (int): The page number of data to retrieve (default is 0).
+        rowsPerPage (int): The number of rows per page (default is 100).
+
     Returns:
-        Response: A Flask response object containing the file or an error message. The response is:
-            - `200 OK` with the file if successful.
+        Response: A JSON response containing the paginated file data or an error message. The
+        response includes:
+            - `200 OK` with the file data if successful.
             - `400 Bad Request` if required headers are missing.
             - `403 Forbidden` if there is a permission error.
             - `404 Not Found` if the requested file does not exist.
             - `500 Internal Server Error` for unexpected errors.
 
+    Emits:
+        CONSOLE_FEEDBACK_EVENT (str): Emits feedback messages to the user's console.
+
     Errors and Feedback:
-        - If the `uuid` or `sid` headers are missing, a `400 Bad Request` response is returned.
-        - On successful file retrieval, a success message is emitted to the user's console.
-        - On errors, appropriate feedback is emitted to the user's console and an error response is
-            returned:
-            - `FileNotFoundError`: Indicates the requested file was not found.
-            - `PermissionError`: Indicates permission issues while accessing the file.
-            - Other exceptions: Logs and reports unexpected errors.
+        - Missing `uuid` or `sid` headers result in a `400 Bad Request` response.
+        - Successful file retrieval emits a success message to the user's console.
+        - File not found or permission errors emit corresponding error messages to the user's
+            console and return appropriate HTTP error responses.
+        - Unexpected errors are logged, reported to the user's console, and result in a `500
+            Internal Server Error` response.
     """
 
     uuid = request.headers.get("uuid")
@@ -321,6 +386,43 @@ def get_workspace_file(relative_path):
 @workspace_route_bp.route(f"{WORKSPACE_ROUTE}/<path:relative_path>", methods=["PUT"])
 @compress.compressed()
 def put_workspace_file(relative_path):
+    """
+    Handles a PUT request to save or update a workspace file for a specific user.
+
+    This function processes a request to save or update a file in the user's workspace directory.
+    It validates the presence of required headers (UUID and SID), processes the provided data, and
+    writes the updated content to the specified file. The function also handles potential errors
+    and sends feedback to the user's console and button via WebSocket events.
+
+    Args:
+        relative_path (str): The relative path of the file within the user's workspace directory.
+
+    Headers:
+    - uuid (str): The unique identifier for the user.
+    - sid (str): The session identifier for the user.
+
+    Request Body:
+    - page (int): The current page number of the data to be saved.
+    - rowsPerPage (int): The number of rows per page.
+    - header (list): The header row for the CSV file.
+    - rows (list): The rows of data to be saved, corresponding to the current page.
+
+    Emits:
+    - CONSOLE_FEEDBACK_EVENT (str): Emits feedback messages to the user's console.
+    - WORKSPACE_FILE_SAVE_FEEDBACK_EVENT (str): Emits a status message indicating the success or
+        failure of the file save operation.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+
+    Status Codes:
+        200: Success - File saved successfully.
+        400: Bad Request - UUID or SID header is missing.
+        403: Forbidden - Permission error while saving the file.
+        404: Not Found - Requested file not found.
+        500: Internal Server Error - An unexpected error occurred.
+    """
+
     uuid = request.headers.get("uuid")
     sid = request.headers.get("sid")
 
