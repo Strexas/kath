@@ -14,7 +14,8 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
     borderRadius: '1.5rem',
     minWidth: '25%',
-    backgroundColor: theme.palette.background.default,
+    backgroundColor: theme.palette.background.paper,
+    backgroundImage: 'none',
   },
 }));
 

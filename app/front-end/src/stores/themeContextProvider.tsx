@@ -130,7 +130,6 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               },
             },
           },
-          // Applied to the <li> elements
           MuiMenuItem: {
             styleOverrides: {
               root: {

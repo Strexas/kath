@@ -33,12 +33,12 @@ interface Props {
 export const BaseLayout: React.FC<Props> = ({ children }) => {
   const Theme = useTheme();
 
-  const [isOptionsMenuOpen, setIsOptionsMenuOpen] = useState(false);
-  const handleOptionsMenuOpen = () => {
-    setIsOptionsMenuOpen(true);
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const handleSettingsDialogOpen = () => {
+    setIsSettingsDialogOpen(true);
   };
-  const handleOptionsMenuClose = () => {
-    setIsOptionsMenuOpen(false);
+  const handleSettingsDialogClose = () => {
+    setIsSettingsDialogOpen(false);
   };
 
   return (
@@ -138,7 +138,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
                   sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
                 />
               }
-              onClick={handleOptionsMenuOpen}
+              onClick={handleSettingsDialogOpen}
             />
             <IconTitleButton
               icon={
@@ -152,7 +152,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
         <Box sx={{ width: '95.75%', height: '99.5%', borderRadius: '0.625rem', bgcolor: Theme.palette.secondary.main }}>
           {children}
         </Box>
-        <SettingsDialog open={isOptionsMenuOpen} handleClose={handleOptionsMenuClose} />
+        <SettingsDialog open={isSettingsDialogOpen} handleClose={handleSettingsDialogClose} />
       </Box>
     </Box>
   );
