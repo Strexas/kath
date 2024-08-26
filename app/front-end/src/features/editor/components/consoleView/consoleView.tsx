@@ -1,6 +1,7 @@
 import { ConsoleGroup, ConsoleGroupItem } from '@/features/editor/components/consoleView';
 import { ConsoleFeedback } from '@/features/editor/types';
 import { socket } from '@/lib';
+import { Events } from '@/types';
 import { useEffect, useRef, useState } from 'react';
 
 /**
@@ -29,10 +30,10 @@ export const ConsoleView: React.FC = () => {
       setConsoleFeedback((prev) => [...prev, data]);
     };
 
-    socket.on('console_feedback', handleConsoleFeedback);
+    socket.on(Events.CONSOLE_FEEDBACK_EVENT, handleConsoleFeedback);
 
     return () => {
-      socket.off('console_feedback');
+      socket.off(Events.CONSOLE_FEEDBACK_EVENT);
     };
   }, []);
 

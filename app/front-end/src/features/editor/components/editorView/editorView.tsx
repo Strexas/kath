@@ -1,11 +1,10 @@
-import { EditorToolbar } from '@/features/editor/components/editorView';
+import { EditorColumnMenu, EditorToolbar } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
+import { FileDataRequestDTO, FileDataResponseDTO } from '@/features/editor/types';
 import { useSessionContext } from '@/hooks';
-import { axios, socket } from '@/lib';
+import { axios } from '@/lib';
 import { Endpoints } from '@/types';
-import { getUUID } from '@/utils';
 import { DataGrid, GridColDef, GridRowsProp, useGridApiRef } from '@mui/x-data-grid';
-import Papa from 'papaparse';
 import { useEffect, useState } from 'react';
 
 /**
@@ -37,41 +36,54 @@ export const EditorView: React.FC = () => {
   const gridApiRef = useGridApiRef();
   const Workspace = useWorkspaceContext();
 
-  const [rows, setRows] = useState<GridRowsProp>([]);
-  const [columns, setColumns] = useState<GridColDef[]>([]);
+  const [gridColumns, setgridColumns] = useState<GridColDef[]>([]);
+  const [gridRows, setgridRows] = useState<GridRowsProp>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
+  const [totalRows, setTotalRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const getWorkspaceFile = async () => {
       if (!Workspace.fileId) {
-        setRows([]);
-        setColumns([]);
+        setgridColumns([]);
+        setgridRows([]);
         return;
       }
 
       setIsLoading(true);
 
       try {
-        const response = await axios.get(`${Endpoints.WORKSPACE}/${Workspace.fileId}`);
-        const data = response.data;
-        const result = Papa.parse(data, { header: true, skipEmptyLines: true });
+        const response = await axios.get(`${Endpoints.WORKSPACE}/${Workspace.fileId}`, {
+          params: {
+            page: page,
+            rowsPerPage: rowsPerPage,
+          },
+        });
 
-        const columns = result.meta.fields?.map((field, index) => ({
-          field: `col${index}`,
-          headerName: field,
-          width: 150,
-          editable: true,
-        }));
+        const { totalRows, header, rows } = response.data as FileDataResponseDTO;
 
-        // TODO: might need to adress this with type declaration
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rows = result.data.map((row: any, index) => ({
-          id: index,
-          ...result.meta.fields?.reduce((acc, field, index) => ({ ...acc, [`col${index}`]: row[field] }), {}),
-        }));
+        const parsedColumns = header.map((value) => {
+          return {
+            field: value,
+            headerName: value,
+            width: 150,
+            editable: true,
+          };
+        });
 
-        setColumns(columns || []);
-        setRows(rows || []);
+        const parsedRows = rows.map((row, index) => {
+          return {
+            id: index,
+            ...row.reduce((acc, value, index) => {
+              return { ...acc, [header[index]]: value };
+            }, {}),
+          };
+        });
+
+        setgridColumns(parsedColumns || []);
+        setgridRows(parsedRows || []);
+        setTotalRows(totalRows);
       } catch (error) {
         console.error('Failed to fetch file content:', error);
       } finally {
@@ -80,46 +92,47 @@ export const EditorView: React.FC = () => {
     };
 
     if (connected) getWorkspaceFile();
-  }, [connected, Workspace.fileId, Workspace.fileType]);
+  }, [connected, Workspace.fileId, Workspace.fileType, page, rowsPerPage]);
 
   const handleSave = () => {
-    const header = gridApiRef.current
-      .getAllColumns()
-      .map((column) => column.headerName)
-      .join(',')
-      .concat('\n');
+    const data: FileDataRequestDTO = {
+      page: page,
+      rowsPerPage: rowsPerPage,
+      header: gridApiRef.current.getAllColumns().map((column) => column.field),
+      rows: gridApiRef.current
+        .getAllRowIds()
+        .map((rowId) =>
+          gridApiRef.current.getAllColumns().map((column) => gridApiRef.current.getCellValue(rowId, column.field))
+        ),
+    };
 
-    const rows = gridApiRef.current
-      .getAllRowIds()
-      .map((rowId) => {
-        return gridApiRef.current
-          .getAllColumns()
-          .map((column) => {
-            const cellValue = gridApiRef.current.getCellValue(rowId, column.field);
-
-            // If the cell value contains a comma, wrap it in quotes
-            return cellValue.includes(',') ? `"${cellValue}"` : cellValue;
-          })
-          .join(',');
-      })
-      .join('\n');
-
-    const content = header.concat(rows);
-
-    socket.emit('workspace_file_update', {
-      uuid: getUUID(),
-      fileId: Workspace.fileId,
-      content: content,
-    });
+    axios.put(`${Endpoints.WORKSPACE}/${Workspace.fileId}`, data);
   };
 
   return (
     <DataGrid
       sx={{ height: '100%', border: 'none' }}
       loading={isLoading}
-      rows={rows}
-      columns={columns}
-      slots={{ toolbar: (props) => <EditorToolbar {...props} disabled={isLoading} handleSave={handleSave} /> }}
+      rows={gridRows}
+      columns={gridColumns}
+      pagination
+      paginationMode='server'
+      rowCount={totalRows}
+      disableColumnSorting
+      initialState={{
+        pagination: {
+          paginationModel: { pageSize: rowsPerPage, page: page },
+        },
+      }}
+      pageSizeOptions={[25, 50, 100]}
+      onPaginationModelChange={(model) => {
+        setPage(model.page);
+        setRowsPerPage(model.pageSize);
+      }}
+      slots={{
+        toolbar: (props) => <EditorToolbar {...props} disabled={isLoading} handleSave={handleSave} />,
+        columnMenu: (props) => <EditorColumnMenu {...props} />,
+      }}
       apiRef={gridApiRef}
     />
   );
