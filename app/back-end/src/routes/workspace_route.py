@@ -26,7 +26,8 @@ Extensions:
 
 import os
 import shutil
-from flask import Blueprint, request, jsonify, send_file
+import csv
+from flask import Blueprint, request, jsonify
 
 from src.setup.extensions import compress, logger
 from src.utils.helpers import socketio_emit_to_user_session, build_workspace_structure
@@ -36,6 +37,7 @@ from src.constants import (
     WORKSPACE_TEMPLATE_DIR,
     WORKSPACE_ROUTE,
     CONSOLE_FEEDBACK_EVENT,
+    WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
 )
 
 workspace_route_bp = Blueprint("workspace_route", __name__)
@@ -219,11 +221,47 @@ def get_workspace_file(relative_path):
     user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
     file_path = os.path.join(user_workspace_dir, relative_path)
 
+    page = int(request.args.get("page", 0))
+    rows_per_page = int(request.args.get("rowsPerPage", 100))
+
+    total_rows = 0
+    paginated_rows = []
+    start_row = page * rows_per_page
+    end_row = start_row + rows_per_page
+
     try:
         # Ensure the user specific directory exists
         if not os.path.exists(user_workspace_dir):
             # Copy the template from the template directory to the user's workspace
             shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
+
+        # Costly operation to read the file and return the required rows.
+        # It gets more expensive as the page number increases, needs to go deeper into the file.
+        # Currently supports CSV files only.
+
+        # Read the file and retrieve the rows
+        with open(file_path, "r", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            # First line as header
+            header = next(reader)
+
+            # Read the rows within the specified range, otherwise skip to the next row.
+            # Loop ends when the end row is reached or the end of the file is reached.
+            for i, row in enumerate(reader):
+                if i >= start_row and i < end_row:
+                    paginated_rows.append(row)
+                total_rows += 1
+
+                if i >= end_row:
+                    break
+
+        # Build the response data
+        response_data = {
+            "page": page,
+            "totalRows": total_rows,
+            "header": header,
+            "rows": paginated_rows,
+        }
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -236,8 +274,8 @@ def get_workspace_file(relative_path):
             sid,
         )
 
-        # Serve the file
-        return send_file(file_path, as_attachment=False)
+        # Serve the file in batches
+        return jsonify(response_data)
 
     except FileNotFoundError as e:
         logger.error("FileNotFoundError: %s while accessing %s", e, file_path)
@@ -274,6 +312,156 @@ def get_workspace_file(relative_path):
                 "type": "errr",
                 "message": f"UnexpectedError: {e.message} while accessing {file_path}",
             },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@workspace_route_bp.route(f"{WORKSPACE_ROUTE}/<path:relative_path>", methods=["PUT"])
+@compress.compressed()
+def put_workspace_file(relative_path):
+    uuid = request.headers.get("uuid")
+    sid = request.headers.get("sid")
+
+    # Ensure the uuid header is present
+    if not uuid:
+        return jsonify({"error": "UUID header is missing"}), 400
+
+    # Ensure the sid header is present
+    if not sid:
+        return jsonify({"error": "SID header is missing"}), 400
+
+    # Emit a feedback to the user's console
+    socketio_emit_to_user_session(
+        CONSOLE_FEEDBACK_EVENT,
+        {"type": "info", "message": f"Saving file at '{relative_path}'..."},
+        uuid,
+        sid,
+    )
+
+    user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
+    file_path = os.path.join(user_workspace_dir, relative_path)
+
+    data = request.json
+    page = data.get("page")
+    rows_per_page = data.get("rowsPerPage")
+    header = data.get("header")
+    rows = data.get("rows")
+
+    start_row = page * rows_per_page
+    end_row = start_row + rows_per_page
+
+    try:
+        # Ensure the user specific directory exists
+        if not os.path.exists(user_workspace_dir):
+            # Copy the template from the template directory to the user's workspace
+            shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # Costly operation to read the entire file and update the required rows.
+        # One full file cycle.
+        # Currently supports CSV files only.
+
+        # Create a temporary file to write updated content
+        temp_file_path = f"{file_path}.tmp"
+
+        # Read the file and write the updated rows
+        with open(file_path, "r", encoding="utf-8") as infile, open(
+            temp_file_path, "w", encoding="utf-8"
+        ) as outfile:
+            reader = csv.reader(infile)
+            writer = csv.writer(outfile)
+
+            # Skip the header
+            next(reader)
+            writer.writerow(header)  # Write the new header
+
+            for i, row in enumerate(reader):
+                if start_row <= i < end_row:
+                    writer.writerow(rows[i - start_row])  # Write the updated row
+                else:
+                    writer.writerow(row)  # Write the existing row
+
+        # Replace the old file with the new file
+        os.replace(temp_file_path, file_path)
+
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {"type": "succ", "message": f"File at '{relative_path}' saved successfully."},
+            uuid,
+            sid,
+        )
+
+        # Emit a feedback to the user's button
+        socketio_emit_to_user_session(
+            WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
+            {"status": "success"},
+            uuid,
+            sid,
+        )
+
+        return jsonify({"status": "success"})
+
+    except FileNotFoundError as e:
+        logger.error("FileNotFoundError: %s while saving %s", e, file_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"FileNotFoundError: {e} while saving {file_path}",
+            },
+            uuid,
+            sid,
+        )
+        # Emit a feedback to the user's button
+        socketio_emit_to_user_session(
+            WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
+            {"status": "error"},
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Requested file not found"}), 404
+    except PermissionError as e:
+        logger.error("PermissionError: %s while saving %s", e, file_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"PermissionError: {e} while saving {file_path}",
+            },
+            uuid,
+            sid,
+        )
+        # Emit a feedback to the user's button
+        socketio_emit_to_user_session(
+            WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
+            {"status": "error"},
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Permission denied"}), 403
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while saving %s", e.message, file_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e.message} while saving {file_path}",
+            },
+            uuid,
+            sid,
+        )
+        # Emit a feedback to the user's button
+        socketio_emit_to_user_session(
+            WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
+            {"status": "error"},
             uuid,
             sid,
         )
