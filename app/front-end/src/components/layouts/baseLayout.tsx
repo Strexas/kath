@@ -1,5 +1,5 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import ShortcutsDialog from '@/components/modals/shortcutsDialog/shortcutsDialog';
+import { ShortcutsDialog } from '@/components/dialogs/shortcutsDialog';
 import { useThemeContext } from '@/hooks';
 import { Colors } from '@/types';
 import { AutoMode, DarkMode, Home, LightMode, SettingsOutlined, SwitchAccessShortcut } from '@mui/icons-material';

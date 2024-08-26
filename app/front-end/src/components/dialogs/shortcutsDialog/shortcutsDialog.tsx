@@ -1,13 +1,18 @@
-import { ShortcutsDivider } from '@/components/modals/shortcutsDialog/shortcutsDivider';
-import CloseIcon from '@mui/icons-material/Close';
-import { Box, Grid, Switch, Typography } from '@mui/material';
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import { styled, useTheme } from '@mui/material/styles';
+import { Shortcuts, ShortcutsDivider, ShortcutsLine } from '@/components/dialogs/shortcutsDialog';
+import { Close as CloseIcon } from '@mui/icons-material';
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  styled,
+  Switch,
+  Typography,
+  useTheme,
+} from '@mui/material';
 import { useState } from 'react';
-import ShortcutsLine from './shortcutsLine';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   backdropFilter: 'blur(5px)',
@@ -24,12 +29,12 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
 }));
 
-interface SettingsDialogProps {
+interface ShortcutsDialogProps {
   open: boolean;
   handleClose: () => void;
 }
 
-export default function SettingsDialog({ open, handleClose }: SettingsDialogProps) {
+export const ShortcutsDialog = ({ open, handleClose }: ShortcutsDialogProps) => {
   const Theme = useTheme();
 
   const [isMac, setIsMac] = useState<boolean>(false);
@@ -74,34 +79,19 @@ export default function SettingsDialog({ open, handleClose }: SettingsDialogProp
             <Switch onChange={handleMacSwitch} />
           </Grid>
         </Grid>
-        <ShortcutsLine
-          windowsKeys={['CTRL', 'C']}
-          macOSKeys={['COMMAND', 'C']}
-          macOS={isMac}
-          description='Undo last action'
-        />
-        <ShortcutsDivider />
-        <ShortcutsLine
-          windowsKeys={['CTRL', 'Y']}
-          macOSKeys={['COMMAND', 'Y']}
-          macOS={isMac}
-          description='Redo last action'
-        />
-        <ShortcutsDivider />
-        <ShortcutsLine
-          windowsKeys={['CTRL', 'A']}
-          macOSKeys={['COMMAND', 'A']}
-          macOS={isMac}
-          description='Select everything'
-        />
-        <ShortcutsDivider />
-        <ShortcutsLine
-          windowsKeys={['CTRL', 'SHIFT', 'ESC']}
-          macOSKeys={['ALT', 'COMMAND', 'ESC']}
-          macOS={isMac}
-          description='Task manager'
-        />
+        {Shortcuts.map((shortcut, index) => (
+          <Box key={index}>
+            <ShortcutsLine
+              key={index}
+              windowsKeys={shortcut.windowsKeys}
+              macOSKeys={shortcut.macOSKeys}
+              macOS={isMac}
+              description={shortcut.description}
+            />
+            {index < Shortcuts.length - 1 && <ShortcutsDivider />}
+          </Box>
+        ))}
       </DialogContent>
     </BootstrapDialog>
   );
-}
+};

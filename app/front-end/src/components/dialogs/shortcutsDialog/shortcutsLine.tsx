@@ -8,7 +8,7 @@ interface ShortcutLineProps {
   macOS?: boolean;
 }
 
-const ShortcutsLine: React.FC<ShortcutLineProps> = ({ windowsKeys, macOSKeys, description, macOS }) => {
+export const ShortcutsLine: React.FC<ShortcutLineProps> = ({ windowsKeys, macOSKeys, description, macOS }) => {
   const macOSSymbols: { [key: string]: string } = {
     command: '⌘',
     option: '⌥',
@@ -57,5 +57,3 @@ const ShortcutsLine: React.FC<ShortcutLineProps> = ({ windowsKeys, macOSKeys, de
     </Grid>
   );
 };
-
-export default ShortcutsLine;
