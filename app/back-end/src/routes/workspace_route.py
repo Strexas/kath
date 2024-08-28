@@ -90,6 +90,11 @@ from src.constants import (
     WORKSPACE_DIR,
     WORKSPACE_TEMPLATE_DIR,
     WORKSPACE_ROUTE,
+    WORKSPACE_FILE_ROUTE,
+    WORKSPACE_CREATE_ROUTE,
+    WORKSPACE_RENAME_ROUTE,
+    WORKSPACE_DELETE_ROUTE,
+    WORKSPACE_UPDATE_FEEDBACK_EVENT,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
 )
@@ -221,7 +226,7 @@ def get_workspace():
         return jsonify({"error": "An internal error occurred"}), 500
 
 
-@workspace_route_bp.route(f"{WORKSPACE_ROUTE}/<path:relative_path>", methods=["GET"])
+@workspace_route_bp.route(f"{WORKSPACE_FILE_ROUTE}/<path:relative_path>", methods=["GET"])
 @compress.compressed()
 def get_workspace_file(relative_path):
     """
@@ -289,6 +294,7 @@ def get_workspace_file(relative_path):
 
     page = int(request.args.get("page", 0))
     rows_per_page = int(request.args.get("rowsPerPage", 100))
+    header = ""
 
     total_rows = 0
     paginated_rows = []
@@ -301,25 +307,29 @@ def get_workspace_file(relative_path):
             # Copy the template from the template directory to the user's workspace
             shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
 
-        # Costly operation to read the file and return the required rows.
-        # It gets more expensive as the page number increases, needs to go deeper into the file.
-        # Currently supports CSV files only.
+        # Check if file is empty
+        if os.path.getsize(file_path) != 0:
 
-        # Read the file and retrieve the rows
-        with open(file_path, "r", encoding="utf-8") as file:
-            reader = csv.reader(file)
-            # First line as header
-            header = next(reader)
+            # Costly operation to read the file and return the required rows.
+            # It gets more expensive as the page number increases, needs to go deeper into the file.
+            # Currently supports CSV files only.
 
-            # Read the rows within the specified range, otherwise skip to the next row.
-            # Loop ends when the end row is reached or the end of the file is reached.
-            for i, row in enumerate(reader):
-                if start_row <= i < end_row:
-                    paginated_rows.append(row)
-                total_rows += 1
+            # Read the file and retrieve the rows
+            with open(file_path, "r", encoding="utf-8") as file:
+                reader = csv.reader(file)
+                # First line as header
+                header = next(reader)
 
-                if i >= end_row:
-                    break
+                if header:
+                    # Read the rows within the specified range, otherwise skip to the next row.
+                    # Loop ends when the end row is reached or the end of the file is reached.
+                    for i, row in enumerate(reader):
+                        if start_row <= i < end_row:
+                            paginated_rows.append(row)
+                        total_rows += 1
+
+                        if i >= end_row:
+                            break
 
         # Build the response data
         response_data = {
@@ -384,7 +394,7 @@ def get_workspace_file(relative_path):
         return jsonify({"error": "An internal error occurred"}), 500
 
 
-@workspace_route_bp.route(f"{WORKSPACE_ROUTE}/<path:relative_path>", methods=["PUT"])
+@workspace_route_bp.route(f"{WORKSPACE_FILE_ROUTE}/<path:relative_path>", methods=["PUT"])
 @compress.compressed()
 def put_workspace_file(relative_path):
     """
@@ -565,6 +575,478 @@ def put_workspace_file(relative_path):
         socketio_emit_to_user_session(
             WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
             {"status": "error"},
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@workspace_route_bp.route(f"{WORKSPACE_CREATE_ROUTE}/<path:relative_path>", methods=["PUT"])
+@workspace_route_bp.route(f"{WORKSPACE_CREATE_ROUTE}/", methods=["PUT"])
+@compress.compressed()
+def put_workspace_create(relative_path=None):
+    """
+    Creates a new file or directory in the user's workspace.
+
+    This endpoint handles:
+    - PUT `/workspace/create/<path:relative_path>`: Create at a specified `relative_path`.
+    - PUT `/workspace/create/`: Create at the root of the workspace.
+
+    Parameters:
+    - `relative_path` (str, optional): Path in the workspace where the entity is created.
+    - Request Headers:
+      - `uuid` (str): User identifier (required).
+      - `sid` (str): User session identifier (required).
+    - Request Body (JSON):
+      - `label` (str): Name of the new file or directory.
+      - `type` (str): Type, either "file" or "folder".
+
+    Responses:
+    - **200 OK**: JSON with `newId`, `newLabel`, and `newType`.
+    - **400 Bad Request**: Missing `uuid` or `sid` headers.
+    - **403 Forbidden**: Permission issues.
+    - **404 Not Found**: Path or file not found.
+    - **500 Internal Server Error**: Unexpected errors.
+
+    Emits:
+    - Console and workspace update feedback via WebSocket.
+
+    Example Request:
+    ```
+    PUT /workspace/create/myfolder
+    Headers:
+      uuid: <user_uuid>
+      sid: <user_session_id>
+    Body:
+    {
+      "label": "newfile.txt",
+      "type": "file"
+    }
+    ```
+
+    Example Response:
+    ```json
+    {
+      "newId": "myfolder/newfile.txt",
+      "newLabel": "newfile.txt",
+      "newType": "file"
+    }
+    ```
+    """
+
+    uuid = request.headers.get("uuid")
+    sid = request.headers.get("sid")
+
+    # Ensure the uuid header is present
+    if not uuid:
+        return jsonify({"error": "UUID header is missing"}), 400
+
+    # Ensure the sid header is present
+    if not sid:
+        return jsonify({"error": "SID header is missing"}), 400
+
+    data = request.json
+    label = data.get("label")
+    file_type = data.get("type")
+
+    if relative_path is None:
+        relative_path = ""
+
+    # Emit a feedback to the user's console
+    socketio_emit_to_user_session(
+        CONSOLE_FEEDBACK_EVENT,
+        {"type": "info", "message": f"Creating {file_type} at '{relative_path}'..."},
+        uuid,
+        sid,
+    )
+
+    user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
+    folder_path = os.path.join(user_workspace_dir, relative_path)
+    destination_path = os.path.join(folder_path, label)
+
+    try:
+        # Ensure the user specific directory exists
+        if not os.path.exists(user_workspace_dir):
+            # Copy the template from the template directory to the user's workspace
+            shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(folder_path), exist_ok=True)
+
+        if file_type == "file":
+            open(destination_path, "w", encoding="utf-8").close()
+        elif file_type == "folder":
+            os.mkdir(destination_path)
+
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {"type": "succ", "message": f"Successfully created '{relative_path}/{label}'."},
+            uuid,
+            sid,
+        )
+
+        # Emit a feedback to the user's workspace
+        socketio_emit_to_user_session(
+            WORKSPACE_UPDATE_FEEDBACK_EVENT,
+            {"status": "updated"},
+            uuid,
+            sid,
+        )
+
+        # Build the response data
+        response_data = {
+            "newId": f"{relative_path}/{label}" if relative_path else label,
+            "newLabel": label,
+            "newType": file_type,
+        }
+
+        return jsonify(response_data)
+
+    except FileNotFoundError as e:
+        logger.error("FileNotFoundError: %s while creating %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"FileNotFoundError: {e} while creating {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Requested file not found"}), 404
+    except PermissionError as e:
+        logger.error("PermissionError: %s while creating %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"PermissionError: {e} while creating {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Permission denied"}), 403
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while creating %s", e.message, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e.message} while creating {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@workspace_route_bp.route(f"{WORKSPACE_RENAME_ROUTE}/<path:relative_path>", methods=["PUT"])
+@compress.compressed()
+def put_workspace_rename(relative_path):
+    """
+    Renames a file or directory in the user's workspace.
+
+    - PUT `/workspace/rename/<path:relative_path>`: Rename the item at `relative_path`.
+
+    Parameters:
+    - `relative_path` (str): Path of the item to be renamed.
+    - Request Headers:
+      - `uuid` (str): User identifier (required).
+      - `sid` (str): User session identifier (required).
+    - Request Body (JSON):
+      - `label` (str): New name for the item.
+      - `type` (str): Type, either "file" or "folder".
+
+    Responses:
+    - **200 OK**: JSON with `newId`, `newLabel`, and `newType`.
+    - **400 Bad Request**: Missing `uuid` or `sid` headers.
+    - **403 Forbidden**: Permission issues.
+    - **404 Not Found**: Item not found.
+    - **500 Internal Server Error**: Unexpected errors.
+
+    Emits:
+    - Console and workspace update feedback via WebSocket.
+
+    Example Request:
+    ```
+    PUT /workspace/rename/myfolder
+    Headers:
+      uuid: <user_uuid>
+      sid: <user_session_id>
+    Body:
+    {
+      "label": "newname",
+      "type": "folder"
+    }
+    ```
+
+    Example Response:
+    ```json
+    {
+      "newId": "myfolder/newname",
+      "newLabel": "newname",
+      "newType": "folder"
+    }
+    ```
+    """
+    
+    uuid = request.headers.get("uuid")
+    sid = request.headers.get("sid")
+
+    # Ensure the uuid header is present
+    if not uuid:
+        return jsonify({"error": "UUID header is missing"}), 400
+
+    # Ensure the sid header is present
+    if not sid:
+        return jsonify({"error": "SID header is missing"}), 400
+
+    data = request.json
+    label = data.get("label")
+    file_type = data.get("type")
+
+    # Emit a feedback to the user's console
+    socketio_emit_to_user_session(
+        CONSOLE_FEEDBACK_EVENT,
+        {"type": "info", "message": f"Renaming {file_type} at '{relative_path}'..."},
+        uuid,
+        sid,
+    )
+
+    user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
+    destination_path = os.path.join(user_workspace_dir, relative_path)
+    new_path = os.path.join(os.path.dirname(destination_path), label)
+
+    try:
+        # Ensure the user specific directory exists
+        if not os.path.exists(user_workspace_dir):
+            # Copy the template from the template directory to the user's workspace
+            shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+
+        # Rename the file or folder
+        os.rename(destination_path, new_path)
+
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {"type": "succ", "message": f"Successfully renamed '{relative_path}'."},
+            uuid,
+            sid,
+        )
+
+        # Emit a feedback to the user's workspace
+        socketio_emit_to_user_session(
+            WORKSPACE_UPDATE_FEEDBACK_EVENT,
+            {"status": "updated"},
+            uuid,
+            sid,
+        )
+
+        # Build the response data
+        response_data = {
+            "newId": (
+                f"{os.path.dirname(relative_path)}/{label}"
+                if os.path.dirname(relative_path)
+                else label
+            ),
+            "newLabel": label,
+            "newType": file_type,
+        }
+
+        return jsonify(response_data)
+
+    except FileNotFoundError as e:
+        logger.error("FileNotFoundError: %s while renaming %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"FileNotFoundError: {e} while renaming {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Requested file not found"}), 404
+    except PermissionError as e:
+        logger.error("PermissionError: %s while renaming %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"PermissionError: {e} while renaming {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Permission denied"}), 403
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while renaming %s", e.message, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e.message} while renaming {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+
+
+@workspace_route_bp.route(f"{WORKSPACE_DELETE_ROUTE}/<path:relative_path>", methods=["PUT"])
+@compress.compressed()
+def put_workspace_delete(relative_path):
+    """
+    Deletes a file or directory from the user's workspace.
+
+    - PUT `/workspace/delete/<path:relative_path>`: Deletes the item at `relative_path`.
+
+    Parameters:
+    - `relative_path` (str): Path of the item to be deleted.
+    - Request Headers:
+      - `uuid` (str): User identifier (required).
+      - `sid` (str): User session identifier (required).
+    - Request Body (JSON):
+      - `type` (str): Type of the item to delete, either "file" or "folder".
+
+    Responses:
+    - **200 OK**: JSON with `oldId` of the deleted item.
+    - **400 Bad Request**: Missing `uuid` or `sid` headers.
+    - **403 Forbidden**: Permission issues.
+    - **404 Not Found**: Item not found.
+    - **500 Internal Server Error**: Unexpected errors.
+
+    Emits:
+    - Console and workspace update feedback via WebSocket.
+
+    Example Request:
+    ```
+    PUT /workspace/delete/myfolder
+    Headers:
+      uuid: <user_uuid>
+      sid: <user_session_id>
+    Body:
+    {
+      "type": "folder"
+    }
+    ```
+
+    Example Response:
+    ```json
+    {
+      "oldId": "myfolder"
+    }
+    ```
+    """
+    
+    uuid = request.headers.get("uuid")
+    sid = request.headers.get("sid")
+
+    # Ensure the uuid header is present
+    if not uuid:
+        return jsonify({"error": "UUID header is missing"}), 400
+
+    # Ensure the sid header is present
+    if not sid:
+        return jsonify({"error": "SID header is missing"}), 400
+
+    data = request.json
+    file_type = data.get("type")
+
+    # Emit a feedback to the user's console
+    socketio_emit_to_user_session(
+        CONSOLE_FEEDBACK_EVENT,
+        {"type": "info", "message": f"Deleting {file_type} at '{relative_path}'..."},
+        uuid,
+        sid,
+    )
+
+    user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
+    destination_path = os.path.join(user_workspace_dir, relative_path)
+
+    try:
+        # Ensure the user specific directory exists
+        if not os.path.exists(user_workspace_dir):
+            # Copy the template from the template directory to the user's workspace
+            shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
+
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+
+        # Delete the file or folder
+        if file_type == "file":
+            os.remove(destination_path)
+        elif file_type == "folder":
+            shutil.rmtree(destination_path)
+
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {"type": "succ", "message": f"Successfully deleted '{relative_path}'."},
+            uuid,
+            sid,
+        )
+
+        # Emit a feedback to the user's workspace
+        socketio_emit_to_user_session(
+            WORKSPACE_UPDATE_FEEDBACK_EVENT,
+            {"status": "updated"},
+            uuid,
+            sid,
+        )
+
+        # Build the response data
+        response_data = {
+            "oldId": relative_path,
+        }
+
+        return jsonify(response_data)
+
+    except FileNotFoundError as e:
+        logger.error("FileNotFoundError: %s while deleting %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"FileNotFoundError: {e} while deleting {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Requested file not found"}), 404
+    except PermissionError as e:
+        logger.error("PermissionError: %s while deleting %s", e, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"PermissionError: {e} while deleting {destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Permission denied"}), 403
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while deleting %s", e.message, destination_path)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e.message} while deleting {destination_path}",
+            },
             uuid,
             sid,
         )
