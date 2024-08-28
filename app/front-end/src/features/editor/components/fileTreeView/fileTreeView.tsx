@@ -1,12 +1,12 @@
+import { FileTreeItem, FileTreeItemContextMenu } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { FileTreeViewItemProps } from '@/features/editor/types';
 import { useSessionContext } from '@/hooks';
-import { axios } from '@/lib';
-import { Endpoints } from '@/types';
-import { Box, LinearProgress } from '@mui/material';
+import { axios, socket } from '@/lib';
+import { Endpoints, Events } from '@/types';
+import { Box, Button, LinearProgress } from '@mui/material';
 import { TreeViewBaseItem } from '@mui/x-tree-view';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { useEffect, useState } from 'react';
-import { FileTreeItem } from './fileTreeItem';
+import { useCallback, useEffect, useState } from 'react';
 
 declare module 'react' {
   interface CSSProperties {
@@ -40,23 +40,51 @@ export const FileTreeView: React.FC = () => {
 
   const [fileTreeViewData, setFileTreeViewData] = useState<TreeViewBaseItem<FileTreeViewItemProps>[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLButtonElement) | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
+
+  const handleOpenContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setContextMenu(event.currentTarget);
+    setContextMenuPosition({
+      top: event.clientY,
+      left: event.clientX,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+    setContextMenuPosition({ top: 0, left: 0 });
+  };
+
+  const getWorkspace = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await axios.get(Endpoints.WORKSPACE);
+      setFileTreeViewData(response.data);
+    } catch (error) {
+      console.error('Failed to fetch workspace data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const getWorkspace = async () => {
-      setIsLoading(true);
+    if (connected) {
+      getWorkspace();
+    }
 
-      try {
-        const response = await axios.get(Endpoints.WORKSPACE);
-        setFileTreeViewData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch workspace data:', error);
-      } finally {
-        setIsLoading(false);
-      }
+    socket.on(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT, getWorkspace);
+
+    return () => {
+      socket.off(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT);
     };
-
-    if (connected) getWorkspace();
-  }, [connected]);
+  }, [connected, getWorkspace]);
 
   return (
     <>
@@ -65,11 +93,22 @@ export const FileTreeView: React.FC = () => {
           <LinearProgress />
         </Box>
       ) : (
-        <RichTreeView
-          items={fileTreeViewData}
-          sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
-          slots={{ item: FileTreeItem }}
-        />
+        <>
+          <Button variant='outlined' onClick={(event) => handleOpenContextMenu(event)} sx={{ mb: '1.5rem' }}>
+            New
+          </Button>
+          <FileTreeItemContextMenu
+            item={{ id: '', label: '', fileType: undefined }}
+            anchorPosition={contextMenuPosition}
+            open={Boolean(contextMenu)}
+            onClose={handleCloseContextMenu}
+          />
+          <RichTreeView
+            items={fileTreeViewData}
+            sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
+            slots={{ item: FileTreeItem }}
+          />
+        </>
       )}
     </>
   );
