@@ -54,7 +54,7 @@ export const EditorView: React.FC = () => {
       setIsLoading(true);
 
       try {
-        const response = await axios.get(`${Endpoints.WORKSPACE}/${Workspace.fileId}`, {
+        const response = await axios.get(`${Endpoints.WORKSPACE_FILE}/${Workspace.fileId}`, {
           params: {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -62,6 +62,12 @@ export const EditorView: React.FC = () => {
         });
 
         const { totalRows, header, rows } = response.data as FileDataResponseDTO;
+
+        if (!header) {
+          setgridColumns([]);
+          setgridRows([]);
+          return;
+        }
 
         const parsedColumns = header.map((value) => {
           return {
