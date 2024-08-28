@@ -16,14 +16,18 @@ declare module 'react' {
 }
 
 /**
- * FileTreeView component displays a hierarchical tree view of files and directories.
+ * `FileTreeView` component renders a hierarchical tree view of files and directories.
  *
- * @description This component renders a `RichTreeView` with items fetched from the workspace endpoint. It displays a loading
- * indicator while the data is being fetched and presents the tree view when the data is loaded. The tree view uses `FileTreeItem`
- * to represent each item. The component handles asynchronous data fetching and provides visual feedback using `LinearProgress`.
+ * @description This component utilizes `RichTreeView` from Material-UI to display a hierarchical view of files and directories
+ * fetched from the workspace endpoint. It handles loading states with `LinearProgress` and displays a context menu for file
+ * operations. The context menu is controlled by state and provides options such as creating new files or folders.
  *
- * The `RichTreeView` component from Material-UI's TreeView package is utilized to render the hierarchical structure, with
- * a custom `item` slot for rendering each tree node via the `FileTreeItem` component.
+ * The component:
+ * - Fetches file tree data asynchronously from the workspace API endpoint.
+ * - Displays a loading indicator while data is being fetched.
+ * - Renders the file tree using `FileTreeItem` for each item.
+ * - Manages the state and position of a context menu that appears on right-click or button click.
+ * - Listens for updates via WebSocket to refresh the file tree data.
  *
  * @component
  *
@@ -33,7 +37,7 @@ declare module 'react' {
  *   <FileTreeView />
  * );
  *
- * @returns {JSX.Element} The rendered tree view component, displaying either a loading indicator or the file tree.
+ * @returns {JSX.Element} The rendered tree view component, showing either a loading indicator or the file tree.
  */
 export const FileTreeView: React.FC = () => {
   const { connected } = useSessionContext();

@@ -16,6 +16,37 @@ export interface FileTreeItemContextMenuProps {
   onClose: () => void;
 }
 
+/**
+ * `FileTreeItemContextMenu` component provides a context menu for file tree items with options for creating, renaming,
+ * deleting files and folders, as well as other related actions.
+ *
+ * @description This component displays a context menu that allows users to perform various actions on file tree items,
+ * such as creating new files or folders, renaming existing items, or deleting items. The menu items are conditionally
+ * rendered based on the type of the selected file or folder. It also includes dialogs for entering information and
+ * confirming actions.
+ *
+ * The component uses `FileTreeItemContextMenuTextfieldDialog` for dialogs requiring text input and `FileTreeItemContextMenuConfirmationDialog`
+ * for actions requiring confirmation. The menu and dialogs are controlled via state hooks and props.
+ *
+ * @component
+ *
+ * @param {FileTreeItemContextMenuProps} props - The props for the component.
+ * @param {FileTreeViewItemProps} props.item - The file or folder item for which the context menu is displayed.
+ * @param {{ top: number; left: number }} props.anchorPosition - The position of the menu relative to the anchor.
+ * @param {boolean} props.open - A boolean indicating whether the context menu is open or not.
+ * @param {Function} props.onClose - The function to be called when the context menu is closed.
+ *
+ * @example
+ * // Example usage of the FileTreeItemContextMenu component
+ * <FileTreeItemContextMenu
+ *   item={selectedItem}
+ *   anchorPosition={{ top: 100, left: 200 }}
+ *   open={isMenuOpen}
+ *   onClose={handleCloseMenu}
+ * />
+ *
+ * @returns {JSX.Element} The context menu component with various menu items and dialogs.
+ */
 export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = ({
   item,
   anchorPosition,

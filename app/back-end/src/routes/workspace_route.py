@@ -77,6 +77,7 @@ Errors and Feedback:
 
 # pylint: disable=import-error
 # pylint: disable=too-many-locals
+# pylint: disable=too-many-lines
 
 import os
 import shutil
@@ -793,7 +794,7 @@ def put_workspace_rename(relative_path):
     }
     ```
     """
-    
+
     uuid = request.headers.get("uuid")
     sid = request.headers.get("sid")
 
@@ -948,7 +949,7 @@ def put_workspace_delete(relative_path):
     }
     ```
     """
-    
+
     uuid = request.headers.get("uuid")
     sid = request.headers.get("sid")
 
