@@ -28,7 +28,9 @@ from .constants import (
   LOVD_TABLES_DATA_TYPES,
 
   # Paths for database downloads
-  DATABASES_DOWNLOAD_PATHS
+  DATABASES_DOWNLOAD_PATHS,
+
+  GNOMAD_PATH,
 )
 
 # DATA COLLECTION IMPORT
@@ -57,4 +59,7 @@ from .refactoring import (
     from_clinvar_name_to_cdna_position,
     save_lovd_as_vcf,
     request_gnomad_api_data,
+    merge_gnomad_lovd,
+    parse_gnomad,
+    set_gnomad_dtypes,
 )
