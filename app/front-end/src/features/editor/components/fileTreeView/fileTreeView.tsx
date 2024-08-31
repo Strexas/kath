@@ -15,12 +15,12 @@ declare module 'react' {
  * `FileTreeView` component renders a hierarchical tree view of files and directories.
  *
  * @description This component utilizes `RichTreeView` from Material-UI to display a hierarchical view of files and directories
- * fetched from the workspace endpoint. It handles loading states with `LinearProgress` and displays a context menu for file
+ * fetched from the workspace context. It handles loading states with `LinearProgress` and displays a context menu for file
  * operations. The context menu is controlled by state and provides options such as creating new files or folders.
  *
  * The component:
- * - Fetches file tree data asynchronously from the workspace API endpoint.
- * - Displays a loading indicator while data is being fetched.
+ * - Fetches file tree data asynchronously through the `useWorkspaceContext` hook.
+ * - Displays a loading indicator (`LinearProgress`) while data is being fetched.
  * - Renders the file tree using `FileTreeItem` for each item.
  * - Manages the state and position of a context menu that appears on right-click or button click.
  * - Listens for updates via WebSocket to refresh the file tree data.
