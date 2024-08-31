@@ -1,12 +1,8 @@
 import { FileTreeItem, FileTreeItemContextMenu } from '@/features/editor/components/fileTreeView/fileTreeItem';
-import { FileTreeViewItemProps } from '@/features/editor/types';
-import { useSessionContext } from '@/hooks';
-import { axios, socket } from '@/lib';
-import { Endpoints, Events } from '@/types';
+import { useWorkspaceContext } from '@/features/editor/hooks';
 import { Box, Button, LinearProgress } from '@mui/material';
-import { TreeViewBaseItem } from '@mui/x-tree-view';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 
 declare module 'react' {
   interface CSSProperties {
@@ -40,15 +36,13 @@ declare module 'react' {
  * @returns {JSX.Element} The rendered tree view component, showing either a loading indicator or the file tree.
  */
 export const FileTreeView: React.FC = () => {
-  const { connected } = useSessionContext();
-
-  const [fileTreeViewData, setFileTreeViewData] = useState<TreeViewBaseItem<FileTreeViewItemProps>[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLButtonElement) | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
     top: 0,
     left: 0,
   });
+
+  const { fileTreeViewItems, fileTreeViewIsLoading } = useWorkspaceContext();
 
   const handleOpenContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -65,34 +59,9 @@ export const FileTreeView: React.FC = () => {
     setContextMenuPosition({ top: 0, left: 0 });
   };
 
-  const getWorkspace = useCallback(async () => {
-    setIsLoading(true);
-
-    try {
-      const response = await axios.get(Endpoints.WORKSPACE);
-      setFileTreeViewData(response.data);
-    } catch (error) {
-      console.error('Failed to fetch workspace data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (connected) {
-      getWorkspace();
-    }
-
-    socket.on(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT, getWorkspace);
-
-    return () => {
-      socket.off(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT);
-    };
-  }, [connected, getWorkspace]);
-
   return (
     <>
-      {isLoading ? (
+      {fileTreeViewIsLoading ? (
         <Box sx={{ width: '100%' }}>
           <LinearProgress />
         </Box>
@@ -108,7 +77,7 @@ export const FileTreeView: React.FC = () => {
             onClose={handleCloseContextMenu}
           />
           <RichTreeView
-            items={fileTreeViewData}
+            items={fileTreeViewItems || []}
             sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
             slots={{ item: FileTreeItem }}
           />
