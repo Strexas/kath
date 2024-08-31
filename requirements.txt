@@ -1,6 +1,7 @@
-requests
-pandas
-selenium
+requests~=2.32.3
+pandas~=2.2.2
+selenium~=4.23.1
 spliceai
 tensorflow
-flask
+flask~=3.0.3
+pyliftover~=0.4.1
