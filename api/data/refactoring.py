@@ -227,8 +227,12 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
             return '?'
         try:
             new_pos = lo.convert_coordinate('chr6', int(position[2:10]))[0][1]
-        except Exception as e:
-            return f"Error processing variant: {str(e)}"
+        except ValueError as ve:
+            return f"Error processing variant (ValueError): {str(ve)}"
+        except IndexError as ie:
+            return f"Error processing variant (IndexError): {str(ie)}"
+        except TypeError as te:
+            return f"Error processing variant (TypeError): {str(te)}"
         return f"6-{new_pos}-{position[-3:]}"
 
     lovd['VariantOnGenome/DNA/hg38'] = lovd['VariantOnGenome/DNA/hg38'].replace('', pd.NA)
