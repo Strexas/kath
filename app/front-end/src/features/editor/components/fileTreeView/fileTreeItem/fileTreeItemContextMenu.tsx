@@ -3,7 +3,7 @@ import {
   FileTreeItemContextMenuTextfieldDialog,
 } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileTreeViewItemProps } from '@/features/editor/types';
+import { FileTreeItemContextMenuActions, FileTreeViewItemProps } from '@/features/editor/types';
 import { axios } from '@/lib';
 import { Endpoints, FileTypes } from '@/types';
 import { Divider, Menu, MenuItem } from '@mui/material';
@@ -60,7 +60,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const menuItems = [];
 
-  if (item.fileType === undefined) {
+  if (item.fileType === undefined || item.fileType === FileTypes.FOLDER) {
     menuItems.push(
       <MenuItem key='newFile' onClick={() => handleActionContextMenu('newFile')}>
         New file...
@@ -74,29 +74,19 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       </MenuItem>
     );
   } else {
-    if (item.fileType === FileTypes.FOLDER || item.fileType === undefined) {
-      menuItems.push(
-        <MenuItem key='newFile' onClick={() => handleActionContextMenu('newFile')}>
-          New file...
-        </MenuItem>,
-        <MenuItem key='newFolder' onClick={() => handleActionContextMenu('newFolder')}>
-          New folder...
-        </MenuItem>,
-        <Divider key='divider-new' />,
-        <MenuItem key='import' onClick={() => handleActionContextMenu('import')} disabled>
-          Import...
-        </MenuItem>,
-        <Divider key='divider-import' />
-      );
-    } else {
-      menuItems.push(
-        <MenuItem key='export' onClick={() => handleActionContextMenu('export')} disabled>
-          Export...
-        </MenuItem>,
-        <Divider key='divider-export' />
-      );
-    }
+    menuItems.push(
+      <MenuItem key='export' onClick={() => handleActionContextMenu('export')} disabled>
+        Export...
+      </MenuItem>,
+      <Divider key='divider-export' />
+    );
+  }
 
+  if (item.fileType === FileTypes.FOLDER) {
+    menuItems.push(<Divider key='divider-import' />);
+  }
+
+  if (item.fileType !== undefined) {
     menuItems.push(
       <MenuItem key='rename' onClick={() => handleActionContextMenu('rename')}>
         Rename...
@@ -176,20 +166,25 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       </Menu>
       <FileTreeItemContextMenuTextfieldDialog
         open={Boolean(newFileDialogOpen)}
+        action={FileTreeItemContextMenuActions.NEW_FILE}
         title='New File'
         label='Name'
+        item={item}
         onClose={() => setNewFileDialogOpen(false)}
         onSave={handleNewFileSave}
       />
       <FileTreeItemContextMenuTextfieldDialog
         open={Boolean(newFolderDialogOpen)}
+        action={FileTreeItemContextMenuActions.NEW_FOLDER}
         title='New Folder'
         label='Name'
+        item={item}
         onClose={() => setNewFolderDialogOpen(false)}
         onSave={handleNewFolderSave}
       />
       <FileTreeItemContextMenuTextfieldDialog
         open={Boolean(renameDialogOpen)}
+        action={FileTreeItemContextMenuActions.RENAME}
         title='Rename'
         label='New name'
         item={item}
@@ -198,7 +193,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       />
       <FileTreeItemContextMenuConfirmationDialog
         open={Boolean(deleteDialogOpen)}
-        action='Delete'
+        action={FileTreeItemContextMenuActions.DELETE}
         content={{ text: 'Are you sure you want to delete ', boldText: item.label }}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
