@@ -2,6 +2,8 @@
 
 import os
 import logging
+import re
+from operator import is_not
 
 import pandas as pd
 from pandas import DataFrame
@@ -178,35 +180,37 @@ def from_clinvar_name_to_cdna_position(name):
 
 def lovd_fill_hg38(lovd: pd.DataFrame):
     """
-    Fills missing hg38 values in the LOVD dataframe
+    fills missing hg38 values in the LOVD dataframe
     by converting hg19 values to hg38.
     New column 'hg19/hg38_lovd' is added to store
     the converted positions in the format '6-position-ref-alt'.
 
-    Parameters:
+    parameters:
     - lovd (pd.DataFrame): A pandas DataFrame containing following columns:
         - 'VariantOnGenome/DNA': hg19 values.
         - 'VariantOnGenome/DNA/hg38': hg38 values.
 
-    Returns:
+    returns:
     None: Modifies the input DataFrame in-place by adding or
     updating the 'hg19/hg38_lovd' column.
     """
 
+    if lovd.empty:
+        return
+
     def convert_hg19_if_missing(row):
         """
         converts hg19 variant to hg38 if hg38 is missing.
-
-        checks if the hg38 value is missing (NaN) in a given row.
+        Checks if the hg38 value is missing (NaN) in a given row.
         If it is, the hg19 variant is converted to hg38
         using the `convert_hg19_to_hg38` function.
         Otherwise, the existing hg38 value is formatted.
 
-        Parameters:
-        - row (pd.Series): A pandas Series representing a single row of the DataFrame.
+        parameters:
+        - row (pd.Series):  single row of the DataFrame.
 
-        Returns:
-        - str: The hg38 value or a conversion of the hg19 value in the format '6-position-ref-alt'.
+        returns:
+        - str: hg38 value or a conversion of the hg19 value in the format '6-position-ref-alt'.
         """
         if pd.isna(row['VariantOnGenome/DNA/hg38']):
             return convert_hg19_to_hg38(convert_to_gnomad_gen_pos(row['VariantOnGenome/DNA']))
@@ -217,8 +221,9 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
         converts a genomic position from hg19 to hg38 using the LiftOver tool.
 
         parameters:
-        - position (str): A string representing the hg19 variant in the format 'g.positionRef>Alt'.
-        - lo (LiftOver): Converter for  coordinates between genome builds
+        - position (str): string representing the hg19 variant
+        in the format 'g.positionRef>Alt'.
+        - lo (LiftOver): converter for coordinates between genome builds
 
         returns:
         - str: converted hg38 position in the format '6-position-ref-alt'.
@@ -241,37 +246,45 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
 
 def convert_to_gnomad_gen_pos(variant: str):
     """
-    Converts a variant string from hg19 or hg38 format
+    converts a variant string from hg19 or hg38 format
     to the format used by gnomAD ('6-position-ref-alt').
 
-    This function processes the variant string,
-    checks if it contains complex cases like intervals or uncertainties,
-    and formats the string accordingly.
-    For special cases like 'dup' or 'del', it adds appropriate postfixes.
-
     parameters:
-    - variant (str): string representing the variant in the format 'g.startRef>Alt'
-    (or other formats like 'g.startdup').
+    - variant (str): string representing the variant
+    in the format 'g.startRef>Alt'.
 
     returns:
     - str: variant formatted as '6-position-ref-alt'
-    or '?' if the input is ambiguous or invalid.
+    or '?' if the input contains interval ranges or is invalid.
     """
 
-    if '_' in variant or '?' in variant:
-        return '?'
-    variant = variant[2:]
-    position = variant[:-3]
-    ref = variant[-3]
-    alt = variant[-1]
+    if not isinstance(variant, str):
+        return "?"
 
-    if 'dup' in variant:
+    patterns = {
+        'dup': re.compile(r'^g\.(\d+)dup$'),
+        'del': re.compile(r'^g\.(\d+)del$'),
+        'ref_alt': re.compile(r'^g\.(\d+)([A-Z])>([A-Z])$')
+    }
+
+    match = patterns['dup'].match(variant)
+    if match:
+        position = match.group(1)
         return f"6-{position}-dup"
 
-    if 'del' in variant:
+    match = patterns['del'].match(variant)
+    if match:
+        position = match.group(1)
         return f"6-{position}-del"
 
-    return f"6-{position}-{ref}-{alt}"
+    match = patterns['ref_alt'].match(variant)
+    if match:
+        position = match.group(1)
+        ref = match.group(2)
+        alt = match.group(3)
+        return f"6-{position}-{ref}-{alt}"
+
+    return "?"
 
 
 def merge_gnomad_lovd(lovd, gnomad):
