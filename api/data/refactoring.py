@@ -3,7 +3,6 @@
 import os
 import logging
 import re
-from operator import is_not
 
 import pandas as pd
 from pandas import DataFrame
