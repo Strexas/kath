@@ -178,8 +178,10 @@ def from_clinvar_name_to_cdna_position(name):
 
 def lovd_fill_hg38(lovd: pd.DataFrame):
     """
-    Fills missing hg38 values in the LOVD dataframe by converting hg19 values to hg38.
-    New column 'hg19/hg38_lovd' is added to store the converted positions in the format '6-position-ref-alt'.
+    Fills missing hg38 values in the LOVD dataframe
+    by converting hg19 values to hg38.
+    New column 'hg19/hg38_lovd' is added to store
+    the converted positions in the format '6-position-ref-alt'.
 
     Parameters:
     - lovd (pd.DataFrame): A pandas DataFrame containing following columns:
@@ -187,15 +189,18 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
         - 'VariantOnGenome/DNA/hg38': hg38 values.
 
     Returns:
-    None: Modifies the input DataFrame in-place by adding or updating the 'hg19/hg38_lovd' column.
+    None: Modifies the input DataFrame in-place by adding or
+    updating the 'hg19/hg38_lovd' column.
     """
 
     def convert_hg19_if_missing(row):
         """
         converts hg19 variant to hg38 if hg38 is missing.
 
-        checks if the hg38 value is missing (NaN) in a given row. If it is, the hg19 variant
-        is converted to hg38 using the `convert_hg19_to_hg38` function. Otherwise, the existing hg38 value is formatted.
+        checks if the hg38 value is missing (NaN) in a given row.
+        If it is, the hg19 variant is converted to hg38
+        using the `convert_hg19_to_hg38` function.
+        Otherwise, the existing hg38 value is formatted.
 
         Parameters:
         - row (pd.Series): A pandas Series representing a single row of the DataFrame.
@@ -218,13 +223,13 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
         returns:
         - str: converted hg38 position in the format '6-position-ref-alt'.
         """
+        if '?' in position:
+            return '?'
         try:
-            if '?' in position:
-                return '?'
             new_pos = lo.convert_coordinate('chr6', int(position[2:10]))[0][1]
-            return f"6-{new_pos}-{position[-3:]}"
         except Exception as e:
             return f"Error processing variant: {str(e)}"
+        return f"6-{new_pos}-{position[-3:]}"
 
     lovd['VariantOnGenome/DNA/hg38'] = lovd['VariantOnGenome/DNA/hg38'].replace('', pd.NA)
     lovd['hg19/hg38_lovd'] = lovd.apply(convert_hg19_if_missing, axis=1)
@@ -232,17 +237,21 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
 
 def convert_to_gnomad_gen_pos(variant: str):
     """
-    Converts a variant string from hg19 or hg38 format to the format used by gnomAD ('6-position-ref-alt').
+    Converts a variant string from hg19 or hg38 format
+    to the format used by gnomAD ('6-position-ref-alt').
 
-    This function processes the variant string, checks if it contains complex cases like intervals or uncertainties,
-    and formats the string accordingly. For special cases like 'dup' or 'del', it adds appropriate postfixes.
+    This function processes the variant string,
+    checks if it contains complex cases like intervals or uncertainties,
+    and formats the string accordingly.
+    For special cases like 'dup' or 'del', it adds appropriate postfixes.
 
     parameters:
     - variant (str): string representing the variant in the format 'g.startRef>Alt'
     (or other formats like 'g.startdup').
 
     returns:
-    - str: variant formatted as '6-position-ref-alt' or '?' if the input is ambiguous or invalid.
+    - str: variant formatted as '6-position-ref-alt'
+    or '?' if the input is ambiguous or invalid.
     """
 
     if '_' in variant or '?' in variant:
