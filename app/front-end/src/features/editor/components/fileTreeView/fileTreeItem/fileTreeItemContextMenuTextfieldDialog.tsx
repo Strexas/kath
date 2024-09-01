@@ -181,7 +181,7 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
     }
 
     if (/[*?[\]]/.test(input)) {
-      return 'Input contains forbidden glob characters (*, ?, [, ])';
+      return 'Input contains forbidden characters (*, ?, [, ])';
     }
 
     // Check for special filename cases ('.' and '..')
@@ -250,9 +250,11 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
             variant='standard'
             label={label}
             value={value}
-            onChange={(event) => setValue(event.target.value)}
+            onChange={(event) => {
+              setValue(event.target.value);
+              setError(null);
+            }}
             error={Boolean(error)}
-            helperText={error}
             sx={{
               ':hover': { borderColor: Theme.palette.primary.main },
               backgroundColor: Theme.palette.background.paper,
@@ -267,7 +269,11 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
                   id='file-extension'
                   variant='standard'
                   value={fileExtension}
-                  onChange={handleFileExtension}
+                  onChange={(event) => {
+                    handleFileExtension(event);
+                    setError(null);
+                  }}
+                  error={Boolean(error)}
                   sx={{ height: '100%', alignItems: 'end' }}
                 >
                   <MenuItem value={FileTypes.CSV}>.{FileTypes.CSV}</MenuItem>
@@ -277,6 +283,7 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
             </>
           )}
         </Box>
+        {error && <Typography sx={{ fontSize: '0.75rem', color: Theme.palette.error.main }}>{error}</Typography>}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>
