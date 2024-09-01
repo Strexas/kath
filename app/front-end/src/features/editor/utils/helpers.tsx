@@ -27,15 +27,18 @@ export const getIconFromFileType = (fileType: FileTypes) => {
 
 export const doesFileExist = (fileTreeView: TreeViewBaseItem<FileTreeViewItemProps>[], path: string): boolean => {
   for (const item of fileTreeView) {
-    if (item.id === path) {
+    const itemIdLowerCase = item.id.toLowerCase();
+    const pathLowerCase = path.toLowerCase();
+
+    if (itemIdLowerCase === pathLowerCase) {
       return true;
     }
 
-    if (path.startsWith(item.id) && item.children) {
+    if (pathLowerCase.startsWith(itemIdLowerCase) && item.children) {
       if (doesFileExist(item.children, path)) {
         return true;
       }
     }
   }
   return false;
-}
+};
