@@ -1,6 +1,10 @@
 import { FilebarGroupItemProps } from '@/features/editor/components/filebarView';
-import { FileTypes } from '@/types';
-import React, { createContext, useState } from 'react';
+import { FileTreeViewItemProps } from '@/features/editor/types';
+import { useSessionContext } from '@/hooks';
+import { axios, socket } from '@/lib';
+import { Endpoints, Events, FileTypes } from '@/types';
+import { TreeViewBaseItem } from '@mui/x-tree-view';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 
 export interface WorkspaceContextProps {
   fileId: string;
@@ -9,6 +13,8 @@ export interface WorkspaceContextProps {
   update: (newId: string, newLabel: string, newType: FileTypes) => void;
   fileHistory: FilebarGroupItemProps[];
   remove: (fileId: string) => void;
+  fileTreeViewItems: TreeViewBaseItem<FileTreeViewItemProps>[] | undefined;
+  fileTreeViewIsLoading: boolean;
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
@@ -18,6 +24,8 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
   update: () => {},
   fileHistory: [],
   remove: () => {},
+  fileTreeViewItems: undefined,
+  fileTreeViewIsLoading: true,
 });
 
 interface Props {
@@ -25,19 +33,21 @@ interface Props {
 }
 
 /**
- * `WorkspaceContextProvider` is a component that provides context for managing the current workspace file's state.
+ * `WorkspaceContextProvider` is a React component that provides context for managing workspace file state across the application.
  *
- * @description This component sets up a React context for managing and sharing workspace file information across the
- * application. It tracks the current file's ID, label, and type, and provides an API to update these values. The context
- * also maintains a history of recently opened files (excluding folders) and supports removing files from this history.
+ * @description This component sets up a context that holds and manages the state related to the current file in the workspace,
+ * including its ID, label, type, and history. It provides functions to update the current file, add or remove files from the
+ * history, and manage the file tree view data. The context is also updated with real-time changes via WebSocket.
  *
  * The context includes:
  * - `fileId`: The unique identifier for the current file.
  * - `fileLabel`: The label or name of the current file.
- * - `fileType`: The type of the file (e.g., folder, document).
- * - `update`: A function to update the current file's ID, label, and type, and add the file to the history.
- * - `fileHistory`: An array of recently opened files, excluding folders.
- * - `remove`: A function to remove a file from the history and update the current file if the removed file was active.
+ * - `fileType`: The type of the file (e.g., `FileTypes.FILE`, `FileTypes.FOLDER`).
+ * - `update`: A function to update the current file's ID, label, and type, and add the file to the history if it's not a folder.
+ * - `fileHistory`: An array of recently accessed files, excluding folders, with their IDs, labels, and types.
+ * - `remove`: A function to remove a file from the history and update the current file if it was active.
+ * - `fileTreeViewItems`: The hierarchical data for the file tree view.
+ * - `fileTreeViewIsLoading`: A boolean indicating if the file tree view data is still loading.
  *
  * @component
  *
@@ -52,13 +62,43 @@ interface Props {
  * @param {Object} props - The props for the WorkspaceContextProvider component.
  * @param {React.ReactNode} [props.children] - Optional child components that will have access to the workspace context.
  *
- * @returns {JSX.Element} The `WorkspaceContext.Provider` with the current workspace context value.
+ * @returns {JSX.Element} The `WorkspaceContext.Provider` component with the current workspace context value.
  */
 export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
   const [fileId, setFileId] = useState<string>('');
   const [fileLabel, setFileLabel] = useState<string>('');
   const [fileType, setFileType] = useState<FileTypes>(FileTypes.FOLDER);
   const [fileHistory, setFileHistory] = useState<FilebarGroupItemProps[]>([]);
+  const [fileTreeViewItems, setFileTreeViewItems] = useState<TreeViewBaseItem<FileTreeViewItemProps>[] | undefined>(
+    undefined
+  );
+  const [fileTreeViewIsLoading, setFileTreeViewIsLoading] = useState(true);
+
+  const { connected } = useSessionContext();
+
+  const getWorkspace = useCallback(async () => {
+    setFileTreeViewIsLoading(true);
+    try {
+      const response = await axios.get(Endpoints.WORKSPACE);
+      setFileTreeViewItems(response.data);
+    } catch (error) {
+      console.error('Failed to fetch workspace data:', error);
+    } finally {
+      setFileTreeViewIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (connected) {
+      getWorkspace();
+    }
+
+    socket.on(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT, getWorkspace);
+
+    return () => {
+      socket.off(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT);
+    };
+  }, [connected, getWorkspace]);
 
   const update = (newId: string, newLabel: string, newType: FileTypes) => {
     setFileId(newId);
@@ -112,6 +152,8 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     update,
     fileHistory,
     remove,
+    fileTreeViewItems,
+    fileTreeViewIsLoading,
   };
 
   return <WorkspaceContext.Provider value={WorkspaceContextValue}>{children}</WorkspaceContext.Provider>;

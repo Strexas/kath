@@ -1,12 +1,8 @@
-import { FileTreeViewItemProps } from '@/features/editor/types';
-import { useSessionContext } from '@/hooks';
-import { axios } from '@/lib';
-import { Endpoints } from '@/types';
-import { Box, LinearProgress } from '@mui/material';
-import { TreeViewBaseItem } from '@mui/x-tree-view';
+import { FileTreeItem, FileTreeItemContextMenu } from '@/features/editor/components/fileTreeView/fileTreeItem';
+import { useWorkspaceContext } from '@/features/editor/hooks';
+import { Box, Button, LinearProgress } from '@mui/material';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
-import { useEffect, useState } from 'react';
-import { FileTreeItem } from './fileTreeItem';
+import { useState } from 'react';
 
 declare module 'react' {
   interface CSSProperties {
@@ -16,14 +12,18 @@ declare module 'react' {
 }
 
 /**
- * FileTreeView component displays a hierarchical tree view of files and directories.
+ * `FileTreeView` component renders a hierarchical tree view of files and directories.
  *
- * @description This component renders a `RichTreeView` with items fetched from the workspace endpoint. It displays a loading
- * indicator while the data is being fetched and presents the tree view when the data is loaded. The tree view uses `FileTreeItem`
- * to represent each item. The component handles asynchronous data fetching and provides visual feedback using `LinearProgress`.
+ * @description This component utilizes `RichTreeView` from Material-UI to display a hierarchical view of files and directories
+ * fetched from the workspace context. It handles loading states with `LinearProgress` and displays a context menu for file
+ * operations. The context menu is controlled by state and provides options such as creating new files or folders.
  *
- * The `RichTreeView` component from Material-UI's TreeView package is utilized to render the hierarchical structure, with
- * a custom `item` slot for rendering each tree node via the `FileTreeItem` component.
+ * The component:
+ * - Fetches file tree data asynchronously through the `useWorkspaceContext` hook.
+ * - Displays a loading indicator (`LinearProgress`) while data is being fetched.
+ * - Renders the file tree using `FileTreeItem` for each item.
+ * - Manages the state and position of a context menu that appears on right-click or button click.
+ * - Listens for updates via WebSocket to refresh the file tree data.
  *
  * @component
  *
@@ -33,43 +33,55 @@ declare module 'react' {
  *   <FileTreeView />
  * );
  *
- * @returns {JSX.Element} The rendered tree view component, displaying either a loading indicator or the file tree.
+ * @returns {JSX.Element} The rendered tree view component, showing either a loading indicator or the file tree.
  */
 export const FileTreeView: React.FC = () => {
-  const { connected } = useSessionContext();
+  const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLButtonElement) | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
 
-  const [fileTreeViewData, setFileTreeViewData] = useState<TreeViewBaseItem<FileTreeViewItemProps>[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const { fileTreeViewItems, fileTreeViewIsLoading } = useWorkspaceContext();
 
-  useEffect(() => {
-    const getWorkspace = async () => {
-      setIsLoading(true);
+  const handleOpenContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setContextMenu(event.currentTarget);
+    setContextMenuPosition({
+      top: event.clientY,
+      left: event.clientX,
+    });
+  };
 
-      try {
-        const response = await axios.get(Endpoints.WORKSPACE);
-        setFileTreeViewData(response.data);
-      } catch (error) {
-        console.error('Failed to fetch workspace data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (connected) getWorkspace();
-  }, [connected]);
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+    setContextMenuPosition({ top: 0, left: 0 });
+  };
 
   return (
     <>
-      {isLoading ? (
+      {fileTreeViewIsLoading ? (
         <Box sx={{ width: '100%' }}>
           <LinearProgress />
         </Box>
       ) : (
-        <RichTreeView
-          items={fileTreeViewData}
-          sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
-          slots={{ item: FileTreeItem }}
-        />
+        <>
+          <Button variant='outlined' onClick={(event) => handleOpenContextMenu(event)} sx={{ mb: '1.5rem' }}>
+            New
+          </Button>
+          <FileTreeItemContextMenu
+            item={{ id: '', label: '', fileType: undefined }}
+            anchorPosition={contextMenuPosition}
+            open={Boolean(contextMenu)}
+            onClose={handleCloseContextMenu}
+          />
+          <RichTreeView
+            items={fileTreeViewItems || []}
+            sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
+            slots={{ item: FileTreeItem }}
+          />
+        </>
       )}
     </>
   );
