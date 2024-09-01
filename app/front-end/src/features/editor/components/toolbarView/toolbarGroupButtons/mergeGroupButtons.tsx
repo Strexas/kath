@@ -1,18 +1,28 @@
-import { AccessAlarms as AccessAlarmsIcon } from '@mui/icons-material';
+import { MergeType as MergeTypeIcon } from '@mui/icons-material';
 
 import { ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 
 // Define the onClick functions for group 2
-const handleAlarm2Click = () => {
-  console.log('Clicked Alarm2 Button!');
+const mergeLovdAndGnomadClick = () => {
+  console.log('Clicked Merge LOVD & gnomAD Button!');
+};
+
+const mergeLovdAndClinvarClick = () => {
+  console.log('Clicked Merge LOVD & ClinVar Button!');
 };
 
 // Define the buttons for group 2
 export const MergeGroupButtons: ToolbarGroupItemProps[] = [
   {
     group: 'merge',
-    icon: AccessAlarmsIcon,
+    icon: MergeTypeIcon,
     label: 'Merge LOVD & gnomAD',
-    onClick: handleAlarm2Click,
+    onClick: mergeLovdAndGnomadClick,
+  },
+  {
+    group: 'merge',
+    icon: MergeTypeIcon,
+    label: 'Merge LOVD & ClinVar',
+    onClick: mergeLovdAndClinvarClick,
   },
 ];
