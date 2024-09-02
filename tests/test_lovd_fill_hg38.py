@@ -90,7 +90,6 @@ class TestLOVDFillHg38(unittest.TestCase):
         })
         with self.assertRaises(TypeError) as context:
             lovd_fill_hg38(self.df)
-
         self.assertEqual(str(context.exception), "Expected a string for 'variant', got NAType instead")
 
 
