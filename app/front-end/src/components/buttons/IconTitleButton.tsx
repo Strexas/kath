@@ -1,4 +1,3 @@
-import { Colors } from '@/types';
 import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 
 interface Props {
@@ -9,6 +8,7 @@ interface Props {
   borderRadius?: string;
   onClick?: () => void;
   isActive?: boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -38,8 +38,10 @@ export const IconTitleButton: React.FC<Props> = ({
   borderRadius,
   onClick,
   isActive = false,
+  disabled = false,
 }) => {
   const Theme = useTheme();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <IconButton
@@ -49,19 +51,34 @@ export const IconTitleButton: React.FC<Props> = ({
           height: height || '3rem',
           borderRadius: borderRadius || '1rem',
           transition: 'background-color 0.5s ease',
+          color: disabled ? alpha(Theme.palette.primary.contrastText, 0.4) : Theme.palette.primary.contrastText,
           ':hover': {
-            backgroundColor: isActive
-              ? alpha(Theme.palette.primary.contrastText, 0.3)
-              : alpha(Theme.palette.primary.contrastText, 0.2),
+            backgroundColor: disabled
+              ? 'transparent'
+              : isActive
+                ? alpha(Theme.palette.primary.contrastText, 0.3)
+                : alpha(Theme.palette.primary.contrastText, 0.2),
           },
-          backgroundColor: isActive ? alpha(Theme.palette.primary.contrastText, 0.3) : 'transparent',
+          backgroundColor: disabled
+            ? 'transparent'
+            : isActive
+              ? alpha(Theme.palette.primary.contrastText, 0.3)
+              : 'transparent',
         }}
-        onClick={onClick}
+        onClick={disabled ? () => {} : onClick}
       >
         {icon}
       </IconButton>
       {title && (
-        <Typography sx={{ color: Colors.backgroundPrimaryLight, fontSize: '0.875rem', fontWeight: 'bold' }}>
+        <Typography
+          sx={{
+            color: disabled ? alpha(Theme.palette.primary.contrastText, 0.4) : Theme.palette.primary.contrastText,
+            fontSize: '0.875rem',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+          }}
+          onClick={disabled ? () => {} : onClick}
+        >
           {title}
         </Typography>
       )}

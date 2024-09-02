@@ -1,5 +1,5 @@
 import { SettingsDialog, ShortcutsDialog } from '@/components/dialogs';
-import { Sidebar } from '@/components/sidebar/sidebar';
+import { Sidebar } from '@/components/sidebar';
 import { Colors } from '@/types';
 import { Box, Typography, useTheme } from '@mui/material';
 import { useState } from 'react';

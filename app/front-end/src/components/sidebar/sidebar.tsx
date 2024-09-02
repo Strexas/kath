@@ -1,5 +1,5 @@
 import { IconTitleButton } from '@/components/buttons/IconTitleButton';
-import { Colors, Paths } from '@/types';
+import { Paths } from '@/types';
 import {
   AutoMode as AutoModeIcon,
   Home as HomeIcon,
@@ -7,7 +7,7 @@ import {
   SwitchAccessShortcut as SwitchAccessShortcutIcon,
 } from '@mui/icons-material';
 import { Box } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   settingsDialogOpen: () => void;
@@ -16,6 +16,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ settingsDialogOpen, shortcutsDialogOpen }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <Box sx={{ width: '4.2vw', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -30,36 +31,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ settingsDialogOpen, shortcutsD
           alignItems: 'center',
         }}
       >
-        <Link to={Paths.HOME} style={{ textDecoration: 'none' }}>
-          <IconTitleButton
-            icon={
-              <HomeIcon
-                sx={{
-                  width: '1.5rem',
-                  height: '1.5rem',
-                  color: Colors.backgroundPrimaryLight,
-                }}
-              />
-            }
-            title={'Home'}
-            isActive={location.pathname === Paths.HOME}
-          />
-        </Link>
-        <Link to={Paths.MACROS} style={{ textDecoration: 'none' }}>
-          <IconTitleButton
-            icon={
-              <AutoModeIcon
-                sx={{
-                  width: '1.5rem',
-                  height: '1.5rem',
-                  color: Colors.backgroundPrimaryLight,
-                }}
-              />
-            }
-            title={'Macros'}
-            isActive={location.pathname === Paths.MACROS}
-          />
-        </Link>
+        <IconTitleButton
+          icon={
+            <HomeIcon
+              sx={{
+                width: '1.5rem',
+                height: '1.5rem',
+              }}
+            />
+          }
+          title={'Home'}
+          isActive={location.pathname === Paths.HOME}
+          onClick={() => navigate(Paths.HOME)}
+        />
+        <IconTitleButton
+          icon={
+            <AutoModeIcon
+              sx={{
+                width: '1.5rem',
+                height: '1.5rem',
+              }}
+            />
+          }
+          title={'Macros'}
+          isActive={location.pathname === Paths.MACROS}
+          onClick={() => navigate(Paths.MACROS)}
+          disabled
+        />
       </Box>
       <Box
         sx={{
@@ -73,17 +71,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ settingsDialogOpen, shortcutsD
         }}
       >
         <IconTitleButton
-          icon={
-            <SettingsOutlinedIcon sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }} />
-          }
+          icon={<SettingsOutlinedIcon sx={{ width: '1.5rem', height: '1.5rem' }} />}
           onClick={settingsDialogOpen}
         />
         <IconTitleButton
-          icon={
-            <SwitchAccessShortcutIcon
-              sx={{ width: '1.5rem', height: '1.5rem', color: Colors.backgroundPrimaryLight }}
-            />
-          }
+          icon={<SwitchAccessShortcutIcon sx={{ width: '1.5rem', height: '1.5rem' }} />}
           onClick={shortcutsDialogOpen}
         />
       </Box>
