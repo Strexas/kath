@@ -316,37 +316,37 @@ def request_gnomad_api_data(gene_name):
     }}
     """
 
-    response = requests.post(url, json={'query': query}, timeout=300)# timeout set to 5 minutes
+    response = requests.post(url, json={'query': query}, timeout=300)  # timeout set to 5 minutes
 
     if response.status_code != 200:
         print('Error:', response.status_code)
-        return None
 
     data = response.json()['data']['gene']['variants']
 
     df = pd.json_normalize(data)
 
-    df['total_ac'] = df['exome.ac'].fillna(0) + df['genome.ac'].fillna(0)
-    df['total_an'] = df['exome.an'].fillna(0) + df['genome.an'].fillna(0)
+    df.loc[:, 'total_ac'] = df.loc[:, 'exome.ac'].fillna(0) + df.loc[:, 'genome.ac'].fillna(0)
+    df.loc[:, 'total_an'] = df.loc[:, 'exome.an'].fillna(0) + df.loc[:, 'genome.an'].fillna(0)
 
-    df['HGVS Consequence'] = df['hgvsc'].fillna(0) # cDNA change
-    df['Protein Consequence'] = df['hgvsp'].fillna(0) # Protein change
+    df.loc[:, 'HGVS Consequence'] = df.loc[:, 'hgvsc'].fillna(0)  # cDNA change
+    df.loc[:, 'Protein Consequence'] = df.loc[:, 'hgvsp'].fillna(0)  # Protein change
 
-    df['Allele Frequency'] = df['total_ac'] / df['total_an']
-    df['Homozygote Count'] = df['exome.ac_hom'].fillna(0) + df['genome.ac_hom'].fillna(0)
-    exome_populations = df['exome.populations']
-    genome_populations = df['genome.populations']
-    ids = ['afr', 'eas', 'asj', 'sas', 'nfe', 'fin', 'mid', 'amr', 'ami', 'remaining']
+    df.loc[:, 'Allele Frequency'] = df.loc[:, 'total_ac'] / df.loc[:, 'total_an']
+    df.loc[:, 'Homozygote Count'] = df.loc[:, 'exome.ac_hom'].fillna(0) + df.loc[:, 'genome.ac_hom'].fillna(0)
+    exome_populations = df.loc[:, 'exome.populations']
+    genome_populations = df.loc[:, 'genome.populations']
+    population_ids = ['afr', 'eas', 'asj', 'sas', 'nfe', 'fin', 'mid', 'amr', 'ami', 'remaining']
 
     for i in range(len(exome_populations)):
         exome_pop = exome_populations[i]
-        process_population_data(df, exome_pop, 'exome', ids, i)
+        process_population_data(df, exome_pop, 'exome', population_ids, i)
         genome_pop = genome_populations[i]
-        process_population_data(df, genome_pop, 'genome', ids, i)
+        process_population_data(df, genome_pop, 'genome', population_ids, i)
 
-    for variant_id in ids:
-        df[f'Allele_Frequency_{variant_id}'] = (df[f'exome_ac_{variant_id}'].fillna(0) + df[f'genome_ac_{variant_id}'].fillna(0)) / (
-                        df[f'exome_an_{variant_id}'].fillna(0) + df[f'genome_an_{variant_id}'].fillna(0))
+    for population_id in population_ids:
+        df.loc[:, f'Allele_Frequency_{population_id}'] = (
+               (df.loc[:, f'exome_ac_{population_id}'].fillna(0) + df.loc[:, f'genome_ac_{population_id}'].fillna(0)) / (
+                df.loc[:, f'exome_an_{population_id}'].fillna(0) + df.loc[:, f'genome_an_{population_id}'].fillna(0)))
     population_mapping = {
             'afr': 'African/African American',
             'eas': 'East Asian',
@@ -360,19 +360,21 @@ def request_gnomad_api_data(gene_name):
             'remaining': 'Remaining',
             '': ''
         }
-    for i in range(len(df)):
-        max_pop = 0
-        maxid = ''
-        for variant_id in ids:
-            if df.loc[i, f'Allele_Frequency_{variant_id}'] > max_pop:
-                max_pop = df.loc[i, f'Allele_Frequency_{variant_id}']
-                maxid = variant_id
-        df.loc[i, 'Popmax'] = max_pop
-        df.loc[i, 'Popmax population'] = population_mapping[maxid]
-    not_to_drop = ['Popmax', 'Popmax population', 'Homozygote Count', 'Allele Frequency', 'variant_id',
-                       'cDNA change', 'Protein change']
-    df = df.drop([col for col in df.columns if col not in not_to_drop], axis=1)
 
-    df.rename(columns={'variant_id': 'gnomAD ID'}, inplace=True)
+    for i in range(df.shape[0]):
+        max_pop = 0
+        max_id = ''
+        for population_id in population_ids:
+            if df.loc[i, f'Allele_Frequency_{population_id}'] > max_pop:
+                max_pop = df.loc[i, f'Allele_Frequency_{population_id}']
+                max_id = population_id
+        df.loc[i, 'Popmax'] = max_pop
+        df.loc[i, 'Popmax population'] = population_mapping[max_id]
+    not_to_drop = ['Popmax', 'Popmax population', 'Homozygote Count', 'Allele Frequency',
+                   'variant_id', 'cDNA change', 'Protein change']
+
+    df = df.filter(not_to_drop, axis="columns")
+
+    df.rename(columns={'variant_id': 'gnomAD ID'})
 
     return df
