@@ -6,11 +6,13 @@ import {
   ToolbarGroupsSelectorItem,
   ToolbarGroupsSelectorItemProps,
 } from '@/features/editor/components/toolbarView';
+
 import {
-  AccessAlarms as AccessAlarmsIcon,
-  AccessibleForward as AccessibleForwardIcon,
-  Android as AndroidIcon,
-} from '@mui/icons-material';
+  ApplyGroupButtons,
+  DownloadGroupButtons,
+  MergeGroupButtons,
+} from '@/features/editor/components/toolbarView/toolbarGroupButtons';
+
 import { useState } from 'react';
 
 /**
@@ -34,242 +36,30 @@ import { useState } from 'react';
  * @returns {JSX.Element} The rendered ToolbarView component, which includes the toolbar group selector and the items of the selected group.
  */
 export const ToolbarView: React.FC = () => {
-  const [selectedGroup, setSelectedGroup] = useState<string>('group1');
+  const [selectedGroup, setSelectedGroup] = useState<string>('download');
 
-  const ToolbarGroupsButtons: ToolbarGroupItemProps[] = [
-    {
-      group: 'group1',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm1',
-      onClick: () => {
-        console.log('Clicked Alarm1 Button!');
-      },
-    },
-    {
-      group: 'group1',
-      icon: AccessibleForwardIcon,
-      label: 'Forward1',
-      onClick: () => {
-        console.log('Clicked Forward1 Button!');
-      },
-    },
-    {
-      group: 'group1',
-      icon: AndroidIcon,
-      label: 'Android1',
-      onClick: () => {
-        console.log('Clicked Android1 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm2',
-      onClick: () => {
-        console.log('Clicked Alarm2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessibleForwardIcon,
-      label: 'Forward2',
-      onClick: () => {
-        console.log('Clicked Forward2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AndroidIcon,
-      label: 'Android2',
-      onClick: () => {
-        console.log('Clicked Android2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm2',
-      onClick: () => {
-        console.log('Clicked Alarm2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessibleForwardIcon,
-      label: 'Forward2',
-      onClick: () => {
-        console.log('Clicked Forward2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AndroidIcon,
-      label: 'Android2',
-      onClick: () => {
-        console.log('Clicked Android2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm2',
-      onClick: () => {
-        console.log('Clicked Alarm2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AccessibleForwardIcon,
-      label: 'Forward2',
-      onClick: () => {
-        console.log('Clicked Forward2 Button!');
-      },
-    },
-    {
-      group: 'group2',
-      icon: AndroidIcon,
-      label: 'Android2',
-      onClick: () => {
-        console.log('Clicked Android2 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm3',
-      onClick: () => {
-        console.log('Clicked Alarm3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessibleForwardIcon,
-      label: 'Forward3',
-      onClick: () => {
-        console.log('Clicked Forward3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AndroidIcon,
-      label: 'Android3',
-      onClick: () => {
-        console.log('Clicked Android3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm3',
-      onClick: () => {
-        console.log('Clicked Alarm3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessibleForwardIcon,
-      label: 'Forward3',
-      onClick: () => {
-        console.log('Clicked Forward3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AndroidIcon,
-      label: 'Android3',
-      onClick: () => {
-        console.log('Clicked Android3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm3',
-      onClick: () => {
-        console.log('Clicked Alarm3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessibleForwardIcon,
-      label: 'Forward3',
-      onClick: () => {
-        console.log('Clicked Forward3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AndroidIcon,
-      label: 'Android3',
-      onClick: () => {
-        console.log('Clicked Android3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm3',
-      onClick: () => {
-        console.log('Clicked Alarm3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessibleForwardIcon,
-      label: 'Forward3',
-      onClick: () => {
-        console.log('Clicked Forward3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AndroidIcon,
-      label: 'Android3',
-      onClick: () => {
-        console.log('Clicked Android3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessAlarmsIcon,
-      label: 'Alarm3',
-      onClick: () => {
-        console.log('Clicked Alarm3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AccessibleForwardIcon,
-      label: 'Forward3',
-      onClick: () => {
-        console.log('Clicked Forward3 Button!');
-      },
-    },
-    {
-      group: 'group3',
-      icon: AndroidIcon,
-      label: 'Android3',
-      onClick: () => {
-        console.log('Clicked Android3 Button!');
-      },
-    },
-  ];
+  // Combine the button groups into a dictionary for easy access
+  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = {
+    download: DownloadGroupButtons,
+    merge: MergeGroupButtons,
+    apply: ApplyGroupButtons,
+  };
 
   const ToolbarGroups: ToolbarGroupsSelectorItemProps[] = [
     {
-      id: 'group1',
-      label: 'Group 1',
-      onClick: () => setSelectedGroup('group1'),
+      id: 'download',
+      label: 'Download',
+      onClick: () => setSelectedGroup('download'),
     },
     {
-      id: 'group2',
-      label: 'Group 2',
-      onClick: () => setSelectedGroup('group2'),
+      id: 'merge',
+      label: 'Merge',
+      onClick: () => setSelectedGroup('merge'),
     },
     {
-      id: 'group3',
-      label: 'Group 3',
-      onClick: () => setSelectedGroup('group3'),
+      id: 'apply',
+      label: 'Apply',
+      onClick: () => setSelectedGroup('apply'),
     },
   ];
 
@@ -281,9 +71,7 @@ export const ToolbarView: React.FC = () => {
         ))}
       </ToolbarGroupsSelector>
       <ToolbarGroup>
-        {ToolbarGroupsButtons.map(
-          (button, index) => button.group === selectedGroup && <ToolbarGroupItem key={index} {...button} />
-        )}
+        {ToolbarGroupsButtons[selectedGroup]?.map((button, index) => <ToolbarGroupItem key={index} {...button} />)}
       </ToolbarGroup>
     </>
   );

@@ -50,6 +50,7 @@ export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, 
           '&:hover': {
             backgroundColor: Theme.palette.action.selected,
           },
+          textTransform: 'none',
         }}
       >
         {label}

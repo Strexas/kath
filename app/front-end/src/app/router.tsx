@@ -1,3 +1,4 @@
+import { BaseLayout } from '@/components/layouts/baseLayout';
 import { Paths } from '@/types';
 import { useMemo } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -32,14 +33,26 @@ export const AppRouter = () => {
           path: Paths.HOME,
           lazy: async () => {
             const { Home } = await import('./routes/home');
-            return { Component: Home };
+            return {
+              Component: (props) => (
+                <BaseLayout>
+                  <Home {...props} />
+                </BaseLayout>
+              ),
+            };
           },
         },
         {
           path: Paths.NOTFOUND,
           lazy: async () => {
             const { NotFound } = await import('./routes/notFound');
-            return { Component: NotFound };
+            return {
+              Component: (props) => (
+                <BaseLayout>
+                  <NotFound {...props} />
+                </BaseLayout>
+              ),
+            };
           },
         },
       ]),
