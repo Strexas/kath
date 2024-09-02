@@ -14,7 +14,6 @@ const handleDownloadGnomadClick = () => {
   console.log('Clicked Download Gnomad Button!');
 };
 
-// Define the buttons for group 1
 export const DownloadGroupButtons: ToolbarGroupItemProps[] = [
   {
     group: 'download',
