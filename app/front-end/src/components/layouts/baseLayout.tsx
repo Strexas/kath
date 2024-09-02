@@ -109,10 +109,7 @@ export const BaseLayout: React.FC<Props> = ({ children }) => {
           flexDirection: 'row',
         }}
       >
-        <Sidebar
-          handleSettingsDialogOpen={handleSettingsDialogOpen}
-          handleShortcutsDialogOpen={handleShortcutsDialogOpen}
-        />
+        <Sidebar settingsDialogOpen={handleSettingsDialogOpen} shortcutsDialogOpen={handleShortcutsDialogOpen} />
 
         <Box
           sx={{

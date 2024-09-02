@@ -8,6 +8,7 @@ interface Props {
   height?: string;
   borderRadius?: string;
   onClick?: () => void;
+  isActive?: boolean;
 }
 
 /**
@@ -29,7 +30,15 @@ interface Props {
  *
  * @returns {JSX.Element} The `IconTitleButton` component rendering an icon button and an optional title.
  */
-export const IconTitleButton: React.FC<Props> = ({ icon, title, width, height, borderRadius, onClick }) => {
+export const IconTitleButton: React.FC<Props> = ({
+  icon,
+  title,
+  width,
+  height,
+  borderRadius,
+  onClick,
+  isActive = false,
+}) => {
   const Theme = useTheme();
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -41,8 +50,11 @@ export const IconTitleButton: React.FC<Props> = ({ icon, title, width, height, b
           borderRadius: borderRadius || '1rem',
           transition: 'background-color 0.5s ease',
           ':hover': {
-            backgroundColor: alpha(Theme.palette.primary.contrastText, 0.2),
+            backgroundColor: isActive
+              ? alpha(Theme.palette.primary.contrastText, 0.3)
+              : alpha(Theme.palette.primary.contrastText, 0.2),
           },
+          backgroundColor: isActive ? alpha(Theme.palette.primary.contrastText, 0.3) : 'transparent',
         }}
         onClick={onClick}
       >
