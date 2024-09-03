@@ -1,11 +1,16 @@
-import { EditorColumnMenu, EditorToolbar } from '@/features/editor/components/editorView';
+import { EditorColumnMenu, EditorHeader, EditorToolbar } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileDataRequestDTO, FileDataResponseDTO } from '@/features/editor/types';
+import {
+  ColumnAggregation,
+  EditorColumnMenuAggregationActions,
+  FileDataRequestDTO,
+  FileDataResponseDTO,
+} from '@/features/editor/types';
 import { useSessionContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
 import { DataGrid, GridColDef, GridRowsProp, useGridApiRef } from '@mui/x-data-grid';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * EditorView component renders a DataGrid with dynamic columns and rows fetched from a workspace file.
@@ -37,70 +42,87 @@ export const EditorView: React.FC = () => {
   const Workspace = useWorkspaceContext();
 
   const [gridColumns, setgridColumns] = useState<GridColDef[]>([]);
+  const [gridColumnsAggregation, setGridColumnsAggregation] = useState<ColumnAggregation>({});
   const [gridRows, setgridRows] = useState<GridRowsProp>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
   const [totalRows, setTotalRows] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [response, setResponse] = useState<FileDataResponseDTO>({ totalRows: 0, header: [], rows: [], page: 0 });
 
+  // Fetch workspace file data
+  const getWorkspaceFile = useCallback(async () => {
+    if (!Workspace.fileId) {
+      setgridColumns([]);
+      setgridRows([]);
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await axios.get(`${Endpoints.WORKSPACE_FILE}/${Workspace.fileId}`, {
+        params: {
+          page: page,
+          rowsPerPage: rowsPerPage,
+        },
+      });
+
+      setResponse(response.data as FileDataResponseDTO);
+    } catch (error) {
+      console.error('Failed to fetch file content:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [Workspace.fileId, page, rowsPerPage]);
+
+  // Data reset effect
   useEffect(() => {
-    const getWorkspaceFile = async () => {
-      if (!Workspace.fileId) {
-        setgridColumns([]);
-        setgridRows([]);
-        return;
-      }
+    setGridColumnsAggregation({});
+  }, [Workspace.fileId]);
 
-      setIsLoading(true);
-
-      try {
-        const response = await axios.get(`${Endpoints.WORKSPACE_FILE}/${Workspace.fileId}`, {
-          params: {
-            page: page,
-            rowsPerPage: rowsPerPage,
-          },
-        });
-
-        const { totalRows, header, rows } = response.data as FileDataResponseDTO;
-
-        if (!header) {
-          setgridColumns([]);
-          setgridRows([]);
-          return;
-        }
-
-        const parsedColumns = header.map((value) => {
-          return {
-            field: value,
-            headerName: value,
-            width: 150,
-            editable: true,
-          };
-        });
-
-        const parsedRows = rows.map((row, index) => {
-          return {
-            id: index,
-            ...row.reduce((acc, value, index) => {
-              return { ...acc, [header[index]]: value };
-            }, {}),
-          };
-        });
-
-        setgridColumns(parsedColumns || []);
-        setgridRows(parsedRows || []);
-        setTotalRows(totalRows);
-      } catch (error) {
-        console.error('Failed to fetch file content:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+  // Data fetching effect
+  useEffect(() => {
     if (connected) getWorkspaceFile();
-  }, [connected, Workspace.fileId, Workspace.fileType, page, rowsPerPage]);
+  }, [connected, getWorkspaceFile]);
 
-  const handleSave = () => {
+  // Parse response effect
+  useEffect(() => {
+    const { totalRows, header, rows } = response;
+
+    if (!header) {
+      setgridColumns([]);
+      setgridRows([]);
+      setGridColumnsAggregation({});
+      return;
+    }
+
+    const parsedColumns = header.map((value) => {
+      return {
+        field: value,
+        headerName: value,
+        flex: 1,
+        minWidth: 150,
+        editable: true,
+        renderHeader: () => <EditorHeader columnName={value} gridColumnsAggregation={gridColumnsAggregation} />,
+      };
+    });
+
+    const parsedRows = rows.map((row, index) => {
+      return {
+        id: index,
+        ...row.reduce((acc, value, index) => {
+          return { ...acc, [header[index]]: value };
+        }, {}),
+      };
+    });
+
+    setgridColumns(parsedColumns);
+    setgridRows(parsedRows);
+    setTotalRows(totalRows);
+  }, [response, gridColumnsAggregation]);
+
+  const handleSave = async () => {
     const data: FileDataRequestDTO = {
       page: page,
       rowsPerPage: rowsPerPage,
@@ -112,7 +134,49 @@ export const EditorView: React.FC = () => {
         ),
     };
 
-    axios.put(`${Endpoints.WORKSPACE}/${Workspace.fileId}`, data);
+    const responseSave = await axios.put(`${Endpoints.WORKSPACE_FILE}/${Workspace.fileId}`, data);
+    setResponse(responseSave.data as FileDataResponseDTO);
+
+    const responseAggregate = await axios.get(`${Endpoints.WORKSPACE_AGGREGATE}/all/${Workspace.fileId}`, {
+      params: {
+        columnsAggregation: JSON.stringify(gridColumnsAggregation),
+      },
+    });
+
+    const { columnsAggregation: responseColumnsAggregation } = responseAggregate.data;
+    setGridColumnsAggregation(responseColumnsAggregation);
+  };
+
+  const handleAggregation = async (field: string, action: EditorColumnMenuAggregationActions) => {
+    switch (action) {
+      case '':
+        setGridColumnsAggregation((prevAggregations) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [field]: _, ...rest } = prevAggregations;
+          return rest;
+        });
+        break;
+      default:
+        {
+          const response = await axios.get(`${Endpoints.WORKSPACE_AGGREGATE}/${Workspace.fileId}`, {
+            params: {
+              field: field,
+              action: action,
+            },
+          });
+
+          const { field: responseField, action: responseAction, value: responseValue } = response.data;
+
+          setGridColumnsAggregation((prevAggregations) => ({
+            ...prevAggregations,
+            [responseField]: {
+              action: responseAction,
+              value: responseValue,
+            },
+          }));
+        }
+        break;
+    }
   };
 
   return (
@@ -137,7 +201,16 @@ export const EditorView: React.FC = () => {
       }}
       slots={{
         toolbar: (props) => <EditorToolbar {...props} disabled={isLoading} handleSave={handleSave} />,
-        columnMenu: (props) => <EditorColumnMenu {...props} />,
+        columnMenu: (props) => (
+          <EditorColumnMenu
+            {...props}
+            aggregationValues={gridColumnsAggregation}
+            handleAggregation={handleAggregation}
+          />
+        ),
+      }}
+      slotProps={{
+        toolbar: {},
       }}
       apiRef={gridApiRef}
     />
