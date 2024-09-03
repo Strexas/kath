@@ -1,4 +1,3 @@
-import { BaseLayout } from '@/components/layouts/baseLayout';
 import { SessionContextProvider, ThemeContextProvider } from '@/stores';
 import { CircularProgress } from '@mui/material';
 import React from 'react';
@@ -41,9 +40,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       fallback={<CircularProgress sx={{ display: 'flex', justifyItems: 'center', alignContent: 'center' }} />}
     >
       <SessionContextProvider>
-        <ThemeContextProvider>
-          <BaseLayout>{children}</BaseLayout>
-        </ThemeContextProvider>
+        <ThemeContextProvider>{children}</ThemeContextProvider>
       </SessionContextProvider>
     </React.Suspense>
   );
