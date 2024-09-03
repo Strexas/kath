@@ -192,14 +192,14 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
 
     if lovd.empty:
         return
-    lovd['hg38_gnomad_format'] = lovd['VariantOnGenome/DNA/hg38'].replace('', pd.NA)
-    missing_hg38_mask = lovd['hg38_gnomad_format'].isna()
+    lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'VariantOnGenome/DNA/hg38'].replace('', pd.NA)
+    missing_hg38_mask = lovd.loc[:,'hg38_gnomad_format'].isna()
     lovd.loc[missing_hg38_mask, 'hg38_gnomad_format'] = lovd.loc[missing_hg38_mask, 'VariantOnGenome/DNA'].apply(
         convert_hg19_if_missing)
-    lovd['hg38_gnomad_format'] = lovd['hg38_gnomad_format'].apply(convert_to_gnomad_gen)
+    lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'hg38_gnomad_format'].apply(convert_to_gnomad_gen)
 
 
-def convert_hg19_if_missing(hg19: pd.Series, lo = LiftOver('hg19', 'hg38')):
+def convert_hg19_if_missing(hg19: str, lo = LiftOver('hg19', 'hg38')):
     """
     Converts hg19 variant to hg38 if hg38 is missing.
     :param hg19: a row from the DataFrame.
@@ -207,13 +207,17 @@ def convert_hg19_if_missing(hg19: pd.Series, lo = LiftOver('hg19', 'hg38')):
     :return: hg38 value or a conversion of the hg19 value in the format 'g.positionref>alt'.
     """
 
-    if pd.isna(hg19):
+    if pd.isna(hg19) or '_' in hg19:
         return "?"
-    if '?' in hg19 or "_" in hg19:
+
+    match = re.search(r'g\.(\d+)', hg19)
+    if not match:
         return '?'
-    position_str = hg19[2:10]
+
+    position_str = match.group(1)
     new_pos = lo.convert_coordinate('chr6', int(position_str))[0][1]
     return f"g.{new_pos}{hg19[-3:]}"
+
 
 
 def convert_to_gnomad_gen(variant: str):

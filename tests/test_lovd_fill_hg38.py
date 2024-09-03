@@ -88,6 +88,18 @@ class TestLOVDFillHg38(unittest.TestCase):
         lovd_fill_hg38(self.df)
         self.assertEqual(self.df.shape[0], 0, "Empty dataframe should not add rows.")
 
+    def test_fill_hg38_NA_variants(self):
+        """Test filling hg38 values when there are pd. NA variants in the dataframe."""
+        self.df = pd.DataFrame({
+            'VariantOnGenome/DNA': [pd.NA],
+            'VariantOnGenome/DNA/hg38': [pd.NA]
+        })
+        lovd_fill_hg38(self.df)
+        expected_values = ['?']
+        self.assertIn('hg38_gnomad_format', self.df.columns,
+                      "Column 'hg38_gnomad_format' should be added.")
+        self.assertListEqual(self.df['hg38_gnomad_format'].tolist(), expected_values)
+
 
 
 if __name__ == '__main__':
