@@ -82,15 +82,6 @@ class TestLOVDFillHg38(unittest.TestCase):
         lovd_fill_hg38(self.df)
         self.assertEqual(self.df.shape[0], 0, "Empty dataframe should not add rows.")
 
-    def test_fill_hg38_NA_variants(self):
-        """Test filling hg38 values when there pd. NA variants in the dataframe."""
-        self.df = pd.DataFrame({
-            'VariantOnGenome/DNA': [pd.NA],
-            'VariantOnGenome/DNA/hg38': [pd.NA]
-        })
-        with self.assertRaises(TypeError) as context:
-            lovd_fill_hg38(self.df)
-        self.assertEqual(str(context.exception), "Expected a string for 'variant', got NAType instead")
 
 
 if __name__ == '__main__':

@@ -181,65 +181,49 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
     """
     Fills missing hg38 values in the LOVD dataframe
     by converting hg19 values to hg38.
-    New column 'hg19/hg38_lovd' is added to store
+    New column 'hg38_gnomad_format' is added to store
     the converted positions in the format '6-position-ref-alt'.
     :param lovd: pandas DataFrame containing following columns:
                - 'VariantOnGenome/DNA': hg19 values.
                - 'VariantOnGenome/DNA/hg38': hg38 values.
-    :return: None: Modifies the input DataFrame in-place by adding or
-               updating the 'hg19/hg38_lovd' column.
+    :return: None: Modifies the input DataFrame in-place by adding
+                'hg38_gnomad_format' column.
     """
 
     if lovd.empty:
         return
-    lovd['VariantOnGenome/DNA/hg38'] = lovd['VariantOnGenome/DNA/hg38'].replace('', pd.NA)
-    lovd['hg38_gnomad_format'] = lovd.apply(convert_hg19_if_missing, axis=1)
+    lovd['hg38_gnomad_format'] = lovd['VariantOnGenome/DNA/hg38'].replace('', pd.NA)
+    missing_hg38_mask = lovd['hg38_gnomad_format'].isna()
+    lovd.loc[missing_hg38_mask, 'hg38_gnomad_format'] = lovd.loc[missing_hg38_mask, 'VariantOnGenome/DNA'].apply(
+        convert_hg19_if_missing)
+    lovd['hg38_gnomad_format'] = lovd['hg38_gnomad_format'].apply(convert_to_gnomad_gen)
 
 
-def convert_hg19_if_missing(row):
+def convert_hg19_if_missing(hg19: pd.Series, lo = LiftOver('hg19', 'hg38')):
     """
-    converts hg19 variant to hg38 if hg38 is missing.
-    Checks if the hg38 value is missing (NaN) in a given row.
-    If it is, the hg19 variant is converted to hg38
-    using the `convert_hg19_to_hg38` function.
-    Otherwise, the existing hg38 value is formatted.
-    :param row: single row of the DataFrame.
-    :return:
-    - str: hg38 value or a conversion of
-    the hg19 value in the format '6-position-ref-alt'.
+    Converts hg19 variant to hg38 if hg38 is missing.
+    :param hg19: a row from the DataFrame.
+    :param lo: converter for genomic data between reference assemblies
+    :return: hg38 value or a conversion of the hg19 value in the format 'g.positionref>alt'.
     """
 
-    if pd.isna(row['VariantOnGenome/DNA/hg38']):
-        return convert_hg19_to_hg38(convert_to_gnomad_gen(row['VariantOnGenome/DNA']))
-    return convert_to_gnomad_gen(row['VariantOnGenome/DNA/hg38'])
-
-
-def convert_hg19_to_hg38(position: str, lo=LiftOver('hg19', 'hg38')):
-    """
-    converts a genomic position from hg19 to hg38 using the LiftOver tool.
-    :param position: string representing the hg19 variant
-                    in the format 'g.positionRef>Alt'.
-    :param lo: converter for coordinates between genome builds
-    :return: string converted hg38 position in the format '6-position-ref-alt'.
-    """
-
-    if '?' in position:
+    if pd.isna(hg19):
+        return "?"
+    if '?' in hg19 or "_" in hg19:
         return '?'
-    new_pos = lo.convert_coordinate('chr6', int(position[2:10]))[0][1]
-    return f"6-{new_pos}-{position[-3:]}"
+    position_str = hg19[2:10]
+    new_pos = lo.convert_coordinate('chr6', int(position_str))[0][1]
+    return f"g.{new_pos}{hg19[-3:]}"
 
 
 def convert_to_gnomad_gen(variant: str):
     """
-    converts a variant string from hg19 or hg38 format
+    converts a variant string from hg38 format
     to the format used by gnomAD ('6-position-ref-alt').
     :param variant: str: the variant in the format 'g.startRef>Alt'.
     :return: str: variant formatted as '6-position-ref-alt'
     or '?' if the input contains interval ranges or is invalid.
     """
-
-    if not isinstance(variant, str):
-        raise TypeError(f"Expected a string for 'variant', got {type(variant).__name__} instead")
 
     patterns = {
         'dup': re.compile(r'^g\.(\d+)dup$'),

@@ -5,8 +5,6 @@ __pycache__
 
 # specific folders
 data/*
-tests/*
-!test_lovd_fill_hg38.py
 
 # large gene reference files
 *.fa
