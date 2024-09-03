@@ -138,6 +138,14 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               },
             },
           },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                fontFamily: 'Nunito',
+                textTransform: 'none',
+              },
+            },
+          },
         },
       }),
     [mode]

@@ -1,5 +1,6 @@
 import {
   FileTreeItemContextMenuConfirmationDialog,
+  FileTreeItemContextMenuFileImportDialog,
   FileTreeItemContextMenuTextfieldDialog,
 } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
@@ -56,6 +57,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
   const Workspace = useWorkspaceContext();
   const [newFileDialogOpen, setNewFileDialogOpen] = useState(false);
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
+  const [fileImportDialogOpen, setFileImportDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const menuItems = [];
@@ -69,7 +71,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         New folder...
       </MenuItem>,
       <Divider key='divider-new' />,
-      <MenuItem key='import' onClick={() => handleActionContextMenu('import')} disabled>
+      <MenuItem key='import' onClick={() => handleActionContextMenu('import')}>
         Import...
       </MenuItem>
     );
@@ -107,8 +109,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         setNewFolderDialogOpen(true);
         break;
       case 'import':
-        // TODO: Implement file import
-        console.log('import');
+        setFileImportDialogOpen(true);
         break;
       case 'export':
         // TODO: Implement file export
@@ -164,6 +165,11 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       >
         {menuItems}
       </Menu>
+      <FileTreeItemContextMenuFileImportDialog
+        open={Boolean(fileImportDialogOpen)}
+        onClose={() => setFileImportDialogOpen(false)}
+        onConfirm={() => {}}
+      />
       <FileTreeItemContextMenuTextfieldDialog
         open={Boolean(newFileDialogOpen)}
         action={FileTreeItemContextMenuActions.NEW_FILE}
