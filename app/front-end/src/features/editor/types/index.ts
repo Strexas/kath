@@ -1,7 +1,11 @@
-export type { ColumnAggregation } from './columnAggregation';
 export { ConsoleFeedbackTypes } from './consoleFeedback';
 export type { ConsoleFeedback } from './consoleFeedback';
-export { EditorColumnMenuAggregationActions } from './editorColumnMenuAggregationActions';
 export type { FileDataRequestDTO, FileDataResponseDTO } from './fileData';
 export { FileTreeItemContextMenuActions } from './fileTreeItemContextMenuActions';
 export type { FileTreeViewItemProps } from './fileTreeViewItemProps';
+export { FileContentAggregationActions } from './models/fileContentAggregationModel';
+export type { FileContentAggregationModel } from './models/fileContentAggregationModel';
+export type { FileContentModel } from './models/fileContentModel';
+export { FileTypes } from './models/fileModel';
+export type { FileModel } from './models/fileModel';
+export type { FilePaginationModel } from './models/filePaginationModel';

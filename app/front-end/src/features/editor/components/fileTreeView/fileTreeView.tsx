@@ -42,7 +42,7 @@ export const FileTreeView: React.FC = () => {
     left: 0,
   });
 
-  const { fileTreeViewItems, fileTreeViewIsLoading } = useWorkspaceContext();
+  const { fileTree, fileTreeIsLoading } = useWorkspaceContext();
 
   const handleOpenContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -61,7 +61,7 @@ export const FileTreeView: React.FC = () => {
 
   return (
     <>
-      {fileTreeViewIsLoading ? (
+      {fileTreeIsLoading ? (
         <Box sx={{ width: '100%' }}>
           <LinearProgress />
         </Box>
@@ -77,7 +77,7 @@ export const FileTreeView: React.FC = () => {
             onClose={handleCloseContextMenu}
           />
           <RichTreeView
-            items={fileTreeViewItems || []}
+            items={fileTree}
             sx={{ height: 'fit-content', flexGrow: 1, overflowY: 'auto' }}
             slots={{ item: FileTreeItem }}
           />

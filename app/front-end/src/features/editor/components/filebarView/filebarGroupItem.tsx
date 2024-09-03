@@ -1,13 +1,7 @@
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileTypes } from '@/types';
+import { FileModel } from '@/features/editor/types';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
-
-export interface FilebarGroupItemProps {
-  fileId: string;
-  fileLabel: string;
-  fileType: FileTypes;
-}
 
 /**
  * `FilebarGroupItem` is a functional component that represents an individual item in the file bar group.
@@ -28,24 +22,24 @@ export interface FilebarGroupItemProps {
  *
  * @returns {JSX.Element} A `Box` component representing an item in the file bar with a clickable label and a close button.
  */
-export const FilebarGroupItem: React.FC<FilebarGroupItemProps> = ({ fileId, fileLabel, fileType }) => {
+export const FilebarGroupItem: React.FC<FileModel> = (file) => {
   const Theme = useTheme();
   const Workspace = useWorkspaceContext();
 
+  const { id, label } = file;
+
   return (
     <Box
-      id={fileId}
+      id={id}
       sx={{
         height: '100%',
         pl: '1rem',
         pr: '0.5rem',
-        bgcolor: Workspace.fileId === fileId ? Theme.palette.background.default : Theme.palette.action.selected,
+        bgcolor: Workspace.file.id === id ? Theme.palette.background.default : Theme.palette.action.selected,
         borderRadius: '0rem',
         ':hover': {
           backgroundColor:
-            Workspace.fileId === fileId
-              ? Theme.palette.background.default
-              : alpha(Theme.palette.background.default, 0.5),
+            Workspace.file.id === id ? Theme.palette.background.default : alpha(Theme.palette.background.default, 0.5),
         },
         cursor: 'pointer',
         display: 'flex',
@@ -55,7 +49,8 @@ export const FilebarGroupItem: React.FC<FilebarGroupItemProps> = ({ fileId, file
       }}
       onClick={() => {
         // Update the workspace to the selected file
-        Workspace.update(fileId, fileLabel, fileType);
+        Workspace.fileStateUpdate(file);
+        Workspace.filesHistoryStateUpdate(file);
       }}
     >
       <Typography
@@ -69,7 +64,7 @@ export const FilebarGroupItem: React.FC<FilebarGroupItemProps> = ({ fileId, file
           whiteSpace: 'nowrap',
         }}
       >
-        {fileLabel}
+        {label}
       </Typography>
       <IconButton
         size='small'
@@ -79,7 +74,7 @@ export const FilebarGroupItem: React.FC<FilebarGroupItemProps> = ({ fileId, file
         onMouseDown={(event) => {
           event.stopPropagation();
           // Remove the file from the workspace
-          Workspace.remove(fileId);
+          Workspace.filesHistoryStateUpdate(undefined, file);
         }}
       >
         <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />

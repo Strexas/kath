@@ -3,9 +3,9 @@ import {
   FileTreeItemContextMenuTextfieldDialog,
 } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileTreeItemContextMenuActions, FileTreeViewItemProps } from '@/features/editor/types';
+import { FileTreeItemContextMenuActions, FileTreeViewItemProps, FileTypes } from '@/features/editor/types';
 import { axios } from '@/lib';
-import { Endpoints, FileTypes } from '@/types';
+import { Endpoints } from '@/types';
 import { Divider, Menu, MenuItem } from '@mui/material';
 import { useState } from 'react';
 
@@ -53,7 +53,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
   open,
   onClose,
 }) => {
-  const Workspace = useWorkspaceContext();
+  const { file, fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
   const [newFileDialogOpen, setNewFileDialogOpen] = useState(false);
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
@@ -141,16 +141,20 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     setRenameDialogOpen(false);
     const data = { label, type: item.fileType === FileTypes.FOLDER ? FileTypes.FOLDER : FileTypes.FILE };
     const response = await axios.put(`${Endpoints.WORKSPACE_RENAME}/${item.id}`, data);
-    Workspace.remove(item.id);
-    if (Workspace.fileId === item.id)
-      Workspace.update(response.data.newId, response.data.newLabel, response.data.newType || FileTypes.FILE);
+    filesHistoryStateUpdate(undefined, { id: item.id, label: item.label, type: item.fileType });
+    if (file.id === item.id)
+      fileStateUpdate(
+        { id: response.data.newId, label: response.data.newLabel, type: response.data.newType || FileTypes.FILE },
+        undefined,
+        undefined
+      );
   };
 
   const handleDeleteConfirm = async () => {
     setDeleteDialogOpen(false);
     const data = { type: item.fileType === FileTypes.FOLDER ? FileTypes.FOLDER : FileTypes.FILE };
     await axios.put(`${Endpoints.WORKSPACE_DELETE}/${item.id}`, data);
-    Workspace.remove(item.id);
+    filesHistoryStateUpdate(undefined, { id: item.id, label: item.label, type: item.fileType || FileTypes.FILE });
   };
 
   return (

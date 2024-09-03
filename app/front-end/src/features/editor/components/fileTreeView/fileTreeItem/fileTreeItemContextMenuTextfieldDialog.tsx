@@ -1,8 +1,7 @@
 import { FileTreeItemContextMenuStyledDialog } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileTreeItemContextMenuActions, FileTreeViewItemProps } from '@/features/editor/types';
+import { FileTreeItemContextMenuActions, FileTreeViewItemProps, FileTypes } from '@/features/editor/types';
 import { doesFileExist } from '@/features/editor/utils';
-import { FileTypes } from '@/types';
 import { Close as CloseIcon } from '@mui/icons-material';
 import {
   Box,
@@ -75,7 +74,7 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
   onSave,
 }) => {
   const Theme = useTheme();
-  const { fileTreeViewItems } = useWorkspaceContext();
+  const { fileTree } = useWorkspaceContext();
 
   const [value, setValue] = useState(() => {
     switch (action) {
@@ -145,16 +144,16 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
     // Check if file already exists
     switch (action) {
       case FileTreeItemContextMenuActions.NEW_FILE:
-        if (doesFileExist(fileTreeViewItems || [], path() + '.' + fileExtension)) return 'This name already exists';
+        if (doesFileExist(fileTree, path() + '.' + fileExtension)) return 'This name already exists';
         break;
       case FileTreeItemContextMenuActions.NEW_FOLDER:
-        if (doesFileExist(fileTreeViewItems || [], path())) return 'This name already exists';
+        if (doesFileExist(fileTree, path())) return 'This name already exists';
         break;
       case FileTreeItemContextMenuActions.RENAME:
         if (fileExtension === '') {
-          if (doesFileExist(fileTreeViewItems || [], path())) return 'This name already exists';
+          if (doesFileExist(fileTree, path())) return 'This name already exists';
         } else {
-          if (doesFileExist(fileTreeViewItems || [], path() + '.' + fileExtension)) return 'This name already exists';
+          if (doesFileExist(fileTree, path() + '.' + fileExtension)) return 'This name already exists';
         }
         break;
       default:
