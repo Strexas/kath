@@ -252,11 +252,9 @@ def get_workspace_aggregate(relative_path):
                         ),
                         404,
                     )
-
-                header_index = header.index(field)
-
+                
                 for row in reader:
-                    value = row[header_index]
+                    value = row[header.index(field)]
                     if action == "cnt":
                         if value:
                             result += float(1)
