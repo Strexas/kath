@@ -1,3 +1,6 @@
+import { EditorColumnMenuAggregationItem } from '@/features/editor/components/editorView';
+import { ColumnAggregation, EditorColumnMenuAggregationActions } from '@/features/editor/types';
+import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
 
@@ -5,7 +8,10 @@ const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }
   backgroundColor: theme.palette.secondary.main,
 }));
 
-interface GridColumnMenuContainerProps extends GridColumnMenuProps {}
+interface GridColumnMenuContainerProps extends GridColumnMenuProps {
+  aggregationValues: ColumnAggregation;
+  handleAggregation: (field: string, action: EditorColumnMenuAggregationActions) => void;
+}
 
 /**
  * `EditorColumnMenu` component customizes the column menu in a DataGrid with a styled container.
@@ -31,9 +37,25 @@ interface GridColumnMenuContainerProps extends GridColumnMenuProps {}
  *
  * @returns {JSX.Element} A styled `GridColumnMenuContainer` containing a `GridColumnMenuHideItem`.
  */
-export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({ hideMenu, colDef, ...other }) => {
+export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
+  aggregationValues,
+  handleAggregation,
+  hideMenu,
+  colDef,
+  ...other
+}) => {
+  const aggregationActiveAction = aggregationValues[colDef.field]
+    ? aggregationValues[colDef.field].action
+    : EditorColumnMenuAggregationActions.NONE;
+
   return (
     <StyledGridColumnMenuContainer hideMenu={hideMenu} colDef={colDef} {...other}>
+      <EditorColumnMenuAggregationItem
+        initialValue={aggregationActiveAction}
+        onClick={hideMenu}
+        onAction={(action) => handleAggregation(colDef.field, action)}
+      />
+      <Divider />
       <GridColumnMenuHideItem onClick={hideMenu} colDef={colDef!} />
     </StyledGridColumnMenuContainer>
   );
