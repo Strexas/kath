@@ -1,9 +1,15 @@
+"""
+Module for testing the `lovd_fill_hg38` function from the `api.data.refactoring` module.
+"""
 import unittest
 import pandas as pd
 from api.data.refactoring import lovd_fill_hg38
 
 
 class TestLOVDFillHg38(unittest.TestCase):
+    """
+        Unit tests for the `lovd_fill_hg38` function.
+    """
 
     def setUp(self):
         """Set up any initial data used in multiple tests."""
