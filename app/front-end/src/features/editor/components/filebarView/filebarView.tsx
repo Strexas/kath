@@ -17,12 +17,12 @@ import { useWorkspaceContext } from '@/features/editor/hooks';
  * @returns {JSX.Element} A `FilebarGroup` component containing a list of `FilebarGroupItem` components.
  */
 export const FilebarView: React.FC = () => {
-  const Workspace = useWorkspaceContext();
+  const { filesHistory } = useWorkspaceContext();
 
   return (
     <FilebarGroup>
-      {Workspace.fileHistory.map((item, index) => (
-        <FilebarGroupItem key={index} {...item} />
+      {filesHistory.map((file, index) => (
+        <FilebarGroupItem key={index} {...file} />
       ))}
     </FilebarGroup>
   );

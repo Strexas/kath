@@ -465,6 +465,7 @@ def put_workspace_file(relative_path):
 
     start_row = page * rows_per_page
     end_row = start_row + rows_per_page
+    total_rows = 0
 
     try:
         # Ensure the user specific directory exists
@@ -498,6 +499,8 @@ def put_workspace_file(relative_path):
                     writer.writerow(rows[i - start_row])  # Write the updated row
                 else:
                     writer.writerow(row)  # Write the existing row
+                if i <= end_row:
+                    total_rows += 1
 
         # Replace the old file with the new file
         os.replace(temp_file_path, file_path)
@@ -518,7 +521,15 @@ def put_workspace_file(relative_path):
             sid,
         )
 
-        return jsonify({"status": "success"})
+        # Build the response data
+        response_data = {
+            "page": page,
+            "totalRows": total_rows,
+            "header": header,
+            "rows": rows,
+        }
+
+        return jsonify(response_data)
 
     except FileNotFoundError as e:
         logger.error("FileNotFoundError: %s while saving %s", e, file_path)

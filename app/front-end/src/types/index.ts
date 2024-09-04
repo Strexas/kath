@@ -4,4 +4,3 @@ export { Events } from './constants/events';
 export { Paths } from './constants/paths';
 
 export { Colors } from './enums/colors';
-export { FileTypes } from './enums/fileTypes';

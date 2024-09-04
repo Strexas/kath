@@ -16,6 +16,7 @@ Dependencies:
 from flask import Blueprint
 
 from src.routes.workspace_route import workspace_route_bp
+from src.routes.workspace_aggregate_route import workspace_aggregate_route_bp
 
 
 def router(prefix):
@@ -35,5 +36,6 @@ def router(prefix):
 
     # Register API routes with the main router blueprint
     router_bp.register_blueprint(workspace_route_bp)
+    router_bp.register_blueprint(workspace_aggregate_route_bp)
 
     return router_bp

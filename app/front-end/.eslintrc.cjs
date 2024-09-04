@@ -27,7 +27,7 @@ module.exports = {
     'react/react-in-jsx-scope': 'off', // React 17+ no longer requires importing React to use JSX
     'react/prop-types': 'off', // TypeScript handles type-checking for props
     '@typescript-eslint/no-explicit-any': 'warn', // Warns against using 'any' type
-    'no-console': 'warn',
+    'no-console': '["error", { allow: ["warn", "error"] }]',
     'no-debugger': 'warn',
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0, maxBOF: 0 }],
     'eqeqeq': ['error', 'always'], // Enforces the use of === and !== instead of == and !=
