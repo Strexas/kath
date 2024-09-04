@@ -6,14 +6,9 @@ import {
   ToolbarGroupsSelectorItem,
   ToolbarGroupsSelectorItemProps,
 } from '@/features/editor/components/toolbarView';
-
-import {
-  ApplyGroupButtons,
-  DownloadGroupButtons,
-  MergeGroupButtons,
-} from '@/features/editor/components/toolbarView/toolbarGroupButtons';
-
-import { useState } from 'react';
+import { useStatusContext } from '@/hooks';
+import { Deblur as DeblurIcon, Download as DownloadIcon, MergeType as MergeTypeIcon } from '@mui/icons-material';
+import { useMemo, useState } from 'react';
 
 /**
  * ToolbarView component manages and displays a set of toolbar groups and items.
@@ -38,12 +33,7 @@ import { useState } from 'react';
 export const ToolbarView: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<string>('download');
 
-  // Combine the button groups into a dictionary for easy access
-  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = {
-    download: DownloadGroupButtons,
-    merge: MergeGroupButtons,
-    apply: ApplyGroupButtons,
-  };
+  const { blocked } = useStatusContext();
 
   const ToolbarGroups: ToolbarGroupsSelectorItemProps[] = [
     {
@@ -62,6 +52,123 @@ export const ToolbarView: React.FC = () => {
       onClick: () => setSelectedGroup('apply'),
     },
   ];
+
+  //
+  // Download group buttons
+  //
+
+  const handleDownloadLovdClick = () => {
+    console.log('Clicked Download Lovd Button!');
+  };
+
+  const handleDownloadClinvarClick = () => {
+    console.log('Clicked Download Clinvar Button!');
+  };
+
+  const handleDownloadGnomadClick = () => {
+    console.log('Clicked Download Gnomad Button!');
+  };
+
+  const DownloadGroupButtons: ToolbarGroupItemProps[] = useMemo(
+    () => [
+      {
+        group: 'download',
+        icon: DownloadIcon,
+        label: 'LOVD',
+        disabled: blocked,
+        onClick: handleDownloadLovdClick,
+      },
+      {
+        group: 'download',
+        icon: DownloadIcon,
+        label: 'ClinVar',
+        disabled: blocked,
+        onClick: handleDownloadClinvarClick,
+      },
+      {
+        group: 'download',
+        icon: DownloadIcon,
+        label: 'gnomAD',
+        disabled: blocked,
+        onClick: handleDownloadGnomadClick,
+      },
+    ],
+    [blocked, handleDownloadLovdClick, handleDownloadClinvarClick, handleDownloadGnomadClick]
+  );
+
+  //
+  // Merge group buttons
+  //
+
+  const mergeLovdAndGnomadClick = () => {
+    console.log('Clicked Merge LOVD & gnomAD Button!');
+  };
+
+  const mergeLovdAndClinvarClick = () => {
+    console.log('Clicked Merge LOVD & ClinVar Button!');
+  };
+
+  const MergeGroupButtons: ToolbarGroupItemProps[] = useMemo(
+    () => [
+      {
+        group: 'merge',
+        icon: MergeTypeIcon,
+        label: 'Merge LOVD & gnomAD',
+        disabled: blocked,
+        onClick: mergeLovdAndGnomadClick,
+      },
+      {
+        group: 'merge',
+        icon: MergeTypeIcon,
+        label: 'Merge LOVD & ClinVar',
+        disabled: blocked,
+        onClick: mergeLovdAndClinvarClick,
+      },
+    ],
+    [blocked, mergeLovdAndGnomadClick, mergeLovdAndClinvarClick]
+  );
+
+  //
+  // Apply group buttons
+  //
+
+  const applySpliceAiClick = () => {
+    console.log('Clicked Apply SpliceAI Button!');
+  };
+
+  const applyCaddClick = () => {
+    console.log('Clicked Apply CADD Button!');
+  };
+
+  const ApplyGroupButtons: ToolbarGroupItemProps[] = useMemo(
+    () => [
+      {
+        group: 'apply',
+        icon: DeblurIcon,
+        label: 'Apply SpliceAI',
+        disabled: blocked,
+        onClick: applySpliceAiClick,
+      },
+      {
+        group: 'apply',
+        icon: DeblurIcon,
+        label: 'Apply CADD',
+        disabled: blocked,
+        onClick: applyCaddClick,
+      },
+    ],
+    [blocked, applySpliceAiClick, applyCaddClick]
+  );
+
+  // Combine the button groups into a dictionary for easy access
+  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = useMemo(
+    () => ({
+      download: DownloadGroupButtons,
+      merge: MergeGroupButtons,
+      apply: ApplyGroupButtons,
+    }),
+    [DownloadGroupButtons, MergeGroupButtons, ApplyGroupButtons]
+  );
 
   return (
     <>

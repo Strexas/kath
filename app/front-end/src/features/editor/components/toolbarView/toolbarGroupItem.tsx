@@ -5,6 +5,7 @@ export interface ToolbarGroupItemProps {
   group: string;
   icon: SvgIconComponent;
   label: string;
+  disabled: boolean;
   onClick: () => void;
 }
 
@@ -34,13 +35,14 @@ export interface ToolbarGroupItemProps {
  * @param {Function} onClick - The function to be called when the button is clicked.
  * @returns {JSX.Element} The rendered Button component with an icon and label.
  */
-export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, label, onClick }) => {
+export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, label, disabled, onClick }) => {
   const Theme = useTheme();
 
   return (
     <Box sx={{ height: '40%', alignContent: 'center' }}>
       <Button
         startIcon={<Icon sx={{ color: Theme.palette.text.primary }} />}
+        disabled={disabled}
         onClick={() => onClick()}
         sx={{
           color: Theme.palette.text.primary,
