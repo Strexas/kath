@@ -10,6 +10,7 @@ const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }
 }));
 
 interface GridColumnMenuContainerProps extends GridColumnMenuProps {
+  disabled: boolean;
   handleAggregation: (column: string, action: FileContentAggregationActions) => void;
 }
 
@@ -30,6 +31,7 @@ interface GridColumnMenuContainerProps extends GridColumnMenuProps {
  * @component
  */
 export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
+  disabled,
   handleAggregation,
   hideMenu,
   colDef,
@@ -40,7 +42,7 @@ export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
     ? fileContent.aggregations[colDef.field].action
     : FileContentAggregationActions.NONE;
 
-  return (
+  return !disabled ? (
     <StyledGridColumnMenuContainer hideMenu={hideMenu} colDef={colDef} {...other}>
       <EditorColumnMenuAggregationItem
         initialValue={aggregationActiveAction}
@@ -50,5 +52,5 @@ export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
       <Divider />
       <GridColumnMenuHideItem onClick={hideMenu} colDef={colDef!} />
     </StyledGridColumnMenuContainer>
-  );
+  ) : null;
 };

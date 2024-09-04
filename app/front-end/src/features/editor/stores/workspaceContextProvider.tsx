@@ -1,5 +1,5 @@
 import { FileContentModel, FileModel, FilePaginationModel, FileTypes } from '@/features/editor/types';
-import { useSessionContext } from '@/hooks';
+import { useSessionContext, useStatusContext } from '@/hooks';
 import { axios, socket } from '@/lib';
 import { Endpoints, Events } from '@/types';
 import { TreeViewBaseItem } from '@mui/x-tree-view';
@@ -149,8 +149,11 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
   const [fileTreeIsLoading, setFileTreeIsLoading] = useState(true);
   const [fileTree, setFileTree] = useState<TreeViewBaseItem<FileModel>[]>([]);
 
+  const { blockedStateUpdate } = useStatusContext();
+
   const getWorkspace = useCallback(async () => {
     setFileTreeIsLoading(true);
+    blockedStateUpdate(true);
     try {
       const response = await axios.get(Endpoints.WORKSPACE);
       setFileTree(response.data);
@@ -158,6 +161,7 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
       console.error('Failed to fetch workspace data:', error);
     } finally {
       setFileTreeIsLoading(false);
+      blockedStateUpdate(false);
     }
   }, []);
 
