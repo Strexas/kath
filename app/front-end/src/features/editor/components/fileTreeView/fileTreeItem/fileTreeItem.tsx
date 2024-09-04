@@ -1,7 +1,7 @@
 import { FileTreeItemContextMenu, FileTreeItemLabel } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
+import { FileTypes } from '@/features/editor/types';
 import { getIconFromFileType, isExpandable } from '@/features/editor/utils';
-import { FileTypes } from '@/types';
 import { FolderRounded as FolderRoundedIcon } from '@mui/icons-material';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
@@ -135,7 +135,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     icon = getIconFromFileType(item.fileType);
   }
 
-  const Workspace = useWorkspaceContext();
+  const { fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
   const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLDivElement) | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
     top: 0,
@@ -145,7 +145,8 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
   const handleClick = (newId: string, newLabel: string, newType: FileTypes) => {
     if (newType === FileTypes.FOLDER) return;
 
-    Workspace.update(newId, newLabel, newType);
+    fileStateUpdate({ id: newId, label: newLabel, type: newType }, undefined, undefined);
+    filesHistoryStateUpdate({ id: newId, label: newLabel, type: newType });
   };
 
   const handleOpenContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {

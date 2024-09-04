@@ -37,4 +37,5 @@ export const Endpoints = {
   WORKSPACE_CREATE: `/workspace/create`,
   WORKSPACE_RENAME: `/workspace/rename`,
   WORKSPACE_DELETE: `/workspace/delete`,
+  WORKSPACE_AGGREGATE: `/workspace/aggregate`,
 };

@@ -1,31 +1,42 @@
-import { FilebarGroupItemProps } from '@/features/editor/components/filebarView';
-import { FileTreeViewItemProps } from '@/features/editor/types';
+import { FileContentModel, FileModel, FilePaginationModel, FileTypes } from '@/features/editor/types';
 import { useSessionContext } from '@/hooks';
 import { axios, socket } from '@/lib';
-import { Endpoints, Events, FileTypes } from '@/types';
+import { Endpoints, Events } from '@/types';
 import { TreeViewBaseItem } from '@mui/x-tree-view';
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 
 export interface WorkspaceContextProps {
-  fileId: string;
-  fileLabel: string;
-  fileType: FileTypes;
-  update: (newId: string, newLabel: string, newType: FileTypes) => void;
-  fileHistory: FilebarGroupItemProps[];
-  remove: (fileId: string) => void;
-  fileTreeViewItems: TreeViewBaseItem<FileTreeViewItemProps>[] | undefined;
-  fileTreeViewIsLoading: boolean;
+  // File state properties
+  file: FileModel;
+  fileContent: FileContentModel;
+  filePagination: FilePaginationModel;
+  fileStateReset: () => void;
+  fileStateUpdate: (file?: FileModel, fileContent?: FileContentModel, filePagination?: FilePaginationModel) => void;
+
+  // File history state properties
+  filesHistory: FileModel[];
+  filesHistoryStateUpdate: (add?: FileModel, remove?: FileModel) => void;
+
+  // File tree state properties
+  fileTreeIsLoading: boolean;
+  fileTree: TreeViewBaseItem<FileModel>[];
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
-  fileId: '',
-  fileLabel: '',
-  fileType: FileTypes.FOLDER,
-  update: () => {},
-  fileHistory: [],
-  remove: () => {},
-  fileTreeViewItems: undefined,
-  fileTreeViewIsLoading: true,
+  // File state defaults
+  file: { id: '', label: '', type: FileTypes.FOLDER },
+  fileContent: { columns: [], rows: [], aggregations: {} },
+  filePagination: { page: 0, rowsPerPage: 100, totalRows: 0 },
+  fileStateReset: () => {},
+  fileStateUpdate: () => {},
+
+  // File history state defaults
+  filesHistory: [],
+  filesHistoryStateUpdate: () => {},
+
+  // File tree state defaults
+  fileTreeIsLoading: true,
+  fileTree: [],
 });
 
 interface Props {
@@ -33,65 +44,132 @@ interface Props {
 }
 
 /**
- * `WorkspaceContextProvider` is a React component that provides context for managing workspace file state across the application.
+ * `WorkspaceContextProvider` component is a context provider that manages and provides the state for the editor's workspace.
  *
- * @description This component sets up a context that holds and manages the state related to the current file in the workspace,
- * including its ID, label, type, and history. It provides functions to update the current file, add or remove files from the
- * history, and manage the file tree view data. The context is also updated with real-time changes via WebSocket.
+ * @description
+ * The `WorkspaceContextProvider` encapsulates the logic and state management for:
+ * - The currently selected file and its content.
+ * - Pagination for the file content.
+ * - A history of previously opened files.
+ * - The hierarchical file tree representing the directory structure.
  *
- * The context includes:
- * - `fileId`: The unique identifier for the current file.
- * - `fileLabel`: The label or name of the current file.
- * - `fileType`: The type of the file (e.g., `FileTypes.FILE`, `FileTypes.FOLDER`).
- * - `update`: A function to update the current file's ID, label, and type, and add the file to the history if it's not a folder.
- * - `fileHistory`: An array of recently accessed files, excluding folders, with their IDs, labels, and types.
- * - `remove`: A function to remove a file from the history and update the current file if it was active.
- * - `fileTreeViewItems`: The hierarchical data for the file tree view.
- * - `fileTreeViewIsLoading`: A boolean indicating if the file tree view data is still loading.
+ * This provider is responsible for:
+ * - Fetching the file tree from the backend API and updating it in response to WebSocket events.
+ * - Managing the state of the current file, including its content and pagination details.
+ * - Maintaining a history of opened files, which allows users to navigate back to previously opened files.
+ *
+ * The component provides this state and functionality to its children through the `WorkspaceContext`.
  *
  * @component
  *
  * @example
- * // Example usage of the WorkspaceContextProvider component
- * return (
+ * // Wrap your components that need access to the workspace state within the WorkspaceContextProvider
+ * import React from 'react';
+ * import { WorkspaceContextProvider } from '@/features/editor/context/WorkspaceContext';
+ * import MyEditorComponent from '@/features/editor/components/MyEditorComponent';
+ *
+ * const App = () => (
  *   <WorkspaceContextProvider>
- *     <YourComponent />
+ *     <MyEditorComponent />
  *   </WorkspaceContextProvider>
  * );
  *
- * @param {Object} props - The props for the WorkspaceContextProvider component.
- * @param {React.ReactNode} [props.children] - Optional child components that will have access to the workspace context.
+ * @param {Props} props - The props object for this component.
+ * @param {React.ReactNode} props.children - The child components that require access to the workspace context.
  *
- * @returns {JSX.Element} The `WorkspaceContext.Provider` component with the current workspace context value.
+ * @returns {JSX.Element} A context provider component that wraps its children with `WorkspaceContext`.
+ *
+ * @see {@link WorkspaceContext} for the context object that provides the workspace state and actions.
  */
 export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
-  const [fileId, setFileId] = useState<string>('');
-  const [fileLabel, setFileLabel] = useState<string>('');
-  const [fileType, setFileType] = useState<FileTypes>(FileTypes.FOLDER);
-  const [fileHistory, setFileHistory] = useState<FilebarGroupItemProps[]>([]);
-  const [fileTreeViewItems, setFileTreeViewItems] = useState<TreeViewBaseItem<FileTreeViewItemProps>[] | undefined>(
-    undefined
-  );
-  const [fileTreeViewIsLoading, setFileTreeViewIsLoading] = useState(true);
+  //
+  // State management
+  //
 
-  const { connected } = useSessionContext();
+  // File state
+  const [file, setFile] = useState<FileModel>({ id: '', label: '', type: FileTypes.FOLDER });
+  const [fileContent, setFileContent] = useState<FileContentModel>({ columns: [], rows: [], aggregations: {} });
+  const [filePagination, setFilePagination] = useState<FilePaginationModel>({
+    page: 0,
+    rowsPerPage: 100,
+    totalRows: 0,
+  });
+
+  const fileStateUpdate = (file?: FileModel, fileContent?: FileContentModel, filePagination?: FilePaginationModel) => {
+    if (file) setFile(file);
+    if (fileContent) setFileContent(fileContent);
+    if (filePagination) setFilePagination(filePagination);
+  };
+
+  const fileStateReset = useCallback(() => {
+    setFile({ id: '', label: '', type: FileTypes.FOLDER });
+    setFileContent({ columns: [], rows: [], aggregations: {} });
+    setFilePagination({ page: 0, rowsPerPage: 100, totalRows: 0 });
+  }, []);
+
+  // File history state
+  const [filesHistory, setFilesHistory] = useState<FileModel[]>([]);
+
+  const filesHistoryStateUpdate = (add?: FileModel, remove?: FileModel) => {
+    setFilesHistory((prevHistory) => {
+      // Remove the file from the history
+      if (remove) {
+        prevHistory = prevHistory.filter((current) => current.id !== remove.id);
+
+        // Check if the filed being removed was the current file
+        if (file.id === remove?.id) {
+          fileStateReset();
+          // If there are files left in the history
+          if (prevHistory.length !== 0) {
+            // Set the state to the latest file in the history
+            const latest_file = prevHistory[prevHistory.length - 1];
+            setFile(latest_file);
+            setFilePagination({ page: 0, rowsPerPage: 100, totalRows: 0 });
+          }
+        }
+      }
+
+      // Add the new file to the history
+      if (add) {
+        // Prevent adding directories to history
+        if (add.type === FileTypes.FOLDER) return prevHistory;
+
+        // Prevent adding duplicate files
+        if (prevHistory.some((current) => current.id === add.id)) return prevHistory;
+
+        // Add the new file to the history
+        return [...prevHistory, add];
+      }
+
+      return prevHistory;
+    });
+  };
+
+  // File tree state
+  const [fileTreeIsLoading, setFileTreeIsLoading] = useState(true);
+  const [fileTree, setFileTree] = useState<TreeViewBaseItem<FileModel>[]>([]);
 
   const getWorkspace = useCallback(async () => {
-    setFileTreeViewIsLoading(true);
+    setFileTreeIsLoading(true);
     try {
       const response = await axios.get(Endpoints.WORKSPACE);
-      setFileTreeViewItems(response.data);
+      setFileTree(response.data);
     } catch (error) {
       console.error('Failed to fetch workspace data:', error);
     } finally {
-      setFileTreeViewIsLoading(false);
+      setFileTreeIsLoading(false);
     }
   }, []);
 
+  //
+  // Use effects for fetching data
+  //
+
+  const { connected } = useSessionContext();
+
+  // File tree fetching effect
   useEffect(() => {
-    if (connected) {
-      getWorkspace();
-    }
+    if (connected) getWorkspace();
 
     socket.on(Events.WORKSPACE_UPDATE_FEEDBACK_EVENT, getWorkspace);
 
@@ -100,60 +178,18 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     };
   }, [connected, getWorkspace]);
 
-  const update = (newId: string, newLabel: string, newType: FileTypes) => {
-    setFileId(newId);
-    setFileLabel(newLabel);
-    setFileType(newType);
-    setFileHistory((prevHistory) => {
-      // Prevent adding directories to history
-      if (newType === FileTypes.FOLDER) {
-        return prevHistory;
-      }
-
-      // Prevent adding duplicate files
-      if (prevHistory.find((item) => item.fileId === newId)) {
-        return prevHistory;
-      }
-
-      // Add the new file to the history
-      return [...prevHistory, { fileId: newId, fileLabel: newLabel, fileType: newType }];
-    });
-  };
-
-  const remove = (fileId_remove: string) => {
-    setFileHistory((prevHistory) => {
-      // Remove the file from the history
-      const newHistory = prevHistory.filter((item) => item.fileId !== fileId_remove);
-
-      // Check if the file being removed was the current file
-      if (fileId === fileId_remove) {
-        // If there are no files left, reset the file state
-        if (newHistory.length === 0) {
-          setFileId('');
-          setFileLabel('');
-          setFileType(FileTypes.FOLDER);
-        } else {
-          // Set the state to the latest file in the history
-          const latest_file = newHistory[newHistory.length - 1];
-          setFileId(latest_file.fileId);
-          setFileLabel(latest_file.fileLabel);
-          setFileType(latest_file.fileType);
-        }
-      }
-
-      return newHistory;
-    });
-  };
-
   const WorkspaceContextValue: WorkspaceContextProps = {
-    fileId,
-    fileLabel,
-    fileType,
-    update,
-    fileHistory,
-    remove,
-    fileTreeViewItems,
-    fileTreeViewIsLoading,
+    file,
+    fileContent,
+    filePagination,
+    fileStateReset,
+    fileStateUpdate,
+
+    filesHistory,
+    filesHistoryStateUpdate,
+
+    fileTreeIsLoading: fileTreeIsLoading,
+    fileTree: fileTree,
   };
 
   return <WorkspaceContext.Provider value={WorkspaceContextValue}>{children}</WorkspaceContext.Provider>;
