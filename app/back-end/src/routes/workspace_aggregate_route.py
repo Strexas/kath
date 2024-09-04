@@ -64,8 +64,14 @@ def get_workspace_aggregate_all(relative_path):
             if header:
                 for row in reader:
                     for field in columns_aggregation.keys():
+
+                        header_index = header.index(field)
+                        if header_index >= len(row):
+                            skipped_counts[field] += 1
+                            continue
+
                         action = header_actions[field]
-                        value = row[header.index(field)]
+                        value = row[header_index]
                         if action == "cnt":
                             if value:
                                 header_values[field] += float(1)
@@ -252,9 +258,14 @@ def get_workspace_aggregate(relative_path):
                         ),
                         404,
                     )
-                
+
                 for row in reader:
-                    value = row[header.index(field)]
+                    header_index = header.index(field)
+                    if header_index >= len(row):
+                        skipped_count += 1
+                        continue
+
+                    value = row[header_index]
                     if action == "cnt":
                         if value:
                             result += float(1)

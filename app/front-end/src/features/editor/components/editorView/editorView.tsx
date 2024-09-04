@@ -115,7 +115,7 @@ export const EditorView: React.FC = () => {
 
   const getWorkspaceFile = useCallback(async () => {
     if (!file.id) {
-      fileStateReset();
+      setFileContentResponse({ totalRows: 0, header: [], rows: [], page: 0 });
       return;
     }
 
