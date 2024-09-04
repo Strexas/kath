@@ -104,11 +104,7 @@ def get_workspace_aggregate_all(relative_path):
                     or header_values[field] == float("-inf")
                     or (
                         header_values[field] == float(0)
-                        and (
-                            header_actions[field] != "min"
-                            or header_actions[field] != "max"
-                            or header_actions[field] != "cnt"
-                        )
+                        and header_actions[field] not in ["min", "max", "cnt"]
                     )
                     else (
                         str(int(header_values[field]))
