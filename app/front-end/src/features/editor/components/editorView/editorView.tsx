@@ -1,10 +1,10 @@
 import { EditorColumnMenu, EditorHeader, EditorToolbar } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileContentAggregationActions, FileDataRequestDTO, FileDataResponseDTO } from '@/features/editor/types';
-import { useSessionContext } from '@/hooks';
+import { useSessionContext, useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
-import { DataGrid, useGridApiRef } from '@mui/x-data-grid';
+import { DataGrid, GridPagination, useGridApiRef } from '@mui/x-data-grid';
 import { useCallback, useEffect, useState } from 'react';
 
 /**
@@ -56,10 +56,13 @@ export const EditorView: React.FC = () => {
   });
 
   const { connected } = useSessionContext();
-  const { file, fileContent, filePagination, fileStateReset, fileStateUpdate } = useWorkspaceContext();
+  const { file, fileContent, filePagination, fileStateUpdate } = useWorkspaceContext();
+  const { blocked, blockedStateUpdate } = useStatusContext();
   const ref = useGridApiRef();
 
   const handleSave = async () => {
+    blockedStateUpdate(true);
+
     const data: FileDataRequestDTO = {
       page: filePagination.page,
       rowsPerPage: filePagination.rowsPerPage,
@@ -83,6 +86,8 @@ export const EditorView: React.FC = () => {
       fileStateUpdate(undefined, { ...fileContent, aggregations: responseColumnsAggregation }, undefined);
     } catch (error) {
       console.error('Failed to save file content:', error);
+    } finally {
+      blockedStateUpdate(false);
     }
   };
 
@@ -94,20 +99,27 @@ export const EditorView: React.FC = () => {
         break;
       default:
         {
-          const response = await axios.get(`${Endpoints.WORKSPACE_AGGREGATE}/${file.id}`, {
-            params: {
-              field: column,
-              action: action,
-            },
-          });
+          blockedStateUpdate(true);
+          try {
+            const response = await axios.get(`${Endpoints.WORKSPACE_AGGREGATE}/${file.id}`, {
+              params: {
+                field: column,
+                action: action,
+              },
+            });
 
-          const { field: responseField, action: responseAction, value: responseValue } = response.data;
+            const { field: responseField, action: responseAction, value: responseValue } = response.data;
 
-          const newAggregations = {
-            ...fileContent.aggregations,
-            [responseField]: { action: responseAction, value: responseValue },
-          };
-          fileStateUpdate(undefined, { ...fileContent, aggregations: newAggregations }, undefined);
+            const newAggregations = {
+              ...fileContent.aggregations,
+              [responseField]: { action: responseAction, value: responseValue },
+            };
+            fileStateUpdate(undefined, { ...fileContent, aggregations: newAggregations }, undefined);
+          } catch (error) {
+            console.error('Failed to fetch aggregation data:', error);
+          } finally {
+            blockedStateUpdate(false);
+          }
         }
         break;
     }
@@ -119,7 +131,7 @@ export const EditorView: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
+    blockedStateUpdate(true);
 
     try {
       const response = await axios.get<FileDataResponseDTO>(`${Endpoints.WORKSPACE_FILE}/${file.id}`, {
@@ -134,6 +146,7 @@ export const EditorView: React.FC = () => {
       console.error('Failed to fetch file content:', error);
     } finally {
       setIsLoading(false);
+      blockedStateUpdate(false);
     }
   }, [file.id, filePagination.page, filePagination.rowsPerPage]);
 
@@ -186,7 +199,7 @@ export const EditorView: React.FC = () => {
   return (
     <DataGrid
       sx={{ height: '100%', border: 'none' }}
-      loading={isLoading}
+      loading={blocked || isLoading}
       rows={fileContent.rows}
       columns={fileContent.columns}
       pagination
@@ -198,6 +211,7 @@ export const EditorView: React.FC = () => {
           paginationModel: { pageSize: filePagination.rowsPerPage, page: filePagination.page },
         },
       }}
+      disableColumnMenu={blocked}
       pageSizeOptions={[25, 50, 100]}
       onPaginationModelChange={(model) => {
         fileStateUpdate(undefined, undefined, {
@@ -207,8 +221,9 @@ export const EditorView: React.FC = () => {
         });
       }}
       slots={{
-        toolbar: (props) => <EditorToolbar {...props} disabled={isLoading} handleSave={handleSave} />,
-        columnMenu: (props) => <EditorColumnMenu {...props} handleAggregation={handleAggregation} />,
+        toolbar: (props) => <EditorToolbar {...props} disabled={blocked || !file.id} handleSave={handleSave} />,
+        columnMenu: (props) => <EditorColumnMenu {...props} disabled={blocked} handleAggregation={handleAggregation} />,
+        pagination: (props) => <GridPagination disabled={blocked} {...props} />,
       }}
       slotProps={{
         toolbar: {},

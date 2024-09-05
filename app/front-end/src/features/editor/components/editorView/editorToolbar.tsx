@@ -1,3 +1,4 @@
+import { useStatusContext } from '@/hooks';
 import { socket } from '@/lib';
 import { Events } from '@/types';
 import { Done as DoneIcon, Error as ErrorIcon } from '@mui/icons-material';
@@ -12,7 +13,6 @@ import {
 import { useEffect, useState } from 'react';
 
 interface EditorToolbarProps extends GridToolbarProps, ToolbarPropsOverrides {
-  disabled?: boolean;
   handleSave: () => void;
 }
 
@@ -47,11 +47,12 @@ interface EditorToolbarProps extends GridToolbarProps, ToolbarPropsOverrides {
  *
  * @returns {JSX.Element} The rendered toolbar component with buttons for DataGrid actions and a save button with status feedback.
  */
-export const EditorToolbar: React.FC<EditorToolbarProps> = ({ disabled, handleSave }) => {
+export const EditorToolbar: React.FC<EditorToolbarProps> = ({ handleSave }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState(true);
 
   const Theme = useTheme();
+  const { blocked } = useStatusContext();
 
   useEffect(() => {
     const handleWorkspaceFileSaveFeedback = (data: { status: 'success' | 'error' }) => {
@@ -63,7 +64,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ disabled, handleSa
     return () => {
       socket.off(Events.WORKSPACE_FILE_SAVE_FEEDBACK_EVENT);
     };
-  });
+  }, []);
 
   return (
     <GridToolbarContainer>
@@ -77,7 +78,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ disabled, handleSa
           setIsSaving(true);
           handleSave();
         }}
-        disabled={disabled || isSaving}
+        disabled={blocked}
         startIcon={
           isSaving ? (
             <CircularProgress size={16} sx={{ color: Theme.palette.primary.main }} />

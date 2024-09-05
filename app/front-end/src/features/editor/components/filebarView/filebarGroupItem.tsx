@@ -1,5 +1,6 @@
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileModel } from '@/features/editor/types';
+import { useStatusContext } from '@/hooks';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 
@@ -25,6 +26,7 @@ import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 export const FilebarGroupItem: React.FC<FileModel> = (file) => {
   const Theme = useTheme();
   const Workspace = useWorkspaceContext();
+  const { blocked } = useStatusContext();
 
   const { id, label } = file;
 
@@ -39,9 +41,13 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
         borderRadius: '0rem',
         ':hover': {
           backgroundColor:
-            Workspace.file.id === id ? Theme.palette.background.default : alpha(Theme.palette.background.default, 0.5),
+            Workspace.file.id === id
+              ? Theme.palette.background.default
+              : blocked
+                ? Theme.palette.action.selected
+                : alpha(Theme.palette.background.default, 0.5),
         },
-        cursor: 'pointer',
+        cursor: blocked ? 'default' : 'pointer',
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
@@ -49,8 +55,10 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
       }}
       onClick={() => {
         // Update the workspace to the selected file
-        Workspace.fileStateUpdate(file);
-        Workspace.filesHistoryStateUpdate(file);
+        if (!blocked) {
+          Workspace.fileStateUpdate(file);
+          Workspace.filesHistoryStateUpdate(file);
+        }
       }}
     >
       <Typography
@@ -68,6 +76,7 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
       </Typography>
       <IconButton
         size='small'
+        disabled={blocked}
         onClick={(event) => {
           event.stopPropagation();
         }}

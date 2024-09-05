@@ -1,5 +1,6 @@
 import { FileTreeItem, FileTreeItemContextMenu } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
+import { useStatusContext } from '@/hooks';
 import { Box, Button, LinearProgress } from '@mui/material';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { useState } from 'react';
@@ -43,6 +44,7 @@ export const FileTreeView: React.FC = () => {
   });
 
   const { fileTree, fileTreeIsLoading } = useWorkspaceContext();
+  const { blocked } = useStatusContext();
 
   const handleOpenContextMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -67,7 +69,12 @@ export const FileTreeView: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Button variant='outlined' onClick={(event) => handleOpenContextMenu(event)} sx={{ mb: '1.5rem' }}>
+          <Button
+            variant='outlined'
+            disabled={blocked}
+            onClick={(event) => handleOpenContextMenu(event)}
+            sx={{ mb: '1.5rem' }}
+          >
             New
           </Button>
           <FileTreeItemContextMenu

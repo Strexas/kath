@@ -1,3 +1,4 @@
+import { useStatusContext } from '@/hooks';
 import { SvgIconComponent } from '@mui/icons-material';
 import { alpha, Box, Button, useTheme } from '@mui/material';
 
@@ -36,11 +37,13 @@ export interface ToolbarGroupItemProps {
  */
 export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, label, onClick }) => {
   const Theme = useTheme();
+  const { blocked } = useStatusContext();
 
   return (
     <Box sx={{ height: '40%', alignContent: 'center' }}>
       <Button
         startIcon={<Icon sx={{ color: Theme.palette.text.primary }} />}
+        disabled={blocked}
         onClick={() => onClick()}
         sx={{
           color: Theme.palette.text.primary,
