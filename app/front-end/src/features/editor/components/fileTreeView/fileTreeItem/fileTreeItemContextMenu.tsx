@@ -172,7 +172,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       <FileTreeItemContextMenuFileImportDialog
         open={Boolean(fileImportDialogOpen)}
         onClose={() => setFileImportDialogOpen(false)}
-        onConfirm={() => {}}
+        item={item}
       />
       <FileTreeItemContextMenuTextfieldDialog
         open={Boolean(newFileDialogOpen)}

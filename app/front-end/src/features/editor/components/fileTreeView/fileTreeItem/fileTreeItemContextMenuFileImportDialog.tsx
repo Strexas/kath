@@ -1,4 +1,10 @@
 import { FileTreeItemContextMenuStyledDialog } from '@/features/editor/components/fileTreeView/fileTreeItem';
+import { useWorkspaceContext } from '@/features/editor/hooks';
+import { FileTreeViewItemProps } from '@/features/editor/types';
+import { doesFileExist } from '@/features/editor/utils';
+import { findUniqueFileName, getFileExtension } from '@/features/editor/utils/helpers';
+import { axios } from '@/lib';
+import { Endpoints } from '@/types';
 import { Close as CloseIcon, UploadFile as UploadFileIcon } from '@mui/icons-material';
 import {
   Box,
@@ -16,24 +22,80 @@ import { ChangeEvent, useState } from 'react';
 export interface FileTreeItemContextMenuFileImportDialogProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  item: FileTreeViewItemProps;
 }
 
 export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemContextMenuFileImportDialogProps> = ({
   open,
   onClose,
-  onConfirm,
+  item,
 }) => {
   const Theme = useTheme();
-  const [filename, setFilename] = useState('');
+  const { fileTree } = useWorkspaceContext();
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const [filename, setFilename] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+
+  const [newInfoFileName, setNewInfoFileName] = useState('');
+  const [isIncorrectFileType, setIsIncorrectFileType] = useState(false);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFilename('');
+    setNewInfoFileName('');
+    setIsIncorrectFileType(false);
+
     if (!e.target.files) {
       return;
     }
-    const file = e.target.files[0];
-    const { name } = file;
-    setFilename(name);
+
+    const selectedFile = e.target.files?.[0] || null;
+    setFile(selectedFile);
+    setFilename(selectedFile.name);
+
+    const filePath = item.id === '' ? selectedFile.name : `${item.id}/${selectedFile.name}`;
+
+    const fileExtension = getFileExtension(selectedFile.name);
+    if (fileExtension !== 'csv' && fileExtension !== 'txt') {
+      setIsIncorrectFileType(true);
+      return;
+    }
+
+    if (doesFileExist(fileTree, filePath)) {
+      const newFileName = findUniqueFileName(fileTree, filePath);
+      setNewInfoFileName(newFileName);
+
+      const newFile = new File([selectedFile], newFileName, { type: selectedFile.type });
+
+      console.log(newFile.name);
+      setFile(newFile);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!file) {
+      console.error('No file selected');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      let parentPath = item.id.match(/^(.*)(?=\/[^/]*$)/)?.[0] || '';
+      if (parentPath === '') parentPath = item.id;
+
+      const url = parentPath ? `${Endpoints.WORKSPACE_IMPORT}/${item.id}` : Endpoints.WORKSPACE_IMPORT;
+
+      await axios.post(url, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      onClose();
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
   };
 
   return (
@@ -56,28 +118,51 @@ export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemConte
         </Grid>
       </DialogTitle>
       <DialogContent sx={{ py: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Button component='label' variant='outlined' startIcon={<UploadFileIcon />} sx={{ marginRight: '1rem' }}>
+        <Typography sx={{ color: Theme.palette.primary.main, fontSize: '1rem', mb: '1rem' }}>
+          Importing to location:{' '}
+          <b>
+            root/{item.id}
+            {item.id !== '' && '/'}
+          </b>
+          ...
+        </Typography>
+        <Box>
+          <Button
+            component='label'
+            variant='outlined'
+            startIcon={<UploadFileIcon />}
+            sx={{ width: '100%', marginRight: '1rem' }}
+          >
             Select a file...
-            <input type='file' accept='.csv, .txt' hidden onChange={handleFileUpload} />
+            <input type='file' accept='.csv, .txt' hidden onChange={handleFileChange} />
           </Button>
-          <Typography sx={{ fontSize: '1rem' }}>
-            {filename === '' ? (
-              'No file selected'
-            ) : (
+          <Typography style={{ fontSize: '1rem', marginTop: '0.5rem', wordWrap: 'break-word' }}>
+            {filename !== '' && (
               <>
-                Selected file: <span style={{ fontWeight: 'bold' }}>{filename}</span>
+                Selected file: "<b>{filename}</b>"
               </>
             )}
           </Typography>
         </Box>
+        {!isIncorrectFileType && newInfoFileName !== '' && (
+          <Typography sx={{ fontSize: '1rem', color: Theme.palette.error.main, mt: '1rem' }}>
+            File will be saved as: "<b>{newInfoFileName}</b>".
+          </Typography>
+        )}
+        {isIncorrectFileType && (
+          <Typography sx={{ fontSize: '1rem', color: Theme.palette.error.main, mt: '1rem' }}>
+            <b>Incorrect file extension!</b>
+            <br /> Accepted file extensions: '<b>.csv</b>', '<b>.txt</b>'
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>
           <Typography sx={{ fontSize: '1rem', color: Theme.palette.text.secondary }}>Cancel</Typography>
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={handleSubmit}
+          disabled={filename === '' || isIncorrectFileType}
           variant='outlined'
           sx={{
             borderColor: Theme.palette.primary.main,
@@ -87,7 +172,14 @@ export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemConte
             },
           }}
         >
-          <Typography sx={{ fontSize: '1rem', color: Theme.palette.primary.main }}>Import</Typography>
+          <Typography
+            sx={{
+              fontSize: '1rem',
+              color: isIncorrectFileType || filename === '' ? Theme.palette.text.secondary : Theme.palette.primary.main,
+            }}
+          >
+            Import
+          </Typography>
         </Button>
       </DialogActions>
     </FileTreeItemContextMenuStyledDialog>
