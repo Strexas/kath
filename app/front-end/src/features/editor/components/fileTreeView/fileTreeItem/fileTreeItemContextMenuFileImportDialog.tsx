@@ -66,7 +66,6 @@ export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemConte
 
       const newFile = new File([selectedFile], newFileName, { type: selectedFile.type });
 
-      console.log(newFile.name);
       setFile(newFile);
     }
   };

@@ -79,7 +79,7 @@ export const FileTreeItemContextMenuConfirmationDialog: React.FC<FileTreeItemCon
         </Grid>
       </DialogTitle>
       <DialogContent sx={{ py: 0 }}>
-        <Typography sx={{ fontSize: '1rem' }}>
+        <Typography sx={{ fontSize: '1rem', wordWrap: 'break-word' }}>
           {content.text}
           <b>{content.boldText}</b>?
         </Typography>
@@ -99,7 +99,9 @@ export const FileTreeItemContextMenuConfirmationDialog: React.FC<FileTreeItemCon
             },
           }}
         >
-          <Typography sx={{ fontSize: '1rem', color: Theme.palette.text.primary }}>{action}</Typography>
+          <Typography sx={{ fontSize: '1rem', color: Theme.palette.text.primary }}>
+            {action.charAt(0).toUpperCase() + action.slice(1).toLowerCase()}
+          </Typography>
         </Button>
       </DialogActions>
     </FileTreeItemContextMenuStyledDialog>
