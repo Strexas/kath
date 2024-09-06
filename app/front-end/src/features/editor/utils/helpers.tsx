@@ -51,7 +51,7 @@ export const findUniqueFileName = (fileTreeView: TreeViewBaseItem<FileTreeViewIt
   let i = 1;
 
   while (doesFileExist(fileTreeView, newFullPath)) {
-    newFilePath = `${filePath} (${i})`;
+    newFilePath = `${filePath}(${i})`;
     newFullPath = `${newFilePath}.${fileExtension}`;
     i++;
   }

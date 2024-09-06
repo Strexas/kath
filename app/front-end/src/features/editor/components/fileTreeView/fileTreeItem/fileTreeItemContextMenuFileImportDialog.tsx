@@ -79,10 +79,7 @@ export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemConte
     formData.append('file', file);
 
     try {
-      let parentPath = item.id.match(/^(.*)(?=\/[^/]*$)/)?.[0] || '';
-      if (parentPath === '') parentPath = item.id;
-
-      const url = parentPath ? `${Endpoints.WORKSPACE_IMPORT}/${item.id}` : Endpoints.WORKSPACE_IMPORT;
+      const url = item.id ? `${Endpoints.WORKSPACE_IMPORT}/${item.id}` : Endpoints.WORKSPACE_IMPORT;
 
       await axios.post(url, formData, {
         headers: {
