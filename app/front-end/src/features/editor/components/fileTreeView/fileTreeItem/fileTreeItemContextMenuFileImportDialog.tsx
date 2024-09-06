@@ -1,8 +1,7 @@
 import { FileTreeItemContextMenuStyledDialog } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTreeViewItemProps } from '@/features/editor/types';
-import { doesFileExist } from '@/features/editor/utils';
-import { findUniqueFileName, getFileExtension } from '@/features/editor/utils/helpers';
+import { doesFileExist, findUniqueFileName, getFileExtension } from '@/features/editor/utils';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
 import { Close as CloseIcon, UploadFile as UploadFileIcon } from '@mui/icons-material';
