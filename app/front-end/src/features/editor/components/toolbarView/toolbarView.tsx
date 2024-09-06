@@ -6,14 +6,12 @@ import {
   ToolbarGroupsSelectorItem,
   ToolbarGroupsSelectorItemProps,
 } from '@/features/editor/components/toolbarView';
-
 import {
   ApplyGroupButtons,
   DownloadGroupButtons,
   MergeGroupButtons,
 } from '@/features/editor/components/toolbarView/toolbarGroupButtons';
-
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 /**
  * ToolbarView component manages and displays a set of toolbar groups and items.
@@ -38,13 +36,6 @@ import { useState } from 'react';
 export const ToolbarView: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<string>('download');
 
-  // Combine the button groups into a dictionary for easy access
-  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = {
-    download: DownloadGroupButtons,
-    merge: MergeGroupButtons,
-    apply: ApplyGroupButtons,
-  };
-
   const ToolbarGroups: ToolbarGroupsSelectorItemProps[] = [
     {
       id: 'download',
@@ -62,6 +53,16 @@ export const ToolbarView: React.FC = () => {
       onClick: () => setSelectedGroup('apply'),
     },
   ];
+
+  // Combine the button groups into a dictionary for easy access
+  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = useMemo(
+    () => ({
+      download: DownloadGroupButtons,
+      merge: MergeGroupButtons,
+      apply: ApplyGroupButtons,
+    }),
+    [DownloadGroupButtons, MergeGroupButtons, ApplyGroupButtons]
+  );
 
   return (
     <>

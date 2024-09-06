@@ -2,6 +2,7 @@ import { FileTreeItemContextMenu, FileTreeItemLabel } from '@/features/editor/co
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTypes } from '@/features/editor/types';
 import { getIconFromFileType, isExpandable } from '@/features/editor/utils';
+import { useStatusContext } from '@/hooks';
 import { FolderRounded as FolderRoundedIcon } from '@mui/icons-material';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
@@ -136,6 +137,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
   }
 
   const { fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
+  const { blocked } = useStatusContext();
   const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLDivElement) | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
     top: 0,
@@ -170,10 +172,15 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
         <StyledFileTreeItemContent
           {...getContentProps({
             onClick: (event) => {
-              if (getContentProps().onClick) getContentProps().onClick(event);
-              handleClick(item.id, item.label, item.fileType);
+              if (!blocked) {
+                if (getContentProps().onClick) getContentProps().onClick(event);
+                handleClick(item.id, item.label, item.fileType);
+              }
             },
-            onContextMenu: (event) => handleOpenContextMenu(event),
+
+            onContextMenu: (event) => {
+              if (!blocked) handleOpenContextMenu(event);
+            },
             className: clsx('content', {
               'Mui-expanded': status.expanded,
               'Mui-selected': status.selected,
