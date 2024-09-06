@@ -1,1 +1,1 @@
-export { doesFileExist, getIconFromFileType, isExpandable } from './helpers';
+export { doesFileExist, findUniqueFileName, getFileExtension, getIconFromFileType, isExpandable } from './helpers';

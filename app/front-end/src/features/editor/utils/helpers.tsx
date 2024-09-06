@@ -39,3 +39,30 @@ export const doesFileExist = (fileTreeView: TreeViewBaseItem<FileTreeViewItemPro
   }
   return false;
 };
+
+export const findUniqueFileName = (fileTreeView: TreeViewBaseItem<FileTreeViewItemProps>[], path: string): string => {
+  const dotIndex = path.lastIndexOf('.');
+  const filePath = path.substring(0, dotIndex);
+  const fileExtension = path.substring(dotIndex + 1);
+
+  let newFilePath = filePath;
+  let newFullPath = `${newFilePath}.${fileExtension}`;
+
+  let i = 1;
+
+  while (doesFileExist(fileTreeView, newFullPath)) {
+    newFilePath = `${filePath}(${i})`;
+    newFullPath = `${newFilePath}.${fileExtension}`;
+    i++;
+  }
+
+  const lastSlashIndex = newFullPath.lastIndexOf('/');
+  const newFileName = newFullPath.substring(lastSlashIndex + 1);
+
+  return newFileName;
+};
+
+export const getFileExtension = (filename: string): string => {
+  const dotIndex = filename.lastIndexOf('.');
+  return dotIndex !== -1 ? filename.substring(dotIndex + 1).toLowerCase() : '';
+};
