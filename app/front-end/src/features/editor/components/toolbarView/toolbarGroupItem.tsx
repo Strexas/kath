@@ -42,7 +42,7 @@ export const ToolbarGroupItem: React.FC<ToolbarGroupItemProps> = ({ icon: Icon, 
   return (
     <Box sx={{ height: '40%', alignContent: 'center' }}>
       <Button
-        startIcon={<Icon sx={{ color: Theme.palette.text.primary }} />}
+        startIcon={<Icon sx={{ color: blocked ? Theme.palette.action.disabled : Theme.palette.text.primary }} />}
         disabled={blocked}
         onClick={() => onClick()}
         sx={{
