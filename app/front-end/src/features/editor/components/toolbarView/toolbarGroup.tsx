@@ -1,7 +1,8 @@
-import { List, useTheme } from '@mui/material';
+import { Box, List, useTheme } from '@mui/material';
 
 export interface ToolbarGroupProps {
-  children: React.ReactNode;
+  params: React.ReactNode;
+  buttons: React.ReactNode;
 }
 
 /**
@@ -25,24 +26,33 @@ export interface ToolbarGroupProps {
  * @param {React.ReactNode} children - The child elements to be displayed inside the list.
  * @returns {JSX.Element} The rendered List component.
  */
-export const ToolbarGroup: React.FC<ToolbarGroupProps> = ({ children }) => {
+export const ToolbarGroup: React.FC<ToolbarGroupProps> = ({ params, buttons }) => {
   const Theme = useTheme();
 
   return (
-    <List
+    <Box
       sx={{
-        height: '75%',
+        width: '100%',
+        height: '100%',
+        display: 'grid',
+        gridTemplateColumns: '30% 70%',
         bgcolor: Theme.palette.background.paper,
-        px: '1rem',
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: '1rem',
-        overflow: 'auto',
-        alignContent: 'flex-start',
       }}
     >
-      {children}
-    </List>
+      <Box sx={{ borderRight: `solid 2px ${Theme.palette.action.selected}` }}>{params}</Box>
+      <List
+        sx={{
+          pl: '1rem',
+          display: 'flex',
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: '1rem',
+          overflow: 'auto',
+          alignContent: 'flex-start',
+        }}
+      >
+        {buttons}
+      </List>
+    </Box>
   );
 };
