@@ -1,0 +1,37 @@
+import { InputLabel, ListSubheader, MenuItem, Select, Typography, styled } from '@mui/material';
+
+export const StyledGroupParamsTypography = styled(Typography)({
+  fontSize: '0.875rem',
+  transition: 'color 0.3s ease',
+});
+
+export const StyledGroupParamsInputLabel = styled(InputLabel)({
+  transition: 'color 0.3s ease',
+});
+
+export const StyledGroupParamsSelect = styled(Select)({
+  height: '3rem',
+  transition: 'color 0.3s ease, border-color 0.3s ease',
+});
+
+export const StyledGroupParamsMenuItem = styled(MenuItem)({
+  whiteSpace: 'normal',
+});
+
+export const StyledGroupParamsListSubheader = styled(ListSubheader)(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  whiteSpace: 'normal',
+}));
+
+export const StyledGroupParamsMenuItemTypography = styled(Typography)({
+  width: '100%',
+  fontSize: '1rem',
+  textAlign: 'right',
+  overflowWrap: 'break-word',
+});
+
+export const StyledGroupParamsMenuItemTypographyBold = styled(Typography)({
+  fontSize: '0.875rem',
+  fontWeight: 'bold',
+  overflowWrap: 'break-word',
+});

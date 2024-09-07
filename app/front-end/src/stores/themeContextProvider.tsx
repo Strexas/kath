@@ -99,6 +99,8 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
                 fontSize: '20px',
                 color: mode === 'light' ? Colors.textPrimaryLight : Colors.textPrimaryDark,
                 fontWeight: '400',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               },
             },
           },
