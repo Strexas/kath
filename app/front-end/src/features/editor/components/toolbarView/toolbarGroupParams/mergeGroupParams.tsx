@@ -1,11 +1,11 @@
 import {
-  StyledGroupParamsInputLabel,
+  GroupParamsInputLabel,
+  GroupParamsTypography,
   StyledGroupParamsListSubheader,
   StyledGroupParamsMenuItem,
   StyledGroupParamsMenuItemTypography,
   StyledGroupParamsMenuItemTypographyBold,
   StyledGroupParamsSelect,
-  StyledGroupParamsTypography,
 } from '@/features/editor/components/toolbarView/toolbarGroupParams';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
 import { FileModel, FileTypes } from '@/features/editor/types';
@@ -97,17 +97,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
         }}
       >
         <FormControl sx={{ width: '90%' }}>
-          <StyledGroupParamsInputLabel
-            sx={{
-              color: blocked
-                ? Theme.palette.action.disabled
-                : lovdError
-                  ? Theme.palette.error.main
-                  : Theme.palette.text.primary,
-            }}
-          >
-            {'Lovd File'}
-          </StyledGroupParamsInputLabel>
+          <GroupParamsInputLabel label={'Lovd File'} error={lovdError} />
           <StyledGroupParamsSelect
             id={'lovd-file-select'}
             name={'lovd-file-select'}
@@ -147,17 +137,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
         <FormControl sx={{ width: '90%' }}>
-          <StyledGroupParamsInputLabel
-            sx={{
-              color: blocked
-                ? Theme.palette.action.disabled
-                : clinvarError
-                  ? Theme.palette.error.main
-                  : Theme.palette.text.primary,
-            }}
-          >
-            {'Clinvar File'}
-          </StyledGroupParamsInputLabel>
+          <GroupParamsInputLabel label={'Clinvar File'} error={clinvarError} />
           <StyledGroupParamsSelect
             id={'clinvar-file-select'}
             name={'clinvar-file-select'}
@@ -197,17 +177,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
         <FormControl sx={{ width: '90%' }}>
-          <StyledGroupParamsInputLabel
-            sx={{
-              color: blocked
-                ? Theme.palette.action.disabled
-                : gnomadError
-                  ? Theme.palette.error.main
-                  : Theme.palette.text.primary,
-            }}
-          >
-            {'Gnomad File'}
-          </StyledGroupParamsInputLabel>
+          <GroupParamsInputLabel label={'Gnomad File'} error={gnomadError} />
           <StyledGroupParamsSelect
             id={'gnomad-file-select'}
             name={'gnomad-file-select'}
@@ -247,13 +217,9 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'end', gap: '0.5rem' }}>
+      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
         <FormControl sx={{ width: '90%' }}>
-          <StyledGroupParamsInputLabel
-            sx={{ color: blocked ? Theme.palette.action.disabled : Theme.palette.text.primary }}
-          >
-            Save To
-          </StyledGroupParamsInputLabel>
+          <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
             id={'save-to-select'}
             name={'save-to'}
@@ -294,22 +260,20 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
             })}
           </StyledGroupParamsSelect>
         </FormControl>
-        <FormControlLabel
-          control={
-            <Checkbox
-              id='override-checkbox'
-              checked={overrideValue}
-              onChange={handleOverrideChange}
-              disabled={blocked}
-            />
-          }
-          label={
-            <StyledGroupParamsTypography sx={{ color: blocked ? Theme.palette.action.disabled : 'initial' }}>
-              Override
-            </StyledGroupParamsTypography>
-          }
-          labelPlacement='start'
-        />
+        {saveToValue !== '/' && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                id='override-checkbox'
+                checked={overrideValue}
+                onChange={handleOverrideChange}
+                disabled={blocked}
+              />
+            }
+            label={<GroupParamsTypography label={'Override File'} />}
+            labelPlacement='start'
+          />
+        )}
       </Box>
     </Box>
   );

@@ -2,8 +2,8 @@ export { ApplyGroupParams } from './applyGroupParams';
 export type { ApplyGroupParamsProps } from './applyGroupParams';
 export { DownloadGroupParams } from './downloadGroupParams';
 export type { DownloadGroupParamsProps } from './downloadGroupParams';
-export { MergeGroupParams } from './mergeGroupParams';
-export type { MergeGroupParamsProps } from './mergeGroupParams';
+export { GroupParamsInputLabel } from './groupParamsComponents/groupParamsInputLabel';
+export { GroupParamsTypography } from './groupParamsComponents/groupParamsTypography';
 export {
   StyledGroupParamsInputLabel,
   StyledGroupParamsListSubheader,
@@ -12,4 +12,6 @@ export {
   StyledGroupParamsMenuItemTypographyBold,
   StyledGroupParamsSelect,
   StyledGroupParamsTypography,
-} from './styledGroupParamsComponents';
+} from './groupParamsComponents/styledGroupParamsComponents';
+export { MergeGroupParams } from './mergeGroupParams';
+export type { MergeGroupParamsProps } from './mergeGroupParams';
