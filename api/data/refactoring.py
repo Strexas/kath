@@ -247,7 +247,18 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
             f.write("\n")
 
 
-def process_population_data(df, pop_data, name, pop_ids, index):
+def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
+    """
+    prepares the calculation of popmax and popmax population for a variant.
+    genome and exome data of ac and an.
+
+    :param DataFrame df: DataFrame containing gnomAD data
+    :param dict pop_data: dictionary containing population data
+    :param str name: name of the population
+    :param list[str] pop_ids: list of population ids
+    :param int index: index of the variant
+    """
+
     for pop_id in pop_ids:
         df.loc[index, f'{name}_ac_{pop_id}'] = 0
         df.loc[index, f'{name}_an_{pop_id}'] = 0
@@ -339,9 +350,9 @@ def request_gnomad_api_data(gene_name):
 
     for i in range(len(exome_populations)):
         exome_pop = exome_populations[i]
-        process_population_data(df, exome_pop, 'exome', population_ids, i)
+        prepare_popmax_calculation(df, exome_pop, 'exome', population_ids, i)
         genome_pop = genome_populations[i]
-        process_population_data(df, genome_pop, 'genome', population_ids, i)
+        prepare_popmax_calculation(df, genome_pop, 'genome', population_ids, i)
 
     for population_id in population_ids:
         df.loc[:, f'Allele_Frequency_{population_id}'] = (
