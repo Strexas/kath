@@ -179,7 +179,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     } catch (error) {
       console.error('Error exporting file:', error);
     }
-  }, [item.id]);
+  }, [item]);
 
   return (
     <>
