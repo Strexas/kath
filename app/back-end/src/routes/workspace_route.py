@@ -1197,43 +1197,43 @@ def export_file(relative_path):
         )
 
         response = send_file(file_path, as_attachment=True)
-        
+
         return response
 
     except FileNotFoundError as e:
-        logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
+        logger.error("FileNotFoundError: %s while exporting %s", e, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"FileNotFoundError: {e} while accessing {user_workspace_dir}",
+                "message": f"FileNotFoundError: {e} while exporting {user_workspace_dir}",
             },
             uuid,
             sid,
         )
         return jsonify({"error": "Requested file not found"}), 404
     except PermissionError as e:
-        logger.error("PermissionError: %s while accessing %s", e, user_workspace_dir)
+        logger.error("PermissionError: %s while exporting %s", e, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"PermissionError: {e} while accessing {user_workspace_dir}",
+                "message": f"PermissionError: {e} while exporting {user_workspace_dir}",
             },
             uuid,
             sid,
         )
         return jsonify({"error": "Permission denied"}), 403
     except UnexpectedError as e:
-        logger.error("UnexpectedError: %s while accessing %s", e.message, user_workspace_dir)
+        logger.error("UnexpectedError: %s while exporting %s", e.message, user_workspace_dir)
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"UnexpectedError: {e.message} while accessing {user_workspace_dir}",
+                "message": f"UnexpectedError: {e.message} while exporting {user_workspace_dir}",
             },
             uuid,
             sid,

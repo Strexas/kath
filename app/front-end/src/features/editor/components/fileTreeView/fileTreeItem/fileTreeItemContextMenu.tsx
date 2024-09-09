@@ -8,7 +8,7 @@ import { FileTreeItemContextMenuActions, FileTreeViewItemProps, FileTypes } from
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
 import { Divider, Menu, MenuItem } from '@mui/material';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 export interface FileTreeItemContextMenuProps {
   item: FileTreeViewItemProps;
@@ -157,7 +157,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     filesHistoryStateUpdate(undefined, { id: item.id, label: item.label, type: item.fileType || FileTypes.FILE });
   };
 
-  const handleExport = async () => {
+  const handleExport = useCallback(async () => {
     try {
       const response = await axios.get(`${Endpoints.WORKSPACE_EXPORT}/${item.id}`, {
         responseType: 'blob',
@@ -179,7 +179,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     } catch (error) {
       console.error('Error exporting file:', error);
     }
-  };
+  }, [item.id]);
 
   return (
     <>
