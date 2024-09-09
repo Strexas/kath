@@ -1198,14 +1198,6 @@ def export_file(relative_path):
 
         response = send_file(file_path, as_attachment=True)
 
-        # Emit success message after file export is successful
-        #socketio_emit_to_user_session(
-        #    CONSOLE_FEEDBACK_EVENT,
-        #    {"type": "succ", "message": f"File '{relative_path}' was exported successfully."},
-        #    uuid,
-        #    sid,
-        #)
-
     except FileNotFoundError as e:
         logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
         # Emit a feedback to the user's console

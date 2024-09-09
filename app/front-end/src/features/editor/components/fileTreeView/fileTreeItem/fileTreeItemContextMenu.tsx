@@ -163,8 +163,9 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      console.log(item.id);
+
       const fileName = item.id.match(/[^/\\]+$/)?.[0] || item.id; // Extracts only the file name, otherwise uses the full path
+
       const link = Object.assign(document.createElement('a'), {
         href: url,
         download: fileName,
@@ -176,7 +177,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       // TODO: Implement socket console event for successful file export
       console.log('Exported:', fileName);
     } catch (error) {
-      console.error('Error exporting the file:', error);
+      console.error('Error exporting file:', error);
     }
   };
 
