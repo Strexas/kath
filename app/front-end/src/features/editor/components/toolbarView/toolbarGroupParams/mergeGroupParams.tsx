@@ -93,7 +93,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'start',
-          gap: '1rem',
+          gap: '0.2rem',
         }}
       >
         <FormControl sx={{ width: '90%' }}>

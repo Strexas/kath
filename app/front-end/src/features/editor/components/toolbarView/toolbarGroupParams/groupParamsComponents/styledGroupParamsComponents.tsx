@@ -10,7 +10,7 @@ export const StyledGroupParamsInputLabel = styled(InputLabel)({
 });
 
 export const StyledGroupParamsSelect = styled(Select)({
-  height: '3rem',
+  height: '80%',
   transition: 'color 0.3s ease, border-color 0.3s ease',
 });
 
