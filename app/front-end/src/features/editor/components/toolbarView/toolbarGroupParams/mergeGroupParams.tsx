@@ -90,13 +90,13 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
       <Box
         sx={{
           height: '100%',
-          display: 'flex',
           flexDirection: 'column',
           alignItems: 'start',
-          gap: '0.2rem',
+          display: 'grid',
+          gap: '1rem',
         }}
       >
-        <FormControl sx={{ width: '90%' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Lovd File'} error={lovdError} />
           <StyledGroupParamsSelect
             id={'lovd-file-select'}
@@ -136,7 +136,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
             })}
           </StyledGroupParamsSelect>
         </FormControl>
-        <FormControl sx={{ width: '90%' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Clinvar File'} error={clinvarError} />
           <StyledGroupParamsSelect
             id={'clinvar-file-select'}
@@ -176,7 +176,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
             })}
           </StyledGroupParamsSelect>
         </FormControl>
-        <FormControl sx={{ width: '90%' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Gnomad File'} error={gnomadError} />
           <StyledGroupParamsSelect
             id={'gnomad-file-select'}
@@ -217,8 +217,8 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
-        <FormControl sx={{ width: '90%' }}>
+      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'start' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
             id={'save-to-select'}

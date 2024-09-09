@@ -62,13 +62,13 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
       <Box
         sx={{
           height: '100%',
-          display: 'flex',
+          display: 'grid',
           flexDirection: 'column',
           alignItems: 'start',
           gap: '1rem',
         }}
       >
-        <FormControl sx={{ width: '50%' }}>
+        <FormControl sx={{ width: '60%' }} size='small'>
           <GroupParamsInputLabel label={'Gene'} />
           <StyledGroupParamsSelect
             id={'gene-select'}
@@ -93,8 +93,8 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
-        <FormControl sx={{ width: '90%' }}>
+      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end' }}>
+        <FormControl sx={{ width: '90%', justifyContent: 'center' }} size='small'>
           <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
             id={'save-to-select'}

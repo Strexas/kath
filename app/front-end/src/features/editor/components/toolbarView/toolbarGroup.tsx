@@ -36,6 +36,7 @@ export const ToolbarGroup: React.FC<ToolbarGroupProps> = ({ params, buttons }) =
         height: '100%',
         display: 'grid',
         gridTemplateColumns: '30% 70%',
+        overflow: 'auto',
         bgcolor: Theme.palette.background.paper,
       }}
     >

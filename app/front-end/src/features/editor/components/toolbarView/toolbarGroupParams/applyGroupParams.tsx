@@ -64,13 +64,13 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
       <Box
         sx={{
           height: '100%',
-          display: 'flex',
+          display: 'grid',
           flexDirection: 'column',
           alignItems: 'start',
           gap: '1rem',
         }}
       >
-        <FormControl sx={{ width: '90%' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Apply To'} error={applyError} />
           <StyledGroupParamsSelect
             id={'lovd-file-select'}
@@ -111,8 +111,8 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'end' }}>
-        <FormControl sx={{ width: '90%' }}>
+      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end' }}>
+        <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
             id={'save-to-select'}
