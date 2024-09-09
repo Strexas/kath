@@ -22,15 +22,9 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
   const mergeLovdAndGnomadClick = useCallback(async () => {
     clinvarErrorStateUpdate('');
 
-    if (!lovdFile) {
-      lovdErrorStateUpdate('Please select a LOVD file');
-      return;
-    }
-
-    if (!gnomadFile) {
-      gnomadErrorStateUpdate('Please select a gnomAD file');
-      return;
-    }
+    if (!lovdFile) lovdErrorStateUpdate('Please select a LOVD file');
+    if (!gnomadFile) gnomadErrorStateUpdate('Please select a gnomAD file');
+    if (!lovdFile || !gnomadFile) return;
 
     blockedStateUpdate(true);
 
@@ -57,15 +51,9 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
   const mergeLovdAndClinvarClick = useCallback(async () => {
     gnomadErrorStateUpdate('');
 
-    if (!lovdFile) {
-      lovdErrorStateUpdate('Please select a LOVD file');
-      return;
-    }
-
-    if (!clinvarFile) {
-      clinvarErrorStateUpdate('Please select a ClinVar file');
-      return;
-    }
+    if (!lovdFile) lovdErrorStateUpdate('Please select a LOVD file');
+    if (!clinvarFile) clinvarErrorStateUpdate('Please select a ClinVar file');
+    if (!lovdFile || !clinvarFile) return;
 
     blockedStateUpdate(true);
 

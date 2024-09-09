@@ -106,7 +106,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
                   : Theme.palette.text.primary,
             }}
           >
-            {lovdError ? lovdError : 'Lovd File'}
+            {'Lovd File'}
           </StyledGroupParamsInputLabel>
           <StyledGroupParamsSelect
             id={'lovd-file-select'}
@@ -156,7 +156,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
                   : Theme.palette.text.primary,
             }}
           >
-            {clinvarError ? clinvarError : 'Clinvar File'}
+            {'Clinvar File'}
           </StyledGroupParamsInputLabel>
           <StyledGroupParamsSelect
             id={'clinvar-file-select'}
@@ -206,7 +206,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
                   : Theme.palette.text.primary,
             }}
           >
-            {gnomadError ? gnomadError : 'Gnomad File'}
+            {'Gnomad File'}
           </StyledGroupParamsInputLabel>
           <StyledGroupParamsSelect
             id={'gnomad-file-select'}

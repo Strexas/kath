@@ -80,7 +80,7 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
                   : Theme.palette.text.primary,
             }}
           >
-            {applyError ? applyError : 'Apply To'}
+            {'Apply To'}
           </StyledGroupParamsInputLabel>
           <StyledGroupParamsSelect
             id={'lovd-file-select'}
