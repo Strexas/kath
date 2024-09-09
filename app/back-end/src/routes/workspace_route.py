@@ -82,7 +82,7 @@ Errors and Feedback:
 import os
 import shutil
 import csv
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 
 from src.setup.extensions import compress, logger
 from src.utils.helpers import socketio_emit_to_user_session, build_workspace_structure
@@ -99,6 +99,7 @@ from src.constants import (
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
     WORKSPACE_IMPORT_ROUTE,
+    WORKSPACE_EXPORT_ROUTE,
 )
 
 workspace_route_bp = Blueprint("workspace_route", __name__)
@@ -1168,3 +1169,83 @@ def import_file(relative_path=None):
         return jsonify({"error": "An internal error occurred"}), 500
 
     return jsonify({'message': 'File imported successfully'}), 200
+
+@workspace_route_bp.route(f"{WORKSPACE_EXPORT_ROUTE}/<path:relative_path>", methods=["GET"])
+def export_file(relative_path):
+
+    uuid = request.headers.get("uuid")
+    sid = request.headers.get("sid")
+
+    # Ensure the uuid header is present
+    if not uuid:
+        return jsonify({"error": "UUID header is missing"}), 400
+
+    # Ensure the sid header is present
+    if not sid:
+        return jsonify({"error": "SID header is missing"}), 400
+
+    try:
+        user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
+        file_path = os.path.join(user_workspace_dir, relative_path)
+
+        #Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {"type": "info", "message": f"Exporting file '{relative_path}'..."},
+            uuid,
+            sid,
+        )
+
+        response = send_file(file_path, as_attachment=True)
+
+        # Emit success message after file export is successful
+        #socketio_emit_to_user_session(
+        #    CONSOLE_FEEDBACK_EVENT,
+        #    {"type": "succ", "message": f"File '{relative_path}' was exported successfully."},
+        #    uuid,
+        #    sid,
+        #)
+
+    except FileNotFoundError as e:
+        logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"FileNotFoundError: {e} while accessing {user_workspace_dir}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Requested file not found"}), 404
+    except PermissionError as e:
+        logger.error("PermissionError: %s while accessing %s", e, user_workspace_dir)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"PermissionError: {e} while accessing {user_workspace_dir}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "Permission denied"}), 403
+    except UnexpectedError as e:
+        logger.error("UnexpectedError: %s while accessing %s", e.message, user_workspace_dir)
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e.message} while accessing {user_workspace_dir}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+
+    return response
+
+    

@@ -34,6 +34,7 @@ WORKSPACE_RENAME_ROUTE = "/workspace/rename"
 WORKSPACE_DELETE_ROUTE = "/workspace/delete"
 WORKSPACE_AGGREGATE_ROUTE = "/workspace/aggregate"
 WORKSPACE_IMPORT_ROUTE = "/workspace/import"
+WORKSPACE_EXPORT_ROUTE = "/workspace/export"
 
 # Events
 CONSOLE_FEEDBACK_EVENT = "console_feedback"

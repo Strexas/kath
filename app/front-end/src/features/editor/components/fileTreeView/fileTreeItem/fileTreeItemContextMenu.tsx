@@ -77,7 +77,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     );
   } else {
     menuItems.push(
-      <MenuItem key='export' onClick={() => handleActionContextMenu('export')} disabled>
+      <MenuItem key='export' onClick={() => handleActionContextMenu('export')}>
         Export...
       </MenuItem>,
       <Divider key='divider-export' />
@@ -112,8 +112,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         setFileImportDialogOpen(true);
         break;
       case 'export':
-        // TODO: Implement file export
-        console.log('export');
+        handleExport();
         break;
       case 'rename':
         setRenameDialogOpen(true);
@@ -156,6 +155,29 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     const data = { type: item.fileType === FileTypes.FOLDER ? FileTypes.FOLDER : FileTypes.FILE };
     await axios.put(`${Endpoints.WORKSPACE_DELETE}/${item.id}`, data);
     filesHistoryStateUpdate(undefined, { id: item.id, label: item.label, type: item.fileType || FileTypes.FILE });
+  };
+
+  const handleExport = async () => {
+    try {
+      const response = await axios.get(`${Endpoints.WORKSPACE_EXPORT}/${item.id}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      console.log(item.id);
+      const fileName = item.id.match(/[^/\\]+$/)?.[0] || item.id; // Extracts only the file name, otherwise uses the full path
+      const link = Object.assign(document.createElement('a'), {
+        href: url,
+        download: fileName,
+      });
+
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      // TODO: Implement socket console event for successful file export
+      console.log('Exported:', fileName);
+    } catch (error) {
+      console.error('Error exporting the file:', error);
+    }
   };
 
   return (
