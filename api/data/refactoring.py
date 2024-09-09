@@ -2,9 +2,11 @@
 
 import os
 import logging
+import re
 
 import pandas as pd
 from pandas import DataFrame
+from pyliftover import LiftOver
 
 from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH
 
@@ -174,45 +176,111 @@ def from_clinvar_name_to_cdna_position(name):
     return name[start:end]
 
 
-def add_g_position_to_gnomad(gnomad):
+def lovd_fill_hg38(lovd: pd.DataFrame):
     """
-    Create new column 'hg38_gnomAD' from 'gnomAD ID' in the gnomAD dataframe.
+    Fills missing hg38 values in the LOVD dataframe
+    by converting hg19 values to hg38.
+    New column 'hg38_gnomad_format' is added to store
+    the converted positions in the format '6-position-ref-alt'.
+    :param lovd: pandas DataFrame containing following columns:
+               - 'VariantOnGenome/DNA': hg19 values.
+               - 'VariantOnGenome/DNA/hg38': hg38 values.
+    :return: None: Modifies the input DataFrame in-place by adding
+                'hg38_gnomad_format' column.
+    """
 
-    Parameters:
-    gnomad : pd.DataFrame
-        gnomAD dataframe. This function modifies it in-place.
+    if lovd.empty:
+        return
+    lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'VariantOnGenome/DNA/hg38'].replace('', pd.NA)
+    missing_hg38_mask = lovd.loc[:,'hg38_gnomad_format'].isna()
+    lovd.loc[missing_hg38_mask, 'hg38_gnomad_format'] = lovd.loc[missing_hg38_mask, 'VariantOnGenome/DNA'].apply(
+        convert_hg19_if_missing)
+    lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'hg38_gnomad_format'].apply(convert_to_gnomad_gen)
+
+
+def convert_hg19_if_missing(hg19: str, lo = LiftOver('hg19', 'hg38')):
     """
-    gnomad[['chromosome', 'position', 'ref', 'alt']] = gnomad['gnomAD ID'].str.split('-', expand=True)
-    gnomad['hg38'] = 'g.' + gnomad['position'] + gnomad['ref'] + '>' + gnomad['alt']
-    gnomad.drop(columns=['chromosome', 'position', 'ref', 'alt'], inplace=True)
+    Converts hg19 variant to hg38 if hg38 is missing.
+    :param hg19: a row from the DataFrame.
+    :param lo: converter for genomic data between reference assemblies
+    :return: hg38 value or a conversion of the hg19 value in the format 'g.positionref>alt'.
+    """
+
+    if pd.isna(hg19) or '_' in hg19:
+        return "?"
+
+    match = re.search(r'g\.(\d+)', hg19)
+    if not match:
+        return '?'
+
+    position_str = match.group(1)
+    new_pos = lo.convert_coordinate('chr6', int(position_str))[0][1]
+    return f"g.{new_pos}{hg19[-3:]}"
+
+
+
+def convert_to_gnomad_gen(variant: str):
+    """
+    converts a variant string from hg38 format
+    to the format used by gnomAD ('6-position-ref-alt').
+    :param variant: str: the variant in the format 'g.startRef>Alt'.
+    :return: str: variant formatted as '6-position-ref-alt'
+    or '?' if the input contains interval ranges or is invalid.
+    """
+
+    patterns = {
+        'dup': re.compile(r'^g\.(\d+)dup$'),
+        'del': re.compile(r'^g\.(\d+)del$'),
+        'ref_alt': re.compile(r'^g\.(\d+)([A-Z])>([A-Z])$')
+    }
+
+    match = patterns['dup'].match(variant)
+    if match:
+        position = match.group(1)
+        return f"6-{position}-dup"
+
+    match = patterns['del'].match(variant)
+    if match:
+        position = match.group(1)
+        return f"6-{position}-del"
+
+    match = patterns['ref_alt'].match(variant)
+    if match:
+        position = match.group(1)
+        ref = match.group(2)
+        alt = match.group(3)
+        return f"6-{position}-{ref}-{alt}"
+
+    return "?"
 
 
 def merge_gnomad_lovd(lovd, gnomad):
     """
-    merge LOVD and gnomAD dataframes on genomic positions.
+    Merge LOVD and gnomAD dataframes on genomic positions.
 
-    parameters:
+    Parameters:
     lovd : pd.DataFrame
         LOVD dataframe.
     gnomAD : pd.DataFrame
         gnomAD dataframe.
 
-    returns:
+    Returns:
     pd.DataFrame
-        merged dataframe with combined information from LOVD and gnomAD.
+        Merged dataframe with combined information from LOVD and gnomAD.
     """
 
-    add_g_position_to_gnomad(gnomad)
+    lovd_fill_hg38(lovd)
     gnomad.columns = [col + '_gnomad' for col in gnomad.columns]
 
-    main_frame = pd.merge(
+    merged_frame = pd.merge(
         lovd,
         gnomad,
         how="outer",
-        left_on="VariantOnGenome/DNA/hg38",
-        right_on="hg38_gnomad")
+        left_on="hg38_gnomad_format",
+        right_on="gnomAD ID_gnomad"
+    )
 
-    return main_frame
+    return merged_frame
 
 
 def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
