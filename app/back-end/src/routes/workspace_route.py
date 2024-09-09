@@ -1197,6 +1197,8 @@ def export_file(relative_path):
         )
 
         response = send_file(file_path, as_attachment=True)
+        
+        return response
 
     except FileNotFoundError as e:
         logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
@@ -1237,7 +1239,5 @@ def export_file(relative_path):
             sid,
         )
         return jsonify({"error": "An internal error occurred"}), 500
-
-    return response
 
     
