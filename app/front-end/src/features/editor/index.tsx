@@ -54,7 +54,7 @@ export const Editor = () => {
           <Box
             sx={{
               width: '100%',
-              height: '15%',
+              height: '25%',
               display: 'flex',
               flexDirection: 'column',
               bgcolor: Theme.palette.action.selected,
@@ -66,7 +66,7 @@ export const Editor = () => {
           <Box
             sx={{
               width: '100%',
-              height: '60%',
+              height: '50%',
               display: 'flex',
               flexDirection: 'column',
               bgcolor: Theme.palette.background.default,

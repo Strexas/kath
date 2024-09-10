@@ -26,5 +26,5 @@ export interface ToolbarGroupsSelectorProps {
  * @returns {JSX.Element} The rendered List component.
  */
 export const ToolbarGroupsSelector: React.FC<ToolbarGroupsSelectorProps> = ({ children }) => {
-  return <List sx={{ height: '25%', p: '0', overflow: 'auto' }}>{children}</List>;
+  return <List sx={{ height: '20%', p: '0', overflow: 'auto' }}>{children}</List>;
 };

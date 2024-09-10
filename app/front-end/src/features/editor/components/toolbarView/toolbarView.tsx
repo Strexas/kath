@@ -1,7 +1,5 @@
 import {
   ToolbarGroup,
-  ToolbarGroupItem,
-  ToolbarGroupItemProps,
   ToolbarGroupsSelector,
   ToolbarGroupsSelectorItem,
   ToolbarGroupsSelectorItemProps,
@@ -11,7 +9,13 @@ import {
   DownloadGroupButtons,
   MergeGroupButtons,
 } from '@/features/editor/components/toolbarView/toolbarGroupButtons';
-import { useMemo, useState } from 'react';
+import {
+  ApplyGroupParams,
+  DownloadGroupParams,
+  MergeGroupParams,
+} from '@/features/editor/components/toolbarView/toolbarGroupParams';
+import { ToolbarContextProvider } from '@/features/editor/stores';
+import React, { useMemo, useState } from 'react';
 
 /**
  * ToolbarView component manages and displays a set of toolbar groups and items.
@@ -54,26 +58,34 @@ export const ToolbarView: React.FC = () => {
     },
   ];
 
-  // Combine the button groups into a dictionary for easy access
-  const ToolbarGroupsButtons: Record<string, ToolbarGroupItemProps[]> = useMemo(
+  // Combine the params groups into a dictionary for easy access
+  const ToolbarGroupsParams: Record<string, React.ReactNode> = useMemo(
     () => ({
-      download: DownloadGroupButtons,
-      merge: MergeGroupButtons,
-      apply: ApplyGroupButtons,
+      download: <DownloadGroupParams />,
+      merge: <MergeGroupParams />,
+      apply: <ApplyGroupParams />,
+    }),
+    []
+  );
+
+  // Combine the button groups into a dictionary for easy access
+  const ToolbarGroupsButtons: Record<string, React.ReactNode> = useMemo(
+    () => ({
+      download: <DownloadGroupButtons />,
+      merge: <MergeGroupButtons />,
+      apply: <ApplyGroupButtons />,
     }),
     [DownloadGroupButtons, MergeGroupButtons, ApplyGroupButtons]
   );
 
   return (
-    <>
+    <ToolbarContextProvider>
       <ToolbarGroupsSelector>
         {ToolbarGroups.map((group, index) => (
           <ToolbarGroupsSelectorItem key={index} {...group} groupRef={selectedGroup} />
         ))}
       </ToolbarGroupsSelector>
-      <ToolbarGroup>
-        {ToolbarGroupsButtons[selectedGroup]?.map((button, index) => <ToolbarGroupItem key={index} {...button} />)}
-      </ToolbarGroup>
-    </>
+      <ToolbarGroup params={ToolbarGroupsParams[selectedGroup]} buttons={ToolbarGroupsButtons[selectedGroup]} />
+    </ToolbarContextProvider>
   );
 };

@@ -165,7 +165,7 @@ export const EditorView: React.FC = () => {
     const { totalRows, header, rows } = fileContentResponse;
 
     if (!header) {
-      fileStateUpdate(undefined, { columns: [], rows: [], aggregations: {} }, undefined);
+      fileStateUpdate(undefined, { columns: [], rows: [], aggregations: fileContent.aggregations }, undefined);
       return;
     }
 
