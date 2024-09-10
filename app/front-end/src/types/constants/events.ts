@@ -9,11 +9,13 @@
  * - `CONSOLE_FEEDBACK_EVENT`: The event name for console feedback messages.
  * - `WORKSPACE_FILE_SAVE_FEEDBACK_EVENT`: The event name for feedback related to saving files in the workspace.
  * - `WORKSPACE_UPDATE_FEEDBACK_EVENT`: The event name for feedback related to updates in the workspace.
+ * - `WORKSPACE_EXPORT_FEEDBACK_EVENT`: The event name for feedback related to exporting the workspace.
  *
  * @constant {Object} Events - The object containing event names.
  * @property {string} CONSOLE_FEEDBACK_EVENT - The event name for receiving console feedback messages.
  * @property {string} WORKSPACE_FILE_SAVE_FEEDBACK_EVENT - The event name for receiving feedback on file save operations within the workspace.
  * @property {string} WORKSPACE_UPDATE_FEEDBACK_EVENT - The event name for receiving feedback on workspace updates.
+ * @property {string} WORKSPACE_EXPORT_FEEDBACK_EVENT - The event name for receiving feedback on exporting the workspace.
  *
  * @example
  * // Example usage of the Events object
@@ -26,4 +28,5 @@ export const Events = {
   CONSOLE_FEEDBACK_EVENT: 'console_feedback',
   WORKSPACE_FILE_SAVE_FEEDBACK_EVENT: 'workspace_file_save_feedback',
   WORKSPACE_UPDATE_FEEDBACK_EVENT: 'workspace_update_feedback',
+  WORKSPACE_EXPORT_FEEDBACK_EVENT: 'workspace_export_feedback',
 };

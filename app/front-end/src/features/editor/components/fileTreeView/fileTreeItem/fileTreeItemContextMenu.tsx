@@ -5,8 +5,9 @@ import {
 } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTreeItemContextMenuActions, FileTreeViewItemProps, FileTypes } from '@/features/editor/types';
-import { axios } from '@/lib';
-import { Endpoints } from '@/types';
+import { axios, socket } from '@/lib';
+import { Endpoints, Events } from '@/types';
+import { getSID, getUUID } from '@/utils';
 import { Divider, Menu, MenuItem } from '@mui/material';
 import { useCallback, useState } from 'react';
 
@@ -174,9 +175,9 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       link.click();
       window.URL.revokeObjectURL(url);
 
-      // TODO: Implement socket console event for successful file export
-      console.log('Exported:', fileName);
+      socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, { uuid: getUUID(), sid: getSID(), status: 'success' });
     } catch (error) {
+      socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, { uuid: getUUID(), sid: getSID(), status: 'failure' });
       console.error('Error exporting file:', error);
     }
   }, [item]);
