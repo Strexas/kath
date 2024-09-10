@@ -175,7 +175,12 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
       link.click();
       window.URL.revokeObjectURL(url);
 
-      socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, { uuid: getUUID(), sid: getSID(), status: 'success' });
+      socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, {
+        uuid: getUUID(),
+        sid: getSID(),
+        status: 'success',
+        fileName: item.id,
+      });
     } catch (error) {
       socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, { uuid: getUUID(), sid: getSID(), status: 'failure' });
       console.error('Error exporting file:', error);

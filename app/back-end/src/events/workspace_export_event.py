@@ -56,6 +56,7 @@ def workspace_export_event_handler():
                 - `status` (str): The status of the file export operation ("success" or "failure").
                 - `uuid` (str): The unique identifier for the user's session.
                 - `sid` (str): The session identifier used for emitting real-time feedback.
+                - `fileName` (str): The name of the file that is being exported.
 
         Emits:
             - Success message to the user's console if the status is "success".
@@ -68,14 +69,14 @@ def workspace_export_event_handler():
         if data["status"] == "success":
             socketio_emit_to_user_session(
                 CONSOLE_FEEDBACK_EVENT,
-                {"type": "succ", "message": "File export completed successfully."},
+                {"type": "succ", "message": f"File '{data['fileName']}' export was completed successfully."},
                 data["uuid"],
                 data["sid"],
             )
         else:
             socketio_emit_to_user_session(
                 CONSOLE_FEEDBACK_EVENT,
-                {"type": "errr", "message": "File export failed."},
+                {"type": "errr", "message": f"File '{data['fileName']}' export failed."},
                 data["uuid"],
                 data["sid"],
             )
