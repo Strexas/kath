@@ -35,14 +35,14 @@ from flask import request
 from src.setup.extensions import socketio, logger, socket_manager
 
 # Import all event modules here
-from src.events.workspace_event import workspace_event_handler
+from src.events.workspace_export_event import workspace_export_event_handler
 
 
 def eventer():
     """
     Register all event handlers including connect and disconnect events.
     """
-    workspace_event_handler(socketio)
+    workspace_export_event_handler()
 
     @socketio.on("connect")
     def handle_connect():
