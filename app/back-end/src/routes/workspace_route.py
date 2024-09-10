@@ -76,7 +76,6 @@ Errors and Feedback:
 """
 
 # pylint: disable=import-error
-# pylint: disable=too-many-locals
 # pylint: disable=too-many-lines
 
 import os
@@ -98,7 +97,6 @@ from src.constants import (
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_FILE_SAVE_FEEDBACK_EVENT,
-    WORKSPACE_IMPORT_ROUTE,
 )
 
 workspace_route_bp = Blueprint("workspace_route", __name__)
@@ -1064,107 +1062,3 @@ def put_workspace_delete(relative_path):
             sid,
         )
         return jsonify({"error": "An internal error occurred"}), 500
-
-@workspace_route_bp.route(f"{WORKSPACE_IMPORT_ROUTE}", methods=["POST"])
-@workspace_route_bp.route(f"{WORKSPACE_IMPORT_ROUTE}/<path:relative_path>", methods=["POST"])
-@compress.compressed()
-def import_file(relative_path=None):
-
-    uuid = request.headers.get("uuid")
-    sid = request.headers.get("sid")
-
-    # Ensure the uuid header is present
-    if not uuid:
-        return jsonify({"error": "UUID header is missing"}), 400
-
-    # Ensure the sid header is present
-    if not sid:
-        return jsonify({"error": "SID header is missing"}), 400
-
-
-    if 'file' not in request.files:
-        return jsonify({'error': 'No file part in the request'}), 400
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return jsonify({'error': 'No file selected for importing'}), 400
-
-    file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else None
-    if file_extension not in ['csv', 'txt']:
-        return jsonify({'error': f"FileImportError: Incorrect file type for '{file.filename}'. Accepted file types: 'csv', 'txt'."}), 400
-
-    relative_path_title = relative_path
-
-    if relative_path is None:
-        relative_path = ""
-        relative_path_title = "root folder"
-
-    socketio_emit_to_user_session(
-        CONSOLE_FEEDBACK_EVENT,
-        {"type": "info", "message": f"Importing file '{file.filename}' to '{relative_path_title}'..."},
-        uuid,
-        sid,
-    )
-
-    try:
-        user_workspace_dir = os.path.join(WORKSPACE_DIR, uuid)
-        folder_path = os.path.join(user_workspace_dir, relative_path)
-        destination_path = os.path.join(folder_path, file.filename)
-        file.save(destination_path)
-
-        socketio_emit_to_user_session(
-            CONSOLE_FEEDBACK_EVENT,
-            {"type": "succ", "message": f"File {file.filename} was imported successfully."},
-            uuid,
-            sid,
-        )
-
-        socketio_emit_to_user_session(
-            WORKSPACE_UPDATE_FEEDBACK_EVENT,
-            {"status": "updated"},
-            uuid,
-            sid,
-        )
-    
-    except FileNotFoundError as e:
-        logger.error("FileNotFoundError: %s while accessing %s", e, user_workspace_dir)
-        # Emit a feedback to the user's console
-        socketio_emit_to_user_session(
-            CONSOLE_FEEDBACK_EVENT,
-            {
-                "type": "errr",
-                "message": f"FileNotFoundError: {e} while accessing {user_workspace_dir}",
-            },
-            uuid,
-            sid,
-        )
-        return jsonify({"error": "Requested file not found"}), 404
-    except PermissionError as e:
-        logger.error("PermissionError: %s while accessing %s", e, user_workspace_dir)
-        # Emit a feedback to the user's console
-        socketio_emit_to_user_session(
-            CONSOLE_FEEDBACK_EVENT,
-            {
-                "type": "errr",
-                "message": f"PermissionError: {e} while accessing {user_workspace_dir}",
-            },
-            uuid,
-            sid,
-        )
-        return jsonify({"error": "Permission denied"}), 403
-    except UnexpectedError as e:
-        logger.error("UnexpectedError: %s while accessing %s", e.message, user_workspace_dir)
-        # Emit a feedback to the user's console
-        socketio_emit_to_user_session(
-            CONSOLE_FEEDBACK_EVENT,
-            {
-                "type": "errr",
-                "message": f"UnexpectedError: {e.message} while accessing {user_workspace_dir}",
-            },
-            uuid,
-            sid,
-        )
-        return jsonify({"error": "An internal error occurred"}), 500
-
-    return jsonify({'message': 'File imported successfully'}), 200
