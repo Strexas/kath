@@ -179,14 +179,14 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         uuid: getUUID(),
         sid: getSID(),
         status: 'success',
-        fileName: item.id,
+        filePath: item.id,
       });
     } catch (error) {
       socket.emit(Events.WORKSPACE_EXPORT_FEEDBACK_EVENT, {
         uuid: getUUID(),
         sid: getSID(),
         status: 'failure',
-        fileName: item.id,
+        filePath: item.id,
       });
       console.error('Error exporting file:', error);
     }
