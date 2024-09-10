@@ -1,9 +1,29 @@
+"""
+This module defines the routes for aggregating data from user workspaces in a Flask application.
+It provides two main routes for performing column-level calculations on CSV files stored in the
+user's workspace. The supported operations include summing, averaging, counting, finding the 
+minimum, and finding the maximum values in specified columns.
+
+The module emits real-time feedback to the user’s session via Socket.IO, providing status updates 
+on the calculations, handling skipped cells due to invalid data, and notifying the user of errors 
+such as file not found, permission denied, or unexpected issues.
+
+Routes:
+    - get_workspace_aggregate_all(relative_path): 
+        Calculates aggregate values (sum, avg, min, max, cnt) for multiple columns in a CSV file.
+
+    - get_workspace_aggregate(relative_path): 
+        Calculates an aggregate value (sum, avg, min, max, cnt) for a single column in a CSV file.
+
+Exceptions are handled to provide feedback through the user’s console using Socket.IO.
+"""
+
 # pylint: disable=import-error
 
 import os
 import csv
-from flask import Blueprint, request, jsonify
 from ast import literal_eval
+from flask import Blueprint, request, jsonify
 
 from src.setup.extensions import logger
 from src.utils.helpers import socketio_emit_to_user_session, is_number
@@ -18,6 +38,39 @@ workspace_aggregate_route_bp = Blueprint("workspace_aggregate_route", __name__)
     f"{WORKSPACE_AGGREGATE_ROUTE}/all/<path:relative_path>", methods=["GET"]
 )
 def get_workspace_aggregate_all(relative_path):
+    """
+    Route to calculate aggregate values (e.g., sum, avg, min, max, cnt) for multiple columns
+    in a CSV file located in the user's workspace. The columns and their aggregation actions
+    are specified in the request's query parameters.
+
+    Args:
+        relative_path (str): The relative path to the CSV file inside the user's workspace.
+
+    Request Headers:
+        - uuid: A unique identifier for the user's session.
+        - sid: A session identifier for emitting real-time console feedback via Socket.IO.
+
+    Query Parameters:
+        - columnsAggregation (str): A stringified dictionary where the keys are column names and
+          the values are dictionaries with an "action" key specifying the aggregation operation
+          ('sum', 'avg', 'min', 'max', or 'cnt').
+
+    Returns:
+        Response (JSON):
+            - On success: A JSON object with aggregated results for each specified column.
+            - On error: A JSON object with an error message and appropriate HTTP status code.
+
+    Emits:
+        - Real-time console feedback using Socket.IO via the `socketio_emit_to_user_session`
+        function. Feedback includes the start, completion, and any warnings or errors during
+        the aggregation process.
+
+    Possible Errors:
+        - FileNotFoundError: The specified CSV file does not exist.
+        - PermissionError: Insufficient permissions to read the CSV file.
+        - UnexpectedError: Any other unexpected error during the aggregation process.
+    """
+
     uuid = request.headers.get("uuid")
     sid = request.headers.get("sid")
 
@@ -140,7 +193,8 @@ def get_workspace_aggregate_all(relative_path):
                     CONSOLE_FEEDBACK_EVENT,
                     {
                         "type": "warn",
-                        "message": f"The following columns had cells skipped due to non-numeric values: {', '.join(skipped_columns_info)}",
+                        "message": "The following columns had cells skipped due to non-numeric "
+                        + f"values: {', '.join(skipped_columns_info)}",
                     },
                     uuid,
                     sid,
@@ -203,6 +257,45 @@ def get_workspace_aggregate_all(relative_path):
     f"{WORKSPACE_AGGREGATE_ROUTE}/<path:relative_path>", methods=["GET"]
 )
 def get_workspace_aggregate(relative_path):
+    """
+    Route to calculate an aggregate value (e.g., sum, avg, min, max, cnt) for a single column
+    in a CSV file located in the user's workspace. The column and the aggregation action
+    are specified in the request's query parameters.
+
+    Args:
+        relative_path (str): The relative path to the CSV file inside the user's workspace.
+
+    Request Headers:
+        - uuid: A unique identifier for the user's session.
+        - sid: A session identifier for emitting real-time console feedback via Socket.IO.
+
+    Query Parameters:
+        - field (str): The name of the column to perform the aggregation on.
+        - action (str): The type of aggregation action to perform
+            ('sum', 'avg', 'min', 'max', or 'cnt').
+
+    Returns:
+        Response (JSON):
+            - On success: A JSON object with the aggregated result for the specified column.
+            - On error: A JSON object with an error message and appropriate HTTP status code.
+
+    Emits:
+        - Real-time console feedback using Socket.IO via the `socketio_emit_to_user_session`
+            function.Feedback includes the start, completion, and any warnings or errors during the
+            aggregation process.
+
+    Possible Errors:
+        - FileNotFoundError: The specified CSV file does not exist.
+        - PermissionError: Insufficient permissions to read the CSV file.
+        - UnexpectedError: Any other unexpected error during the aggregation process.
+
+    Notes:
+        - If the column contains non-numeric values, those cells are skipped and a warning is sent
+        via Socket.IO.
+        - The result is formatted as "N/A" if no valid numeric data is found or if the specified
+        action is invalid for the data present in the column.
+    """
+
     uuid = request.headers.get("uuid")
     sid = request.headers.get("sid")
 
@@ -289,7 +382,8 @@ def get_workspace_aggregate(relative_path):
                     CONSOLE_FEEDBACK_EVENT,
                     {
                         "type": "warn",
-                        "message": f"At column '{field}' {skipped_count} cells were skipped because they contain non-numeric values.",
+                        "message": f"At column '{field}' {skipped_count} cells "
+                        + "were skipped because they contain non-numeric values.",
                     },
                     uuid,
                     sid,
