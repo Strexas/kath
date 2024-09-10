@@ -1,4 +1,5 @@
 import { FileContentModel, FileModel, FilePaginationModel, FileTypes } from '@/features/editor/types';
+import { getWorkspaceArray } from '@/features/editor/utils';
 import { useSessionContext, useStatusContext } from '@/hooks';
 import { axios, socket } from '@/lib';
 import { Endpoints, Events } from '@/types';
@@ -20,6 +21,7 @@ export interface WorkspaceContextProps {
   // File tree state properties
   fileTreeIsLoading: boolean;
   fileTree: TreeViewBaseItem<FileModel>[];
+  fileTreeArray: FileModel[];
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
@@ -37,6 +39,7 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
   // File tree state defaults
   fileTreeIsLoading: true,
   fileTree: [],
+  fileTreeArray: [],
 });
 
 interface Props {
@@ -148,6 +151,7 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
   // File tree state
   const [fileTreeIsLoading, setFileTreeIsLoading] = useState(true);
   const [fileTree, setFileTree] = useState<TreeViewBaseItem<FileModel>[]>([]);
+  const [fileTreeArray, setFileTreeArray] = useState<FileModel[]>([]);
 
   const { blockedStateUpdate } = useStatusContext();
 
@@ -157,6 +161,7 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     try {
       const response = await axios.get(Endpoints.WORKSPACE);
       setFileTree(response.data);
+      setFileTreeArray(getWorkspaceArray(response.data));
     } catch (error) {
       console.error('Failed to fetch workspace data:', error);
     } finally {
@@ -192,8 +197,9 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     filesHistory,
     filesHistoryStateUpdate,
 
-    fileTreeIsLoading: fileTreeIsLoading,
-    fileTree: fileTree,
+    fileTreeIsLoading,
+    fileTree,
+    fileTreeArray,
   };
 
   return <WorkspaceContext.Provider value={WorkspaceContextValue}>{children}</WorkspaceContext.Provider>;

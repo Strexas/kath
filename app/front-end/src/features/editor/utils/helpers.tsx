@@ -1,6 +1,6 @@
+import { FileModel, FileTreeViewItemProps, FileTypes } from '@/features/editor/types';
 import { Article as ArticleIcon, FolderRounded, InsertDriveFile as InsertDriveFileIcon } from '@mui/icons-material';
 import { TreeViewBaseItem } from '@mui/x-tree-view';
-import { FileTreeViewItemProps, FileTypes } from '../types';
 
 export const isExpandable = (reactChildren: React.ReactNode) => {
   if (Array.isArray(reactChildren)) {
@@ -65,4 +65,28 @@ export const findUniqueFileName = (fileTreeView: TreeViewBaseItem<FileTreeViewIt
 export const getFileExtension = (filename: string): string => {
   const dotIndex = filename.lastIndexOf('.');
   return dotIndex !== -1 ? filename.substring(dotIndex + 1).toLowerCase() : '';
+};
+
+export const getWorkspaceArray = (fileTreeView: TreeViewBaseItem<FileTreeViewItemProps>[]): FileModel[] => {
+  const workspaceArray: FileModel[] = [];
+  fileTreeView.sort((a, b) => {
+    if (a.fileType === FileTypes.FOLDER || b.fileType === FileTypes.FOLDER) {
+      if (a.fileType === b.fileType) {
+        return a.id.localeCompare(b.id);
+      }
+
+      return a.fileType === FileTypes.FOLDER ? 1 : -1;
+    }
+
+    return a.id.localeCompare(b.id);
+  });
+
+  for (const item of fileTreeView) {
+    workspaceArray.push({ id: item.id, label: item.label, type: item.fileType });
+    if (item.children && item.children.length !== 0) {
+      workspaceArray.push(...getWorkspaceArray(item.children));
+    }
+  }
+
+  return workspaceArray;
 };
