@@ -74,7 +74,7 @@ def get_workspace_merge_lovd_gnomad(relative_path):
             {
                 "type": "info",
                 "message": f"Merging LOVD and gnomAD data to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
@@ -204,7 +204,7 @@ def get_workspace_merge_lovd_clinvar(relative_path):
             {
                 "type": "info",
                 "message": f"Merging LOVD and ClinVar data to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,

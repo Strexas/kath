@@ -64,7 +64,7 @@ def get_workspace_download_lovd(relative_path):
             {
                 "type": "info",
                 "message": f"Downloading LOVD data for gene '{gene}' to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
@@ -134,7 +134,7 @@ def get_workspace_download_lovd(relative_path):
         )
         return jsonify({"error": "An internal error occurred"}), 500
 
-    return jsonify({"message": "LOVD data downloaded successful"}), 200
+    return jsonify({"message": "LOVD data downloaded successfully"}), 200
 
 
 @workspace_download_route_bp.route(
@@ -180,7 +180,7 @@ def get_workspace_download_clinvar(relative_path):
             {
                 "type": "info",
                 "message": f"Downloading ClinVar data for gene '{gene}' to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
@@ -252,7 +252,7 @@ def get_workspace_download_clinvar(relative_path):
         )
         return jsonify({"error": "An internal error occurred"}), 500
 
-    return jsonify({"message": "CliVar data downloaded successful"}), 200
+    return jsonify({"message": "CliVar data downloaded successfullly"}), 200
 
 
 @workspace_download_route_bp.route(
@@ -296,7 +296,7 @@ def get_workspace_download_gnomad(relative_path):
             {
                 "type": "info",
                 "message": f"Downloading gnomAD data for gene '{gene}' to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
@@ -366,4 +366,4 @@ def get_workspace_download_gnomad(relative_path):
         )
         return jsonify({"error": "An internal error occurred"}), 500
 
-    return jsonify({"message": "gnomAD data downloaded successful"}), 200
+    return jsonify({"message": "gnomAD data downloaded successfullly"}), 200

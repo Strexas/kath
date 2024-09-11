@@ -68,7 +68,7 @@ def get_workspace_apply_spliceai(relative_path):
             {
                 "type": "info",
                 "message": f"Applying SpliceAI algorithm to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
@@ -109,7 +109,7 @@ def get_workspace_apply_spliceai(relative_path):
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"FileNotFoundError: {e} while SpliceAI applying algorithm "
+                "message": f"FileNotFoundError: {e} while applying SpliceAI algorithm"
                 + f"{destination_path}",
             },
             uuid,
@@ -125,7 +125,7 @@ def get_workspace_apply_spliceai(relative_path):
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"PermissionError: {e} while SpliceAI applying algorithm "
+                "message": f"PermissionError: {e} while applying SpliceAI algorithm"
                 + f"{destination_path}",
             },
             uuid,
@@ -141,7 +141,7 @@ def get_workspace_apply_spliceai(relative_path):
             CONSOLE_FEEDBACK_EVENT,
             {
                 "type": "errr",
-                "message": f"UnexpectedError: {e.message} while applying SpliceAI algorithm "
+                "message": f"UnexpectedError: {e.message} while applying SpliceAI algorithm"
                 + f"{destination_path}",
             },
             uuid,
@@ -197,7 +197,7 @@ def get_workspace_apply_cadd(relative_path):
             {
                 "type": "info",
                 "message": f"Applying CADD algorithm to '{relative_path}' with "
-                + f"override: `{override}'...",
+                + f"override: '{override}'...",
             },
             uuid,
             sid,
