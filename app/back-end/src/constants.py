@@ -28,7 +28,16 @@ WORKSPACE_TEMPLATE_DIR = os.path.join(WORKSPACE_DIR, "template")
 # Routes
 BASE_ROUTE = "/api/v1"
 WORKSPACE_ROUTE = "/workspace"
+WORKSPACE_FILE_ROUTE = "/workspace/file"
+WORKSPACE_CREATE_ROUTE = "/workspace/create"
+WORKSPACE_RENAME_ROUTE = "/workspace/rename"
+WORKSPACE_DELETE_ROUTE = "/workspace/delete"
+WORKSPACE_AGGREGATE_ROUTE = "/workspace/aggregate"
+WORKSPACE_IMPORT_ROUTE = "/workspace/import"
+WORKSPACE_EXPORT_ROUTE = "/workspace/export"
 
 # Events
 CONSOLE_FEEDBACK_EVENT = "console_feedback"
 WORKSPACE_FILE_SAVE_FEEDBACK_EVENT = "workspace_file_save_feedback"
+WORKSPACE_UPDATE_FEEDBACK_EVENT = "workspace_update_feedback"
+WOKRSPACE_EXPORT_FEEDBACK_EVENT = "workspace_export_feedback"

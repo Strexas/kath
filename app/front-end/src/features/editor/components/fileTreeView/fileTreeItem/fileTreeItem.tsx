@@ -1,6 +1,8 @@
+import { FileTreeItemContextMenu, FileTreeItemLabel } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
+import { FileTypes } from '@/features/editor/types';
 import { getIconFromFileType, isExpandable } from '@/features/editor/utils';
-import { FileTypes } from '@/types';
+import { useStatusContext } from '@/hooks';
 import { FolderRounded as FolderRoundedIcon } from '@mui/icons-material';
 import Collapse from '@mui/material/Collapse';
 import { alpha, styled } from '@mui/material/styles';
@@ -12,8 +14,7 @@ import { TreeItem2DragAndDropOverlay } from '@mui/x-tree-view/TreeItem2DragAndDr
 import { unstable_useTreeItem2 as useTreeItem2, UseTreeItem2Parameters } from '@mui/x-tree-view/useTreeItem2';
 import { animated, useSpring } from '@react-spring/web';
 import clsx from 'clsx';
-import React from 'react';
-import { FileTreeItemLabel } from '.';
+import React, { useState } from 'react';
 
 const StyledFileTreeItemRoot = styled(TreeItem2Root)(({ theme }) => ({
   //color: theme.palette.mode === 'light' ? theme.palette.grey[800] : theme.palette.grey[400],
@@ -135,12 +136,34 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     icon = getIconFromFileType(item.fileType);
   }
 
-  const Workspace = useWorkspaceContext();
+  const { fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
+  const { blocked } = useStatusContext();
+  const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLDivElement) | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
+    top: 0,
+    left: 0,
+  });
 
   const handleClick = (newId: string, newLabel: string, newType: FileTypes) => {
     if (newType === FileTypes.FOLDER) return;
 
-    Workspace.update(newId, newLabel, newType);
+    fileStateUpdate({ id: newId, label: newLabel, type: newType }, undefined, undefined);
+    filesHistoryStateUpdate({ id: newId, label: newLabel, type: newType });
+  };
+
+  const handleOpenContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setContextMenu(event.currentTarget);
+    setContextMenuPosition({
+      top: event.clientY,
+      left: event.clientX,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+    setContextMenuPosition({ top: 0, left: 0 });
   };
 
   return (
@@ -149,8 +172,14 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
         <StyledFileTreeItemContent
           {...getContentProps({
             onClick: (event) => {
-              if (getContentProps().onClick) getContentProps().onClick(event);
-              handleClick(item.id, item.label, item.fileType);
+              if (!blocked) {
+                if (getContentProps().onClick) getContentProps().onClick(event);
+                handleClick(item.id, item.label, item.fileType);
+              }
+            },
+
+            onContextMenu: (event) => {
+              if (!blocked) handleOpenContextMenu(event);
             },
             className: clsx('content', {
               'Mui-expanded': status.expanded,
@@ -168,6 +197,12 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
           <FileTreeItemLabel {...getLabelProps({ icon, expandable: expandable && status.expanded })} />
           <TreeItem2DragAndDropOverlay {...getDragAndDropOverlayProps()} />
         </StyledFileTreeItemContent>
+        <FileTreeItemContextMenu
+          item={item}
+          anchorPosition={contextMenuPosition}
+          open={Boolean(contextMenu)}
+          onClose={handleCloseContextMenu}
+        />
         {children && <TransitionComponent {...getGroupTransitionProps()} />}
       </StyledFileTreeItemRoot>
     </TreeItem2Provider>

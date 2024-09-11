@@ -106,3 +106,23 @@ def build_workspace_structure(path, user_workspace_dir):
         ]
 
     return workspace_structure
+
+
+def is_number(value):
+    """
+    Checks if the given value can be converted to a float.
+
+    Parameters:
+    - value: The value to check.
+
+    Returns:
+    - bool: True if the value can be converted to a float, otherwise False.
+    """
+    if str(value).lower() == "nan":
+        return False
+
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False

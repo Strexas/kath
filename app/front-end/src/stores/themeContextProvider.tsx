@@ -99,6 +99,8 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
                 fontSize: '20px',
                 color: mode === 'light' ? Colors.textPrimaryLight : Colors.textPrimaryDark,
                 fontWeight: '400',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
               },
             },
           },
@@ -135,6 +137,14 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               root: {
                 fontFamily: 'Nunito',
                 fontSize: '0.9rem',
+              },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                fontFamily: 'Nunito',
+                textTransform: 'none',
               },
             },
           },

@@ -16,12 +16,13 @@
  * @example
  * // Example usage of Paths
  * import { Paths } from './path/to/paths';
- * 
+ *
  * // Configure routing
  * <Route path={Paths.HOME} component={HomePage} />
  * <Route path={Paths.NOTFOUND} component={NotFoundPage} />
  */
 export const Paths = {
-    HOME: '/',
-    NOTFOUND: '*',
+  HOME: '/',
+  MACROS: '/macros',
+  NOTFOUND: '*',
 };
