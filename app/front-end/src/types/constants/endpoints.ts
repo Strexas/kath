@@ -20,6 +20,12 @@
  * @property {string} WORKSPACE_CREATE - The endpoint path for creating new items in the workspace.
  * @property {string} WORKSPACE_RENAME - The endpoint path for renaming items in the workspace.
  * @property {string} WORKSPACE_DELETE - The endpoint path for deleting items in the workspace.
+ * @property {string} WORKSPACE_AGGREGATE - The endpoint path for aggregating workspace items.
+ * @property {string} WORKSPACE_IMPORT - The endpoint path for importing workspace items.
+ * @property {string} WORKSPACE_EXPORT - The endpoint path for exporting workspace items.
+ * @property {string} WORKSPACE_DOWNLOAD - The endpoint path for downloading workspace items.
+ * @property {string} WORKSPACE_MERGE - The endpoint path for merging workspace items.
+ * @property {string} WORKSPACE_APPLY - The endpoint path for applying workspace items.
  *
  * @example
  * // Example usage of the Endpoints object
@@ -40,4 +46,7 @@ export const Endpoints = {
   WORKSPACE_AGGREGATE: `/workspace/aggregate`,
   WORKSPACE_IMPORT: `/workspace/import`,
   WORKSPACE_EXPORT: `/workspace/export`,
+  WORKSPACE_DOWNLOAD: `/workspace/download`,
+  WORKSPACE_MERGE: `/workspace/merge`,
+  WORKSPACE_APPLY: `/workspace/apply`,
 };

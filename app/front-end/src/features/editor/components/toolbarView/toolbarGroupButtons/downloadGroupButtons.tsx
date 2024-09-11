@@ -1,6 +1,9 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
-import { useToolbarContext } from '@/features/editor/hooks';
+import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
+import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
+import { axios } from '@/lib';
+import { Endpoints } from '@/types';
 import { Download as DownloadIcon } from '@mui/icons-material';
 import { useCallback, useMemo } from 'react';
 
@@ -8,22 +11,22 @@ export interface DownloadGroupButtonsProps {}
 
 export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
   const { blockedStateUpdate } = useStatusContext();
+  const { fileTree } = useWorkspaceContext();
   const { saveTo, override, gene } = useToolbarContext();
 
   const handleDownloadLovdClick = useCallback(async () => {
     blockedStateUpdate(true);
 
     try {
-      console.log(
-        'Clicked Download Lovd Button! Params:\n  saveTo:',
-        saveTo,
-        '\n  override:',
-        override,
-        '\n  gene:',
-        gene
-      );
+      const timestamp = generateTimestamp();
+      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_${timestamp}.csv`);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // TODO: remove this line
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/lovd/${savePath}`, {
+        params: {
+          override,
+          gene,
+        },
+      });
     } catch (error) {
       console.error('Error downloading LOVD file:', error);
     } finally {
@@ -35,16 +38,15 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
     blockedStateUpdate(true);
 
     try {
-      console.log(
-        'Clicked Download Clinvar Button! Params:\n  saveTo:',
-        saveTo,
-        '\n  override:',
-        override,
-        '\n  gene:',
-        gene
-      );
+      const timestamp = generateTimestamp();
+      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `clinvar_${timestamp}.csv`);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // TODO: remove this line
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/clinvar/${savePath}`, {
+        params: {
+          override,
+          gene,
+        },
+      });
     } catch (error) {
       console.error('Error downloading ClinVar file:', error);
     } finally {
@@ -56,16 +58,15 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
     blockedStateUpdate(true);
 
     try {
-      console.log(
-        'Clicked Download Gnomad Button! Params:\n  saveTo:',
-        saveTo,
-        '\n  override:',
-        override,
-        '\n  gene:',
-        gene
-      );
+      const timestamp = generateTimestamp();
+      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `gnomad_${timestamp}.csv`);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // TODO: remove this line
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/gnomad/${savePath}`, {
+        params: {
+          override,
+          gene,
+        },
+      });
     } catch (error) {
       console.error('Error downloading gnomAD file:', error);
     } finally {
