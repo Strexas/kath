@@ -4,3 +4,4 @@ selenium
 spliceai
 tensorflow
 flask
+pyliftover
