@@ -93,7 +93,7 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end' }}>
+      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'start', rowGap: '2.16rem' }}>
         <FormControl sx={{ width: '90%', justifyContent: 'center' }} size='small'>
           <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
