@@ -1,6 +1,9 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
-import { useToolbarContext } from '@/features/editor/hooks';
+import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
+import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
+import { axios } from '@/lib';
+import { Endpoints } from '@/types';
 import { MergeType as MergeTypeIcon } from '@mui/icons-material';
 import { useCallback, useMemo } from 'react';
 
@@ -8,6 +11,7 @@ export interface MergeGroupButtonsProps {}
 
 export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
   const { blockedStateUpdate } = useStatusContext();
+  const { fileTree } = useWorkspaceContext();
   const {
     saveTo,
     override,
@@ -29,18 +33,16 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
     blockedStateUpdate(true);
 
     try {
-      console.log(
-        'Clicked Merge LOVD & gnomAD Button! Params:\n  saveTo:',
-        saveTo,
-        '\n  override:',
-        override,
-        '\n  lovd:',
-        lovdFile,
-        '\n  gnomad:',
-        gnomadFile
-      );
+      const timestamp = generateTimestamp();
+      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_gnomad_${timestamp}.csv`);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // TODO: remove this line
+      await axios.get(`${Endpoints.WORKSPACE_MERGE}/lovd_gnomad/${savePath}`, {
+        params: {
+          override,
+          lovdFile,
+          gnomadFile,
+        },
+      });
     } catch (error) {
       console.error('Error merging LOVD & gnomAD files:', error);
     } finally {
@@ -58,18 +60,16 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
     blockedStateUpdate(true);
 
     try {
-      console.log(
-        'Clicked Merge LOVD & ClinVar Button! Params:\n  saveTo:',
-        saveTo,
-        '\n  override:',
-        override,
-        '\n  lovd:',
-        lovdFile,
-        '\n  clinvar:',
-        clinvarFile
-      );
+      const timestamp = generateTimestamp();
+      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_clinvar_${timestamp}.csv`);
 
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // TODO: remove this line
+      await axios.get(`${Endpoints.WORKSPACE_MERGE}/lovd_clinvar/${savePath}`, {
+        params: {
+          override,
+          lovdFile,
+          clinvarFile,
+        },
+      });
     } catch (error) {
       console.error('Error merging LOVD & ClinVar files:', error);
     } finally {

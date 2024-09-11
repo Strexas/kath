@@ -111,7 +111,7 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
           </StyledGroupParamsSelect>
         </FormControl>
       </Box>
-      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end' }}>
+      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end', rowGap: '2.16rem' }}>
         <FormControl sx={{ width: '90%' }} size='small'>
           <GroupParamsInputLabel label={'Save To'} />
           <StyledGroupParamsSelect
