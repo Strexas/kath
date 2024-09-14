@@ -46,9 +46,11 @@ from .collection import (
     download_lovd_database_for_eys_gene,
     download_genes_lovd,
     download_database_for_eys_gene,
+    download_data_from_gnomad_eys,
 
     # Functions for storing databases
     store_database_for_eys_gene
+
 )
 
 # DATA REFACTORING IMPORT
@@ -58,7 +60,6 @@ from .refactoring import (
     parse_lovd,
     from_clinvar_name_to_cdna_position,
     save_lovd_as_vcf,
-    request_gnomad_api_data,
     merge_gnomad_lovd,
     parse_gnomad,
     set_gnomad_dtypes,
