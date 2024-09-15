@@ -188,4 +188,3 @@ def store_database_for_eys_gene(database_name, override=False):
         download_lovd_database_for_eys_gene(override)
     else:
         download_database_for_eys_gene(database_name, override)
-

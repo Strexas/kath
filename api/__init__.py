@@ -32,7 +32,7 @@ from .data.constants import (
 )
 
 # DATA COLLECTION IMPORT
-from .data.collection import (
+from .data.downloading import (
     # Custom exceptions
     BadResponseException,
     DownloadError,

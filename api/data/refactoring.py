@@ -197,8 +197,9 @@ def lovd_fill_hg38(lovd: pd.DataFrame):
         return
     lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'VariantOnGenome/DNA/hg38'].replace('', pd.NA)
     missing_hg38_mask = lovd.loc[:,'hg38_gnomad_format'].isna()
-    lovd.loc[missing_hg38_mask, 'hg38_gnomad_format'] = lovd.loc[missing_hg38_mask, 'VariantOnGenome/DNA'].apply(
-        convert_hg19_if_missing)
+    lovd.loc[missing_hg38_mask, 'hg38_gnomad_format'] = (lovd.loc[missing_hg38_mask,
+                                                                'VariantOnGenome/DNA'].
+                                                         apply(convert_hg19_if_missing))
     lovd.loc[:,'hg38_gnomad_format'] = lovd.loc[:,'hg38_gnomad_format'].apply(convert_to_gnomad_gen)
 
 
@@ -316,6 +317,38 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
             f.write("\n")
 
 
+def find_popmax_in_gnomad(data):
+    """
+    Finds popmax in gnomad data
+    :param DataFrame data: Gnomad data.
+    """
+
+    population_mapping = {
+            'afr': 'African/African American',
+            'eas': 'East Asian',
+            'asj': 'Ashkenazi Jew',
+            'sas': 'South Asian',
+            'nfe': 'European (non-Finnish)',
+            'fin': 'European (Finnish)',
+            'mid': 'Middle Eastern',
+            'amr': 'Admixed American',
+            'ami': "Amish",
+            'remaining': 'Remaining',
+            '': ''
+        }
+    population_ids = ['afr', 'eas', 'asj', 'sas', 'nfe', 'fin', 'mid', 'amr', 'ami', 'remaining']
+
+    for i in range(data.shape[0]):
+        max_pop = 0
+        max_id = ''
+        for population_id in population_ids:
+            if data.loc[i, f'Allele_Frequency_{population_id}'] > max_pop:
+                max_pop = data.loc[i, f'Allele_Frequency_{population_id}']
+                max_id = population_id
+        data.loc[i, 'Popmax'] = max_pop
+        data.loc[i, 'Popmax population'] = population_mapping[max_id]
+
+
 def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
     """
     prepares the calculation of popmax and popmax population for a variant.
@@ -412,12 +445,13 @@ def request_gnomad_api_data(gene_name):
     df.loc[:, 'Protein Consequence'] = df.loc[:, 'hgvsp'].fillna(0)  # Protein change
 
     df.loc[:, 'Allele Frequency'] = df.loc[:, 'total_ac'] / df.loc[:, 'total_an']
-    df.loc[:, 'Homozygote Count'] = df.loc[:, 'exome.ac_hom'].fillna(0) + df.loc[:, 'genome.ac_hom'].fillna(0)
+    df.loc[:, 'Homozygote Count'] = (df.loc[:, 'exome.ac_hom'].fillna(0)
+                                     + df.loc[:, 'genome.ac_hom'].fillna(0))
     exome_populations = df.loc[:, 'exome.populations']
     genome_populations = df.loc[:, 'genome.populations']
     population_ids = ['afr', 'eas', 'asj', 'sas', 'nfe', 'fin', 'mid', 'amr', 'ami', 'remaining']
 
-    for i in range(len(exome_populations)):
+    for i in range(exome_populations.shape[0]):
         exome_pop = exome_populations[i]
         prepare_popmax_calculation(df, exome_pop, 'exome', population_ids, i)
         genome_pop = genome_populations[i]
@@ -425,31 +459,12 @@ def request_gnomad_api_data(gene_name):
 
     for population_id in population_ids:
         df.loc[:, f'Allele_Frequency_{population_id}'] = (
-               (df.loc[:, f'exome_ac_{population_id}'].fillna(0) + df.loc[:, f'genome_ac_{population_id}'].fillna(0)) / (
-                df.loc[:, f'exome_an_{population_id}'].fillna(0) + df.loc[:, f'genome_an_{population_id}'].fillna(0)))
-    population_mapping = {
-            'afr': 'African/African American',
-            'eas': 'East Asian',
-            'asj': 'Ashkenazi Jew',
-            'sas': 'South Asian',
-            'nfe': 'European (non-Finnish)',
-            'fin': 'European (Finnish)',
-            'mid': 'Middle Eastern',
-            'amr': 'Admixed American',
-            'ami': "Amish",
-            'remaining': 'Remaining',
-            '': ''
-        }
+               (df.loc[:, f'exome_ac_{population_id}'].fillna(0)
+                + df.loc[:, f'genome_ac_{population_id}'].fillna(0))
+               / (df.loc[:, f'exome_an_{population_id}'].fillna(0)
+                  + df.loc[:, f'genome_an_{population_id}'].fillna(0)))
 
-    for i in range(df.shape[0]):
-        max_pop = 0
-        max_id = ''
-        for population_id in population_ids:
-            if df.loc[i, f'Allele_Frequency_{population_id}'] > max_pop:
-                max_pop = df.loc[i, f'Allele_Frequency_{population_id}']
-                max_id = population_id
-        df.loc[i, 'Popmax'] = max_pop
-        df.loc[i, 'Popmax population'] = population_mapping[max_id]
+    find_popmax_in_gnomad(df)
     not_to_drop = ['Popmax', 'Popmax population', 'Homozygote Count', 'Allele Frequency',
                    'variant_id', 'cDNA change', 'Protein change']
 

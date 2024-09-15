@@ -69,7 +69,8 @@ def workspace_export_event_handler():
         if data["status"] == "success":
             socketio_emit_to_user_session(
                 CONSOLE_FEEDBACK_EVENT,
-                {"type": "succ", "message": f"File '{data['filePath']}' export was completed successfully."},
+                {"type": "succ",
+                 "message": f"File '{data['filePath']}' export was completed successfully."},
                 data["uuid"],
                 data["sid"],
             )
