@@ -127,7 +127,6 @@ export const EditorView: React.FC = () => {
 
   const onCellEditStart = () => {
     unsavedStateUpdate(true);
-    console.log(unsaved);
   };
 
   const getWorkspaceFile = useCallback(async () => {

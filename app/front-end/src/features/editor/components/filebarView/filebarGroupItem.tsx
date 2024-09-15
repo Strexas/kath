@@ -1,8 +1,10 @@
+import { EditorConfirmLeave } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileModel } from '@/features/editor/types';
 import { useStatusContext } from '@/hooks';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
+import { useCallback, useState } from 'react';
 
 /**
  * `FilebarGroupItem` is a functional component that represents an individual item in the file bar group.
@@ -26,68 +28,86 @@ import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 export const FilebarGroupItem: React.FC<FileModel> = (file) => {
   const Theme = useTheme();
   const Workspace = useWorkspaceContext();
-  const { blocked } = useStatusContext();
+  const { blocked, unsaved } = useStatusContext();
 
   const { id, label } = file;
 
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const handleConfirm = useCallback(() => {
+    Workspace.fileStateUpdate(file);
+    Workspace.filesHistoryStateUpdate(file);
+    setIsConfirmDialogOpen(false);
+  }, [file, Workspace]);
+
   return (
-    <Box
-      id={id}
-      sx={{
-        height: '100%',
-        pl: '1rem',
-        pr: '0.5rem',
-        bgcolor: Workspace.file.id === id ? Theme.palette.background.default : Theme.palette.action.selected,
-        borderRadius: '0rem',
-        ':hover': {
-          backgroundColor:
-            Workspace.file.id === id
-              ? Theme.palette.background.default
-              : blocked
-                ? Theme.palette.action.selected
-                : alpha(Theme.palette.background.default, 0.5),
-        },
-        cursor: blocked ? 'default' : 'pointer',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}
-      onClick={() => {
-        // Update the workspace to the selected file
-        if (!blocked) {
-          Workspace.fileStateUpdate(file);
-          Workspace.filesHistoryStateUpdate(file);
-        }
-      }}
-    >
-      <Typography
+    <>
+      <Box
+        id={id}
         sx={{
-          fontSize: 12,
-          fontWeight: 'bold',
-          textTransform: 'none',
-          maxWidth: '10rem',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          height: '100%',
+          pl: '1rem',
+          pr: '0.5rem',
+          bgcolor: Workspace.file.id === id ? Theme.palette.background.default : Theme.palette.action.selected,
+          borderRadius: '0rem',
+          ':hover': {
+            backgroundColor:
+              Workspace.file.id === id
+                ? Theme.palette.background.default
+                : blocked
+                  ? Theme.palette.action.selected
+                  : alpha(Theme.palette.background.default, 0.5),
+          },
+          cursor: blocked ? 'default' : 'pointer',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '0.5rem',
+        }}
+        onClick={() => {
+          // Update the workspace to the selected file
+          if (!blocked) {
+            if (unsaved) {
+              setIsConfirmDialogOpen(true);
+            } else {
+              Workspace.fileStateUpdate(file);
+              Workspace.filesHistoryStateUpdate(file);
+            }
+          }
         }}
       >
-        {label}
-      </Typography>
-      <IconButton
-        size='small'
-        disabled={blocked}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onMouseDown={(event) => {
-          event.stopPropagation();
-          // Remove the file from the workspace
-          Workspace.filesHistoryStateUpdate(undefined, file);
-        }}
-      >
-        <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />
-      </IconButton>
-    </Box>
+        <Typography
+          sx={{
+            fontSize: 12,
+            fontWeight: 'bold',
+            textTransform: 'none',
+            maxWidth: '10rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </Typography>
+        <IconButton
+          size='small'
+          disabled={blocked}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onMouseDown={(event) => {
+            event.stopPropagation();
+            // Remove the file from the workspace
+            Workspace.filesHistoryStateUpdate(undefined, file);
+          }}
+        >
+          <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />
+        </IconButton>
+      </Box>
+      <EditorConfirmLeave
+        isOpen={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={handleConfirm}
+      />
+    </>
   );
 };
