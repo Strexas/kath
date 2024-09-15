@@ -57,7 +57,7 @@ export const EditorView: React.FC = () => {
 
   const { connected } = useSessionContext();
   const { file, fileContent, filePagination, fileStateUpdate } = useWorkspaceContext();
-  const { blocked, blockedStateUpdate } = useStatusContext();
+  const { blocked, blockedStateUpdate, unsaved, unsavedStateUpdate } = useStatusContext();
   const ref = useGridApiRef();
 
   const handleSave = async () => {
@@ -123,6 +123,11 @@ export const EditorView: React.FC = () => {
         }
         break;
     }
+  };
+
+  const onCellEditStart = () => {
+    unsavedStateUpdate(true);
+    console.log(unsaved);
   };
 
   const getWorkspaceFile = useCallback(async () => {
@@ -196,6 +201,19 @@ export const EditorView: React.FC = () => {
     );
   }, [fileContentResponse, fileContent.aggregations]);
 
+  // Browser tab close/refresh warning if there are unsaved changes effect
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (unsaved) event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [unsaved]);
+
   return (
     <DataGrid
       sx={{ height: '100%', border: 'none' }}
@@ -229,6 +247,7 @@ export const EditorView: React.FC = () => {
         toolbar: {},
       }}
       apiRef={ref}
+      onCellEditStart={onCellEditStart}
     />
   );
 };
