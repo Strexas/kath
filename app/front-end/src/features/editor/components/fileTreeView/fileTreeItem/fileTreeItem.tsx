@@ -183,7 +183,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
               if (!blocked) {
                 if (getContentProps().onClick) getContentProps().onClick(event);
                 if (unsaved) {
-                  setIsConfirmDialogOpen(true);
+                  if (item.fileType !== FileTypes.FOLDER) setIsConfirmDialogOpen(true);
                 } else {
                   handleClick(item.id, item.label, item.fileType);
                 }
