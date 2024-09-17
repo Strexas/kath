@@ -137,7 +137,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     icon = getIconFromFileType(item.fileType);
   }
 
-  const { fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
+  const { fileStateUpdate, filesHistoryStateUpdate, file } = useWorkspaceContext();
   const { blocked } = useStatusContext();
   const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLDivElement) | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
@@ -183,7 +183,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
               if (!blocked) {
                 if (getContentProps().onClick) getContentProps().onClick(event);
                 if (unsaved) {
-                  if (item.fileType !== FileTypes.FOLDER) setIsConfirmDialogOpen(true);
+                  if (item.fileType !== FileTypes.FOLDER && item.id !== file.id) setIsConfirmDialogOpen(true);
                 } else {
                   handleClick(item.id, item.label, item.fileType);
                 }

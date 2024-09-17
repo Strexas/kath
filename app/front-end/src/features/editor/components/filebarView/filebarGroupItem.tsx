@@ -32,12 +32,44 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
 
   const { id, label } = file;
 
+  const [confirmAction, setConfirmAction] = useState<'tab' | 'close' | null>(null);
+
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const handleConfirm = useCallback(() => {
+
+  const handleConfirmTab = useCallback(() => {
     Workspace.fileStateUpdate(file);
     Workspace.filesHistoryStateUpdate(file);
     setIsConfirmDialogOpen(false);
   }, [file, Workspace]);
+
+  const handleConfirmClose = useCallback(() => {
+    Workspace.filesHistoryStateUpdate(undefined, file);
+    setIsConfirmDialogOpen(false);
+  }, [file, Workspace]);
+
+  const handleTabClick = useCallback(() => {
+    if (!blocked) {
+      if (unsaved) {
+        setConfirmAction('tab');
+        setIsConfirmDialogOpen(true);
+      } else {
+        Workspace.fileStateUpdate(file);
+        Workspace.filesHistoryStateUpdate(file);
+      }
+    }
+  }, [blocked, unsaved, file, Workspace]);
+
+  const handleCloseIconClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!blocked) {
+      if (unsaved) {
+        setConfirmAction('close');
+        setIsConfirmDialogOpen(true);
+      } else {
+        Workspace.filesHistoryStateUpdate(undefined, file);
+      }
+    }
+  };
 
   return (
     <>
@@ -63,17 +95,7 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
           alignItems: 'center',
           gap: '0.5rem',
         }}
-        onClick={() => {
-          // Update the workspace to the selected file
-          if (!blocked) {
-            if (unsaved) {
-              setIsConfirmDialogOpen(true);
-            } else {
-              Workspace.fileStateUpdate(file);
-              Workspace.filesHistoryStateUpdate(file);
-            }
-          }
-        }}
+        onClick={handleTabClick}
       >
         <Typography
           sx={{
@@ -94,11 +116,7 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
           onClick={(event) => {
             event.stopPropagation();
           }}
-          onMouseDown={(event) => {
-            event.stopPropagation();
-            // Remove the file from the workspace
-            Workspace.filesHistoryStateUpdate(undefined, file);
-          }}
+          onMouseDown={handleCloseIconClick}
         >
           <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />
         </IconButton>
@@ -106,7 +124,7 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
       <EditorConfirmLeave
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}
-        onConfirm={handleConfirm}
+        onConfirm={confirmAction === 'tab' ? handleConfirmTab : handleConfirmClose}
       />
     </>
   );
