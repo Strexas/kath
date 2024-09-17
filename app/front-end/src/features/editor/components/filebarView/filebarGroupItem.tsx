@@ -36,20 +36,22 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-  const handleConfirmTab = useCallback(() => {
+  const handleTabConfirm = useCallback(() => {
     Workspace.fileStateUpdate(file);
     Workspace.filesHistoryStateUpdate(file);
     setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
   }, [file, Workspace]);
 
-  const handleConfirmClose = useCallback(() => {
+  const handleCloseConfirm = useCallback(() => {
     Workspace.filesHistoryStateUpdate(undefined, file);
     setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
   }, [file, Workspace]);
 
   const handleTabClick = useCallback(() => {
     if (!blocked) {
-      if (unsaved) {
+      if (unsaved && Workspace.file.id !== id) {
         setConfirmAction('tab');
         setIsConfirmDialogOpen(true);
       } else {
@@ -69,6 +71,11 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
         Workspace.filesHistoryStateUpdate(undefined, file);
       }
     }
+  };
+
+  const handleConfirmDialogCancel = () => {
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
   };
 
   return (
@@ -123,8 +130,8 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
       </Box>
       <EditorConfirmLeave
         isOpen={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
-        onConfirm={confirmAction === 'tab' ? handleConfirmTab : handleConfirmClose}
+        onClose={handleConfirmDialogCancel}
+        onConfirm={confirmAction === 'tab' ? handleTabConfirm : handleCloseConfirm}
       />
     </>
   );
