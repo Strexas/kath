@@ -4,14 +4,13 @@ import os
 import logging
 import re
 
-import requests
 
 import pandas as pd
 from pandas import DataFrame
 
 from pyliftover import LiftOver
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, DEFAULT_SAVE_PATH, \
+from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, \
     SAVE_LOVD_GNOMAD
 
 
