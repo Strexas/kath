@@ -362,7 +362,7 @@ def routing_merge(lovd_path:str=LOVD_PATH,
     :return: None
     """
 
-    if not overwrite:
+    if os.path.exists(save_path) and not overwrite:
         return
 
     if not os.path.exists(os.path.dirname(save_path)):
