@@ -11,8 +11,8 @@ from pandas import DataFrame
 
 from pyliftover import LiftOver
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH
-
+from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, DEFAULT_SAVE_PATH, \
+    SAVE_LOVD_GNOMAD
 
 
 def set_lovd_dtypes(df_dict):
@@ -347,4 +347,62 @@ def find_popmax_in_gnomad(data):
                 max_id = population_id
         data.loc[i, 'Popmax'] = max_pop
         data.loc[i, 'Popmax population'] = population_mapping[max_id]
+
+
+def routing_merge(lovd_path:str=LOVD_PATH,gnomad_path:str=GNOMAD_PATH,save_path:str=DEFAULT_SAVE_PATH,overwrite:bool=False):
+    """
+    Merges data from provided paths and saves to new location
+    :param overwrite: does file requires overwriting
+    :param lovd_path: path to LOVD dataframe
+    :param gnomad_path: path to gnomAD dataframe
+    :param save_path: path where to save merged data
+    :return:
+    """
+
+    if overwrite:
+        return
+
+    lovd_file = os.path.join(lovd_path, "lovd_data.txt")
+    gnomad_file = os.path.join(gnomad_path, "gnomad_data.csv")
+
+    if not os.path.exists(lovd_file):
+        raise FileNotFoundError(f"LOVD data file not found at: {lovd_file}")
+
+    if not os.path.exists(gnomad_file):
+        raise FileNotFoundError(f"gnomAD data file not found at: {gnomad_file}")
+
+    lovd_data = parse_lovd(lovd_path + "/lovd_data.txt")
+    gnomad_data = parse_gnomad(gnomad_path + '/gnomad_data.csv')
+
+    set_lovd_dtypes(lovd_data)
+    set_gnomad_dtypes(gnomad_data)
+
+    # Extract "Variants_On_Genome" and merge it with "Variants_On_Transcripts"
+    variants_on_genome = lovd_data["Variants_On_Genome"].copy()
+
+    lovd_data = pd.merge(
+        lovd_data["Variants_On_Transcripts"],
+        variants_on_genome[['id', 'VariantOnGenome/DNA', 'VariantOnGenome/DNA/hg38']],
+        on='id',
+        how='left'
+    )
+
+    # Copy gnomAD data and merge with LOVD data
+    gnomad_data = gnomad_data.copy()
+    final_data = merge_gnomad_lovd(lovd_data, gnomad_data)
+
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path))
+    try:
+        final_data.to_csv(SAVE_LOVD_GNOMAD)
+        print(f"Merged data saved to {save_path}")
+    except OSError as e:
+        print(f"Error saving file: {e}")
+
+    save_to = SAVE_LOVD_GNOMAD
+
+    # check if directory exists, if not - create
+    save_to_dir = os.path.dirname(save_to)
+    if not os.path.exists(save_to_dir):
+        os.makedirs(save_to_dir)
 

@@ -33,26 +33,6 @@ from .constants import (
   GNOMAD_PATH,
 )
 
-# DATA COLLECTION IMPORT
-from .collection import (
-    # Custom exceptions
-    BadResponseException,
-    DownloadError,
-
-    # Custom utility functions
-    get_file_from_url,
-
-    # Functions for downloading databases
-    download_lovd_database_for_eys_gene,
-    download_genes_lovd,
-    download_database_for_eys_gene,
-    download_data_from_gnomad_eys,
-
-    # Functions for storing databases
-    store_database_for_eys_gene
-
-)
-
 # DATA REFACTORING IMPORT
 from .refactoring import (
     # Functions for refactoring data
