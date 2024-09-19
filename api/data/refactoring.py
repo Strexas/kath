@@ -349,18 +349,24 @@ def find_popmax_in_gnomad(data):
         data.loc[i, 'Popmax population'] = population_mapping[max_id]
 
 
-def routing_merge(lovd_path:str=LOVD_PATH,gnomad_path:str=GNOMAD_PATH,save_path:str=DEFAULT_SAVE_PATH,overwrite:bool=False):
+def routing_merge(lovd_path:str=LOVD_PATH,
+                  gnomad_path:str=GNOMAD_PATH,
+                  save_path:str=SAVE_LOVD_GNOMAD,
+                  overwrite:bool=False):
     """
     Merges data from provided paths and saves to new location
     :param overwrite: does file requires overwriting
     :param lovd_path: path to LOVD dataframe
     :param gnomad_path: path to gnomAD dataframe
     :param save_path: path where to save merged data
-    :return:
+    :return: None
     """
 
     if overwrite:
         return
+
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path))
 
     lovd_file = os.path.join(lovd_path, "lovd_data.txt")
     gnomad_file = os.path.join(gnomad_path, "gnomad_data.csv")
@@ -379,6 +385,7 @@ def routing_merge(lovd_path:str=LOVD_PATH,gnomad_path:str=GNOMAD_PATH,save_path:
 
     # Extract "Variants_On_Genome" and merge it with "Variants_On_Transcripts"
     variants_on_genome = lovd_data["Variants_On_Genome"].copy()
+    gnomad_data = gnomad_data.copy()
 
     lovd_data = pd.merge(
         lovd_data["Variants_On_Transcripts"],
@@ -387,22 +394,10 @@ def routing_merge(lovd_path:str=LOVD_PATH,gnomad_path:str=GNOMAD_PATH,save_path:
         how='left'
     )
 
-    # Copy gnomAD data and merge with LOVD data
-    gnomad_data = gnomad_data.copy()
     final_data = merge_gnomad_lovd(lovd_data, gnomad_data)
 
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
     try:
-        final_data.to_csv(SAVE_LOVD_GNOMAD)
+        final_data.to_csv(save_path)
         print(f"Merged data saved to {save_path}")
     except OSError as e:
         print(f"Error saving file: {e}")
-
-    save_to = SAVE_LOVD_GNOMAD
-
-    # check if directory exists, if not - create
-    save_to_dir = os.path.dirname(save_to)
-    if not os.path.exists(save_to_dir):
-        os.makedirs(save_to_dir)
-
