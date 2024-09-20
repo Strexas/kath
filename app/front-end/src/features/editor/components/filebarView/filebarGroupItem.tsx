@@ -64,7 +64,7 @@ export const FilebarGroupItem: React.FC<FileModel> = (file) => {
   const handleCloseIconClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     if (!blocked) {
-      if (unsaved) {
+      if (unsaved && Workspace.file.id === id) {
         setConfirmAction('close');
         setIsConfirmDialogOpen(true);
       } else {
