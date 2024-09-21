@@ -66,15 +66,15 @@ def get_file_from_url(url, save_to, override=False):
         f.write(response.content)
 
 
-def download_lovd_database_for_eys_gene(override=False):
+def download_lovd_database_for_eys_gene(save_to=STORE_AS_LOVD, override=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
+    :param str save_to: path to save (default: 'data/lovd/lovd_eys.txt')
     :param bool override: needs override
     """
 
     url = LOVD_FILE_URL_EYS
-    save_to = STORE_AS_LOVD
 
     # check if directory exists, if not - create
     save_to_dir = os.path.dirname(save_to)
@@ -186,9 +186,12 @@ def store_database_for_eys_gene(database_name, override=False):
     if database_name not in DATABASES_DOWNLOAD_PATHS:
         raise IndexError(f"Requested {database_name} database is not supported")
     if database_name == "lovd":
-        download_lovd_database_for_eys_gene(override)
+        download_lovd_database_for_eys_gene(database_name, override)
+    elif database_name == "gnomad":
+        download_data_from_gnomad_eys(database_name, override)
     else:
         download_database_for_eys_gene(database_name, override)
+
 
 def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
     """
@@ -228,6 +231,11 @@ def download_data_from_gnomad_eys(path, override=False):
     :returns: DataFrame from gnomAD API
     :rtype: DataFrame
     """
+
+    if os.path.exists(path) and not override:
+        print(f"The file at {path} already exists.")
+        logging.info("The file at %s already exists.", path)
+        return
 
     url = 'https://gnomad.broadinstitute.org/api'
     query = f"""
@@ -276,9 +284,11 @@ def download_data_from_gnomad_eys(path, override=False):
         if not os.path.isfile(path):
             f = open('logs.txt', 'x')
             f.write(response.text)
+            logging.error("Error while downloading data from gnomAD API. Check logs.txt for more information.")
         else:
             f = open('logs.txt', 'a')
             f.write(response.text)
+            logging.error("Error while downloading data from gnomAD API. Check logs.txt for more information.")
 
     data = response.json()['data']['gene']['variants']
 
