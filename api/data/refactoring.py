@@ -11,7 +11,7 @@ from pandas import DataFrame
 from pyliftover import LiftOver
 
 from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, \
-    SAVE_LOVD_GNOMAD
+    DEFAULT_SAVE_PATH
 
 
 def set_lovd_dtypes(df_dict):
@@ -350,7 +350,7 @@ def find_popmax_in_gnomad(data):
 
 def routing_merge(lovd_path:str=LOVD_PATH,
                   gnomad_path:str=GNOMAD_PATH,
-                  save_path:str=SAVE_LOVD_GNOMAD,
+                  save_path:str=DEFAULT_SAVE_PATH,
                   overwrite:bool=False):
     """
     Merges data from provided paths and saves to new location
@@ -361,20 +361,19 @@ def routing_merge(lovd_path:str=LOVD_PATH,
     :return: None
     """
 
-    if os.path.exists(save_path) and not overwrite:
+    save_as = os.path.join(save_path, "lovd_gnomad.csv")
+
+    if os.path.exists(save_as) and not overwrite:
         return
 
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
-    lovd_file = os.path.join(lovd_path, "lovd_data.txt")
-    gnomad_file = os.path.join(gnomad_path, "gnomad_data.csv")
+    if not os.path.exists(os.path.join(lovd_path, "lovd_data.txt")):
+        raise FileNotFoundError(f"LOVD data file not found at: {lovd_path}")
 
-    if not os.path.exists(lovd_file):
-        raise FileNotFoundError(f"LOVD data file not found at: {lovd_file}")
-
-    if not os.path.exists(gnomad_file):
-        raise FileNotFoundError(f"gnomAD data file not found at: {gnomad_file}")
+    if not os.path.exists(os.path.join(gnomad_path, "gnomad_data.csv")):
+        raise FileNotFoundError(f"gnomAD data file not found at: {gnomad_path}")
 
     lovd_data = parse_lovd(lovd_path + "/lovd_data.txt")
     gnomad_data = parse_gnomad(gnomad_path + '/gnomad_data.csv')
@@ -396,7 +395,7 @@ def routing_merge(lovd_path:str=LOVD_PATH,
     final_data = merge_gnomad_lovd(lovd_data, gnomad_data)
 
     try:
-        final_data.to_csv(save_path)
+        final_data.to_csv(save_as)
         print(f"Merged data saved to {save_path}")
     except OSError as e:
         print(f"Error saving file: {e}")

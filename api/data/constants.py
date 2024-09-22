@@ -26,7 +26,6 @@ LOVD_PATH = os.path.join(DATA_PATH, "lovd/")
 GNOMAD_PATH = os.path.join(DATA_PATH, "gnomad/")
 CLINVAR_PATH = os.path.join(DATA_PATH, "clinvar/")
 DEFAULT_SAVE_PATH = os.path.join(DATA_PATH, "merged_data/")
-SAVE_LOVD_GNOMAD = "../data/merged_data/lovd_gnomad.csv"
 
 # variable data types
 LOVD_TABLES_DATA_TYPES = {
