@@ -1,6 +1,6 @@
-import { EditorColumnMenuAggregationItem } from '@/features/editor/components/editorView';
+import { EditorColumnMenuAggregationItem, EditorColumnMenuSortItem } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileContentAggregationActions } from '@/features/editor/types';
+import { FileContentAggregationActions, SortEnum } from '@/features/editor/types';
 import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
@@ -12,6 +12,7 @@ const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }
 interface GridColumnMenuContainerProps extends GridColumnMenuProps {
   disabled: boolean;
   handleAggregation: (column: string, action: FileContentAggregationActions) => void;
+  handleSort: (column: string, sort: SortEnum) => void;
 }
 
 /**
@@ -33,6 +34,7 @@ interface GridColumnMenuContainerProps extends GridColumnMenuProps {
 export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
   disabled,
   handleAggregation,
+  handleSort,
   hideMenu,
   colDef,
   ...other
@@ -44,6 +46,11 @@ export const EditorColumnMenu: React.FC<GridColumnMenuContainerProps> = ({
 
   return !disabled ? (
     <StyledGridColumnMenuContainer hideMenu={hideMenu} colDef={colDef} {...other}>
+      <EditorColumnMenuSortItem
+        onClick={hideMenu}
+        onSort={(sort: SortEnum) => handleSort(colDef.field, sort)}
+      ></EditorColumnMenuSortItem>
+      <Divider />
       <EditorColumnMenuAggregationItem
         initialValue={aggregationActiveAction}
         onClick={hideMenu}

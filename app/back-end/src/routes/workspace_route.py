@@ -81,10 +81,16 @@ Errors and Feedback:
 import os
 import shutil
 import csv
+from ast import literal_eval
 from flask import Blueprint, request, jsonify
 
 from src.setup.extensions import compress, logger
-from src.utils.helpers import socketio_emit_to_user_session, build_workspace_structure
+from src.utils.helpers import (
+    socketio_emit_to_user_session,
+    build_workspace_structure,
+    is_number,
+    convert_to_number,
+)
 from src.utils.exceptions import UnexpectedError
 from src.constants import (
     WORKSPACE_DIR,
@@ -296,6 +302,7 @@ def get_workspace_file(relative_path):
     rows_per_page = int(request.args.get("rowsPerPage", 100))
     header = ""
 
+    sort = literal_eval(request.args.get("sorts"))
     total_rows = 0
     paginated_rows = []
     start_row = page * rows_per_page
@@ -308,18 +315,78 @@ def get_workspace_file(relative_path):
             shutil.copytree(WORKSPACE_TEMPLATE_DIR, user_workspace_dir)
 
         # Check if file is empty
-        if os.path.getsize(file_path) != 0:
+        if os.path.getsize(file_path) == 0:
+            return jsonify(
+                {"page": page, "totalRows": total_rows, "header": header, "rows": paginated_rows}
+            )
 
-            # Costly operation to read the file and return the required rows.
-            # It gets more expensive as the page number increases, needs to go deeper into the file.
-            # Currently supports CSV files only.
+        # Return file content with sorting
+        if sort:
+            sort_key, sort_order = list(sort.items())[0]
+            sorted_file_path = f"{file_path}.{sort_key}.{sort_order}.sort"
 
-            # Read the file and retrieve the rows
-            with open(file_path, "r", encoding="utf-8") as file:
+            existing_sorted_files = [
+                f
+                for f in os.listdir(os.path.dirname(file_path))
+                if f.startswith(os.path.basename(file_path)) and f.endswith(".sort")
+            ]
+
+            # Remove old sorted files that do not match the current sort key and order
+            for file_name in existing_sorted_files:
+                if file_name != os.path.basename(sorted_file_path):
+                    os.remove(os.path.join(os.path.dirname(file_path), file_name))
+
+            if not os.path.exists(sorted_file_path):
+                with open(file_path, "r", encoding="utf-8") as file:
+                    reader = csv.reader(file)
+                    # First line as header
+                    header = next(reader)
+                    if header:
+                        rows = list(reader)  # Read all rows
+
+                        # Find the index of the column to sort by
+                        if sort_key in header:
+                            sort_index = header.index(sort_key)
+                            reverse_sort = sort_order == "desc"
+
+                            # Detect if the column is numeric or string by examining the first valid value
+                            first_valid_value = next(
+                                (row[sort_index] for row in rows if row[sort_index]), None
+                            )
+
+                            if first_valid_value and is_number(first_valid_value):
+                                # Sort numerically
+                                rows = sorted(
+                                    rows,
+                                    key=lambda row: (
+                                        convert_to_number(row[sort_index])
+                                        if row[sort_index]
+                                        else (float("-inf") if reverse_sort else float("inf"))
+                                    ),
+                                    reverse=reverse_sort,
+                                )
+                            else:
+                                # Sort alphabetically (string sort)
+                                rows = sorted(
+                                    rows,
+                                    key=lambda row: (
+                                        row[sort_index].lower()
+                                        if row[sort_index] != ""
+                                        else ("\u0000" if reverse_sort else "\uFFFF")
+                                    ),
+                                    reverse=reverse_sort,
+                                )
+
+                            # Save sorted data
+                            with open(sorted_file_path, "w", encoding="utf-8") as sorted_file:
+                                writer = csv.writer(sorted_file)
+                                writer.writerow(header)
+                                writer.writerows(rows)
+
+            with open(sorted_file_path, "r", encoding="utf-8") as file:
                 reader = csv.reader(file)
                 # First line as header
                 header = next(reader)
-
                 if header:
                     # Read the rows within the specified range, otherwise skip to the next row.
                     # Loop ends when the end row is reached or the end of the file is reached.
@@ -330,6 +397,201 @@ def get_workspace_file(relative_path):
 
                         if i >= end_row:
                             break
+
+        # Return file content without sorting
+        else:
+            with open(file_path, "r", encoding="utf-8") as file:
+                reader = csv.reader(file)
+                # First line as header
+                header = next(reader)
+                if header:
+                    # Read the rows within the specified range, otherwise skip to the next row.
+                    # Loop ends when the end row is reached or the end of the file is reached.
+                    for i, row in enumerate(reader):
+                        if start_row <= i < end_row:
+                            paginated_rows.append(row)
+                        total_rows += 1
+
+                        if i >= end_row:
+                            break
+
+            # Costly operation to read the file and return the required rows.
+            # It gets more expensive as the page number increases, needs to go deeper into the file.
+            # Currently supports CSV files only.
+
+            # # Read the file and retrieve the rows
+            # with open(file_path, "r", encoding="utf-8") as file:
+            #     reader = csv.reader(file)
+            #     # First line as header
+            #     header = next(reader)
+
+            #     if header:
+            #         # Read the rows within the specified range, otherwise skip to the next row.
+            #         # Loop ends when the end row is reached or the end of the file is reached.
+            #         for i, row in enumerate(reader):
+            #             if start_row <= i < end_row:
+            #                 paginated_rows.append(row)
+            #             total_rows += 1
+
+            #             if i >= end_row:
+            #                 break
+
+            # with open(file_path, "r", encoding="utf-8") as file:
+            # if sort:
+            #     reader = csv.reader(file)
+            #     # First line as header
+            #     header = next(reader)
+            #     if header:
+            #         rows = list(reader)
+
+            #         sort_key, sort_order = list(sort.items())[0]
+
+            #         # Find the index of the column to sort by
+            #         if sort_key in header:
+            #             sort_index = header.index(sort_key)
+            #             reverse_sort = sort_order == "desc"
+
+            #             # Sort rows based on the sort_index
+            #             rows = sorted(
+            #                 rows, key=lambda row: row[sort_index], reverse=reverse_sort
+            #             )
+
+            #         # Paginate the sorted rows
+            #         paginated_rows = rows[start_row:end_row]
+            #         total_rows = len(rows)
+            # else:
+            #     reader = csv.reader(file)
+            #     # First line as header
+            #     header = next(reader)
+
+            #     if header:
+            #         # Read the rows within the specified range, otherwise skip to the next row.
+            #         # Loop ends when the end row is reached or the end of the file is reached.
+            #         for i, row in enumerate(reader):
+            #             if start_row <= i < end_row:
+            #                 paginated_rows.append(row)
+            #             total_rows += 1
+
+            #             if i >= end_row:
+            #                 break
+
+            # reader = csv.reader(file)
+            # # First line as header
+            # header = next(reader)
+
+            # if header:
+            #     # If sort is not empty, sort the rows based on the provided column and order
+            #     if sort:
+            #         sort_key, sort_order = list(sort.items())[0]
+            #         rows = list(reader)  # Read all rows
+
+            #         # Find the index of the column to sort by
+            #         if sort_key in header:
+            #             sort_index = header.index(sort_key)
+            #             reverse_sort = sort_order == "desc"
+
+            #             # Detect if the column is numeric or string by examining the first valid value
+            #             first_valid_value = next(
+            #                 (row[sort_index] for row in rows if row[sort_index]), None
+            #             )
+
+            #             if first_valid_value and is_number(first_valid_value):
+            #                 # Sort numerically
+            #                 rows = sorted(
+            #                     rows,
+            #                     key=lambda row: (
+            #                         convert_to_number(row[sort_index])
+            #                         if row[sort_index]
+            #                         else (float("-inf") if reverse_sort else float("inf"))
+            #                     ),
+            #                     reverse=reverse_sort,
+            #                 )
+            #             else:
+            #                 # Sort alphabetically (string sort)
+            #                 rows = sorted(
+            #                     rows,
+            #                     key=lambda row: (
+            #                         row[sort_index].lower()
+            #                         if row[sort_index] != ""
+            #                         else ("\u0000" if reverse_sort else "\uFFFF")
+            #                     ),
+            #                     reverse=reverse_sort,
+            #                 )
+
+            #             # Save sorted data
+            #             with open(
+            #                 sorted_file_path, "w", encoding="utf-8", newline=""
+            #             ) as sorted_file:
+            #                 writer = csv.writer(sorted_file)
+            #                 writer.writerow(header)
+            #                 writer.writerows(rows)
+
+            #             paginated_rows = rows[start_row:end_row]
+            #             total_rows = len(rows)
+            #     else:
+            #         # Read the rows within the specified range, otherwise skip to the next row.
+            #         # Loop ends when the end row is reached or the end of the file is reached.
+            #         for i, row in enumerate(reader):
+            #             if start_row <= i < end_row:
+            #                 paginated_rows.append(row)
+            #             total_rows += 1
+
+            #             if i >= end_row:
+            #                 break
+
+            # reader = csv.reader(file)
+
+            # # First line as header
+            # header = next(reader)
+
+            # if header:
+            #     rows = list(reader)  # Read all rows
+
+            #     # If sort is not empty, sort the rows based on the provided column and order
+            #     if sort:
+            #         sort_key, sort_order = list(sort.items())[0]
+
+            #         # Find the index of the column to sort by
+            #         if sort_key in header:
+            #             sort_index = header.index(sort_key)
+            #             reverse_sort = sort_order == "desc"
+
+            #             # Detect if the column is numeric or string by examining the first valid value
+            #             first_valid_value = next(
+            #                 (row[sort_index] for row in rows if row[sort_index]), None
+            #             )
+
+            #             if first_valid_value and is_number(first_valid_value):
+            #                 # Sort numerically
+            #                 rows = sorted(
+            #                     rows,
+            #                     key=lambda row: (
+            #                         convert_to_number(row[sort_index])
+            #                         if row[sort_index]
+            #                         else float("-inf")
+            #                     ),
+            #                     reverse=reverse_sort,
+            #                 )
+            #             else:
+            #                 # Sort alphabetically (string sort)
+            #                 rows = sorted(
+            #                     rows,
+            #                     # Empty strings should be sorted to the end in ascending order
+            #                     key=lambda row: (
+            #                         (
+            #                             row[sort_index].lower()
+            #                             if row[sort_index]
+            #                             else float("inf")
+            #                         )
+            #                         if not reverse_sort
+            #                         else (row[sort_index].lower() if row[sort_index] else "")
+            #                     ),
+            #                     reverse=reverse_sort,
+            #                 )
+
+            #     # Paginate the (sorted or unsorted) rows
+            #     paginated_rows = rows[start_row:end_row]
+            #     total_rows = len(rows)
 
         # Build the response data
         response_data = {
@@ -461,6 +723,8 @@ def put_workspace_file(relative_path):
     rows_per_page = data.get("rowsPerPage")
     header = data.get("header")
     rows = data.get("rows")
+    sort = literal_eval(request.args.get("sorts"))
+    copy_file_path = file_path
 
     start_row = page * rows_per_page
     end_row = start_row + rows_per_page
@@ -475,6 +739,10 @@ def put_workspace_file(relative_path):
         # Ensure the directory exists
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
+        if sort:
+            sort_key, sort_order = list(sort.items())[0]
+            copy_file_path = f"{file_path}.{sort_key}.{sort_order}.sort"
+
         # Costly operation to read the entire file and update the required rows.
         # One full file cycle.
         # Currently supports CSV files only.
@@ -483,7 +751,7 @@ def put_workspace_file(relative_path):
         temp_file_path = f"{file_path}.tmp"
 
         # Read the file and write the updated rows
-        with open(file_path, "r", encoding="utf-8") as infile, open(
+        with open(copy_file_path, "r", encoding="utf-8") as infile, open(
             temp_file_path, "w", encoding="utf-8"
         ) as outfile:
             reader = csv.reader(infile)
@@ -503,6 +771,22 @@ def put_workspace_file(relative_path):
 
         # Replace the old file with the new file
         os.replace(temp_file_path, file_path)
+
+        # Check if outdated files exists
+        existing_files = [
+            f
+            for f in os.listdir(os.path.dirname(file_path))
+            if f.startswith(os.path.basename(file_path))
+            and (
+                not f.endswith(".csv")
+                and not f.endswith(".txt")
+                and not os.path.isdir(os.path.join(os.path.dirname(file_path), f))
+            )
+        ]
+
+        # Remove old files
+        for file_name in existing_files:
+            os.remove(os.path.join(os.path.dirname(file_path), file_name))
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -841,6 +1125,22 @@ def put_workspace_rename(relative_path):
         # Ensure the directory exists
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
 
+        # Check if outdated files exists
+        existing_files = [
+            f
+            for f in os.listdir(os.path.dirname(destination_path))
+            if f.startswith(os.path.basename(destination_path))
+            and (
+                not f.endswith(".csv")
+                and not f.endswith(".txt")
+                and not os.path.isdir(os.path.join(os.path.dirname(destination_path), f))
+            )
+        ]
+
+        # Remove old files
+        for file_name in existing_files:
+            os.remove(os.path.join(os.path.dirname(destination_path), file_name))
+
         # Rename the file or folder
         os.rename(destination_path, new_path)
 
@@ -993,6 +1293,22 @@ def put_workspace_delete(relative_path):
 
         # Ensure the directory exists
         os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+
+        # Check if outdated files exists
+        existing_files = [
+            f
+            for f in os.listdir(os.path.dirname(destination_path))
+            if f.startswith(os.path.basename(destination_path))
+            and (
+                not f.endswith(".csv")
+                and not f.endswith(".txt")
+                and not os.path.isdir(os.path.join(os.path.dirname(destination_path), f))
+            )
+        ]
+
+        # Remove old files
+        for file_name in existing_files:
+            os.remove(os.path.join(os.path.dirname(destination_path), file_name))
 
         # Delete the file or folder
         if file_type == "file":
