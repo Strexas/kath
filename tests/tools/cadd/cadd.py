@@ -54,16 +54,15 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     :param str cadd_version: The CADD version to use for fetching the score.
     :return: A string indicating the evaluation result based on the highest PHRED score, or an error message.
     """
-    chromosome = row["chromosome"]
-    pos_start = row["position_g_start"]
-    pos_end = row["position_g_end"]
+    position = row.loc["hg38_gnomad_format"]
+    chromosome = row.loc["chromosome"]
+    if pd.isna(chromosome) or pd.isna(position):
+        chromosome = row.loc["Chromosome_gnomad"]
+        position= row.loc["Position_gnomad"]
+    else:
+        position = row.loc["hg38_gnomad_format"].split('-')[1]
 
-    if pd.isna(chromosome) or pd.isna(pos_start):
-        chromosome = row["Chromosome_gnomad"]
-        pos_start = row["Position_gnomad"]
-        pos_end = row["Position_gnomad"]
-
-    score = fetch_cadd_scores(cadd_version, chromosome, pos_start, pos_end)
+    score = fetch_cadd_scores(cadd_version, chromosome, position)
 
     if score is None or not isinstance(score, list) or len(score) < 2:
         return "CADD score unavailable or invalid format"
@@ -79,7 +78,7 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     sorted_df = score_df.sort_values(by="PHRED", ascending=False)
     highest_score_row = sorted_df.iloc[0]
 
-    return f"Highest PHRED score: {highest_score_row['PHRED']}"
+    return highest_score_row.loc['PHRED']
 
 
 def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
@@ -90,7 +89,7 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     :param str cadd_version: The version of the CADD model to use for score fetching.
     :return: The updated DataFrame with the 'cadd_eval' column.
     """
-    data["cadd_eval"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
+    data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
     return data
 
 
