@@ -1,6 +1,4 @@
 """ Module provides interface to web APIs of CADD tool. """
-import argparse
-
 import pandas as pd
 import requests
 
@@ -36,13 +34,23 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end=None):
         if response.status_code == 200:
             data = response.json()
             return data
-        raise BadResponseException(f"Error: {response.status_code} - {response.text}")
+        raise BadResponseException(
+            f"Error: Received status code {response.status_code} - {response.reason}: {response.text}")
+
     except requests.exceptions.Timeout as exc:
-        raise DownloadError("Error: Timeout occurred while trying to reach the server.") from exc
+        raise DownloadError(
+            "Error: Timeout occurred while trying to reach the server. "
+            "Please check your internet connection or the server status.") from exc
+
     except requests.exceptions.RequestException as req_err:
-        raise DownloadError(f"Error: {req_err}") from req_err
+        raise DownloadError(
+            f"Error: An unexpected error occurred while making the request. "
+            f"Details: {req_err}") from req_err
+
     except ValueError as exc:
-        raise BadResponseException("Error: Invalid JSON format in response.") from exc
+        raise BadResponseException(
+            "Error: Invalid JSON format in response. "
+            "Please ensure the server is returning valid JSON.") from exc
 
 
 def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
@@ -65,15 +73,15 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     score = fetch_cadd_scores(cadd_version, chromosome, position)
 
     if score is None or not isinstance(score, list) or len(score) < 2:
-        return "CADD score unavailable or invalid format"
+        raise ValueError("CADD score unavailable or invalid format")
 
     try:
         score_df = pd.DataFrame(score[1:], columns=score[0])
     except (IndexError, ValueError) as e:
-        return f"Error processing CADD score: {e}"
+        raise ValueError(f"Error processing CADD score: {e}") from e
 
     if "PHRED" not in score_df.columns:
-        return "PHRED score unavailable"
+        raise KeyError("PHRED score unavailable")
 
     sorted_df = score_df.sort_values(by="PHRED", ascending=False)
     highest_score_row = sorted_df.iloc[0]
@@ -92,24 +100,3 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
     return data
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Fetch CADD scores for genomic positions.")
-    parser.add_argument("version", help="CADD version, e.g., 'v1.3' or 'GRCh38-v1.7'")
-    parser.add_argument("chromosome", type=int, help="Chromosome number")
-    parser.add_argument("--position", type=int, help="Genomic position (for single SNV)")
-    parser.add_argument("--start", type=int,
-                        help="Genomic start position (for a range of positions)")
-    parser.add_argument("--end", type=int, help="Genomic end position (for a range of positions)")
-
-    args = parser.parse_args()
-
-    if args.position:
-        result = fetch_cadd_scores(args.version, args.chromosome, args.position)
-        print(result)
-    elif args.start and args.end:
-        result = fetch_cadd_scores(args.version, args.chromosome, args.start, args.end)
-        print(result)
-    else:
-        print("Please provide either '--position' for single SNV \
-              or '--start' and '--end' for a range of positions.")
