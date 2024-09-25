@@ -126,9 +126,6 @@ def get_workspace_merge_lovd_gnomad(relative_path):
         except OSError as e:
             raise RuntimeError(f"Error saving file: {e}")
 
-        # TODO: Remove this sleep statement once the merge logic is implemented
-        time.sleep(1)  # Simulate a delay for the merge process
-
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
