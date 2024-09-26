@@ -46,7 +46,7 @@ from .data.downloading import (
     download_database_for_eys_gene,
 
     # Functions for storing databases
-    store_database_for_eys_gene
+    download_selected_database_for_eys_gene
 )
 
 # DATA REFACTORING IMPORT

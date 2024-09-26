@@ -18,7 +18,8 @@ from .constants import (LOVD_FILE_URL,
                         LOVD_PATH,
                         DATABASES_DOWNLOAD_PATHS,
                         LOVD_FILE_URL_EYS,
-                        STORE_AS_LOVD)
+                        STORE_AS_LOVD,
+                        STORE_AS_GNOMAD)
 
 
 # EXCEPTIONS
@@ -176,21 +177,36 @@ def download_database_for_eys_gene(database_name, override=False):
     os.rename(latest_file, os_path)
 
 
-def store_database_for_eys_gene(database_name, override=False):
+def download_selected_database_for_eys_gene(database_name, save_path="", override=False):
     """
     Calls a function to download a database.
+
     :param database_name: the name of the database that should be downloaded
+    :param save_path: path to save the data
     :param override: should be already existing file be overwritten
     """
+    if not isinstance(database_name, str):
+        raise TypeError("Database name should be a string")
+
     database_name = database_name.lower()
+
+    # if save_path is not provided, save to default location
+    if database_name == "lovd" and save_path == "":
+        save_path = STORE_AS_LOVD
+    elif database_name == "gnomad" and save_path == "":
+        save_path = STORE_AS_GNOMAD
+
+    # check if database_name is supported
     if database_name not in DATABASES_DOWNLOAD_PATHS:
-        raise IndexError(f"Requested {database_name} database is not supported")
+        raise IndexError(f"Requested for {database_name} database is not supported")
+
+    # download the database
     if database_name == "lovd":
-        download_lovd_database_for_eys_gene(database_name, override)
+        download_lovd_database_for_eys_gene(save_path, override)
     elif database_name == "gnomad":
-        download_data_from_gnomad_eys(database_name, override)
+        download_data_from_gnomad_eys(save_path, override)
     else:
-        download_database_for_eys_gene(database_name, override)
+        raise IndexError(f"Requested for {database_name} is not yet supported")
 
 
 def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
@@ -215,7 +231,7 @@ def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
             df.loc[index, f'{name}_an_{variant_id}'] = pop['an']
 
 
-def download_data_from_gnomad_eys(path, override=False):
+def download_data_from_gnomad_eys(path=STORE_AS_GNOMAD, override=False):
     """
     Requests gnomAD API for data about a specific gene containing:
     - variant_id
@@ -226,10 +242,8 @@ def download_data_from_gnomad_eys(path, override=False):
     - popmax
     - popmax population
 
-    :param str gene_name: name of gene
-    :param bool to_file: if True, saves data to variants.csv
-    :returns: DataFrame from gnomAD API
-    :rtype: DataFrame
+    :param str path: path to save the data (default: 'data/gnomad/gnomad_eys.csv')
+    :param bool override: should an existing file be overriden with a new one
     """
 
     if os.path.exists(path) and not override:
@@ -348,5 +362,3 @@ def download_data_from_gnomad_eys(path, override=False):
 
     if not os.path.isfile(path) or override:
         df.to_csv(path, index=False)
-
-    return df
