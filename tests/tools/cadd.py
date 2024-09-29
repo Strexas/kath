@@ -1,6 +1,7 @@
 """ Module provides interface to web APIs of CADD tool. """
-import pandas as pd
+import argparse
 import requests
+import pandas as pd
 
 
 class BadResponseException(Exception):
@@ -13,14 +14,16 @@ class DownloadError(Exception):
 
 def fetch_cadd_scores(cadd_version, chromosome, start, end=None):
     """
-    Fetches CADD (Combined Annotation Dependent Depletion) scores for either a single SNV or a range of genomic
-    positions.
+    Fetches CADD (Combined Annotation Dependent Depletion)
+    scores for either a single SNV or a range of genomic positions.
 
     :param str cadd_version: Version of the CADD model used, e.g., "v1.3" or "GRCh38-v1.7".
     :param int chromosome: Chromosome number where the SNV or genomic region is located.
     :param int start: Genomic start position (or single position for SNV) of the region.
-    :param int end: (Optional) Genomic end position of the region. If not provided, fetches a single SNV.
-    :return: A dictionary containing CADD scores and annotations for the specified SNV or region, or None if an
+    :param int end: (Optional) Genomic end position of the region.
+    If not provided, fetches a single SNV.
+    :return: A dictionary containing CADD scores and annotations
+    for the specified SNV or region, or None if an
     error occurs.
     """
 
@@ -35,7 +38,8 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end=None):
             data = response.json()
             return data
         raise BadResponseException(
-            f"Error: Received status code {response.status_code} - {response.reason}: {response.text}")
+            f"Error: Received status code {response.status_code} - "
+            f"{response.reason}: {response.text}")
 
     except requests.exceptions.Timeout as exc:
         raise DownloadError(
@@ -55,12 +59,14 @@ def fetch_cadd_scores(cadd_version, chromosome, start, end=None):
 
 def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     """
-    Evaluates the CADD score for a given row in the DataFrame and returns the highest PHRED score evaluation.
+    Evaluates the CADD score for a given row in the
+     DataFrame and returns the highest PHRED score evaluation.
     Handles cases where the response is malformed or incomplete.
 
     :param row: A row from the DataFrame.
     :param str cadd_version: The CADD version to use for fetching the score.
-    :return: A string indicating the evaluation result based on the highest PHRED score, or an error message.
+    :return: A string indicating the evaluation result based
+     on the highest PHRED score, or an error message.
     """
     position = row.loc["hg38_gnomad_format"]
     chromosome = row.loc["chromosome"]
@@ -100,3 +106,24 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
     return data
 
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Fetch CADD scores for genomic positions.")
+    parser.add_argument("version", help="CADD version, e.g., 'v1.3' or 'GRCh38-v1.7'")
+    parser.add_argument("chromosome", type=int, help="Chromosome number")
+    parser.add_argument("--position", type=int, help="Genomic position (for single SNV)")
+    parser.add_argument("--start", type=int,
+                        help="Genomic start position (for a range of positions)")
+    parser.add_argument("--end", type=int, help="Genomic end position (for a range of positions)")
+
+    args = parser.parse_args()
+
+    if args.position:
+        result = fetch_cadd_scores(args.version, args.chromosome, args.position)
+        print(result)
+    elif args.start and args.end:
+        result = fetch_cadd_scores(args.version, args.chromosome, args.start, args.end)
+        print(result)
+    else:
+        print("Please provide either '--position' for single SNV \
+              or '--start' and '--end' for a range of positions.")
