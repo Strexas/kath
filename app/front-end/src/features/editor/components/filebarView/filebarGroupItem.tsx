@@ -1,8 +1,10 @@
+import { EditorConfirmLeave } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileModel } from '@/features/editor/types';
 import { useStatusContext } from '@/hooks';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
+import { useCallback, useState } from 'react';
 
 /**
  * `FilebarGroupItem` is a functional component that represents an individual item in the file bar group.
@@ -26,68 +28,111 @@ import { alpha, Box, IconButton, Typography, useTheme } from '@mui/material';
 export const FilebarGroupItem: React.FC<FileModel> = (file) => {
   const Theme = useTheme();
   const Workspace = useWorkspaceContext();
-  const { blocked } = useStatusContext();
+  const { blocked, unsaved } = useStatusContext();
 
   const { id, label } = file;
 
+  const [confirmAction, setConfirmAction] = useState<'tab' | 'close' | null>(null);
+
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+
+  const handleTabConfirm = useCallback(() => {
+    Workspace.fileStateUpdate(file);
+    Workspace.filesHistoryStateUpdate(file);
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  }, [file, Workspace]);
+
+  const handleCloseConfirm = useCallback(() => {
+    Workspace.filesHistoryStateUpdate(undefined, file);
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  }, [file, Workspace]);
+
+  const handleTabClick = useCallback(() => {
+    if (!blocked) {
+      if (unsaved && Workspace.file.id !== id) {
+        setConfirmAction('tab');
+        setIsConfirmDialogOpen(true);
+      } else {
+        Workspace.fileStateUpdate(file);
+        Workspace.filesHistoryStateUpdate(file);
+      }
+    }
+  }, [blocked, unsaved, file, Workspace]);
+
+  const handleCloseIconClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!blocked) {
+      if (unsaved && Workspace.file.id === id) {
+        setConfirmAction('close');
+        setIsConfirmDialogOpen(true);
+      } else {
+        Workspace.filesHistoryStateUpdate(undefined, file);
+      }
+    }
+  };
+
+  const handleConfirmDialogCancel = () => {
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  };
+
   return (
-    <Box
-      id={id}
-      sx={{
-        height: '100%',
-        pl: '1rem',
-        pr: '0.5rem',
-        bgcolor: Workspace.file.id === id ? Theme.palette.background.default : Theme.palette.action.selected,
-        borderRadius: '0rem',
-        ':hover': {
-          backgroundColor:
-            Workspace.file.id === id
-              ? Theme.palette.background.default
-              : blocked
-                ? Theme.palette.action.selected
-                : alpha(Theme.palette.background.default, 0.5),
-        },
-        cursor: blocked ? 'default' : 'pointer',
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: '0.5rem',
-      }}
-      onClick={() => {
-        // Update the workspace to the selected file
-        if (!blocked) {
-          Workspace.fileStateUpdate(file);
-          Workspace.filesHistoryStateUpdate(file);
-        }
-      }}
-    >
-      <Typography
+    <>
+      <Box
+        id={id}
         sx={{
-          fontSize: 12,
-          fontWeight: 'bold',
-          textTransform: 'none',
-          maxWidth: '10rem',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
+          height: '100%',
+          pl: '1rem',
+          pr: '0.5rem',
+          bgcolor: Workspace.file.id === id ? Theme.palette.background.default : Theme.palette.action.selected,
+          borderRadius: '0rem',
+          ':hover': {
+            backgroundColor:
+              Workspace.file.id === id
+                ? Theme.palette.background.default
+                : blocked
+                  ? Theme.palette.action.selected
+                  : alpha(Theme.palette.background.default, 0.5),
+          },
+          cursor: blocked ? 'default' : 'pointer',
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: '0.5rem',
         }}
+        onClick={handleTabClick}
       >
-        {label}
-      </Typography>
-      <IconButton
-        size='small'
-        disabled={blocked}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-        onMouseDown={(event) => {
-          event.stopPropagation();
-          // Remove the file from the workspace
-          Workspace.filesHistoryStateUpdate(undefined, file);
-        }}
-      >
-        <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />
-      </IconButton>
-    </Box>
+        <Typography
+          sx={{
+            fontSize: 12,
+            fontWeight: 'bold',
+            textTransform: 'none',
+            maxWidth: '10rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {label}
+        </Typography>
+        <IconButton
+          size='small'
+          disabled={blocked}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+          onMouseDown={handleCloseIconClick}
+        >
+          <CloseIcon sx={{ fontSize: 12, color: Theme.palette.text.primary }} />
+        </IconButton>
+      </Box>
+      <EditorConfirmLeave
+        isOpen={isConfirmDialogOpen}
+        onClose={handleConfirmDialogCancel}
+        onConfirm={confirmAction === 'tab' ? handleTabConfirm : handleCloseConfirm}
+      />
+    </>
   );
 };
