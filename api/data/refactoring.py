@@ -4,15 +4,14 @@ import os
 import logging
 import re
 
-import requests
 
 import pandas as pd
 from pandas import DataFrame
 
 from pyliftover import LiftOver
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH
-
+from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, \
+    DEFAULT_SAVE_PATH
 
 
 def set_lovd_dtypes(df_dict):
@@ -347,4 +346,3 @@ def find_popmax_in_gnomad(data):
                 max_id = population_id
         data.loc[i, 'Popmax'] = max_pop
         data.loc[i, 'Popmax population'] = population_mapping[max_id]
-

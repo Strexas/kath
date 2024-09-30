@@ -26,6 +26,7 @@ DATA_PATH = os.path.join(__file__[:__file__.index("kath") + 4], "data/")
 LOVD_PATH = os.path.join(DATA_PATH, "lovd/")
 GNOMAD_PATH = os.path.join(DATA_PATH, "gnomad/")
 CLINVAR_PATH = os.path.join(DATA_PATH, "clinvar/")
+DEFAULT_SAVE_PATH = os.path.join(DATA_PATH, "merged_data/")
 
 # variable data types
 LOVD_TABLES_DATA_TYPES = {

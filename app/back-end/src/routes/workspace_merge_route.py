@@ -8,6 +8,8 @@ the user's workspace.
 
 import os
 import time  # TODO: Remove this import once the merge logic is implemented
+
+import pandas as pd
 from flask import Blueprint, request, jsonify
 
 from src.setup.extensions import logger
@@ -19,6 +21,9 @@ from src.constants import (
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
+
+from api import set_lovd_dtypes, parse_lovd
+from api.data import merge_gnomad_lovd, set_gnomad_dtypes, parse_gnomad
 
 workspace_merge_route_bp = Blueprint("workspace_merge_route", __name__)
 
@@ -85,8 +90,41 @@ def get_workspace_merge_lovd_gnomad(relative_path):
         # [destination_path, override, lovd_file, gnomad_file]
         #
 
-        # TODO: Remove this sleep statement once the merge logic is implemented
-        time.sleep(1)  # Simulate a delay for the merge process
+        if os.path.exists(destination_path) and not override:
+            return
+
+        if not os.path.exists(destination_path):
+            os.makedirs(destination_path)
+
+        if not os.path.exists(lovd_file):
+            raise FileNotFoundError(f"LOVD data file not found at: {lovd_file}")
+
+        if not os.path.exists(gnomad_file):
+            raise FileNotFoundError(f"gnomAD data file not found at: {gnomad_file}")
+
+        lovd_data = parse_lovd(lovd_file)
+        gnomad_data = parse_gnomad(gnomad_file)
+
+        set_lovd_dtypes(lovd_data)
+        set_gnomad_dtypes(gnomad_data)
+
+        # Extract "Variants_On_Genome" and merge it with "Variants_On_Transcripts"
+        variants_on_genome = lovd_data["Variants_On_Genome"].copy()
+        gnomad_data = gnomad_data.copy()
+
+        lovd_data = pd.merge(
+            lovd_data["Variants_On_Transcripts"],
+            variants_on_genome[['id', 'VariantOnGenome/DNA', 'VariantOnGenome/DNA/hg38']],
+            on='id',
+            how='left'
+        )
+
+        final_data = merge_gnomad_lovd(lovd_data, gnomad_data)
+
+        try:
+            final_data.to_csv(destination_path)
+        except OSError as e:
+            raise RuntimeError(f"Error saving file: {e}")
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
