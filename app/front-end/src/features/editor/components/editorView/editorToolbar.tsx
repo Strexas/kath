@@ -2,7 +2,7 @@ import { useStatusContext } from '@/hooks';
 import { socket } from '@/lib';
 import { Events } from '@/types';
 import { Done as DoneIcon, Error as ErrorIcon } from '@mui/icons-material';
-import { Box, Button, CircularProgress, useTheme } from '@mui/material';
+import { alpha, Box, Button, CircularProgress, Typography, useTheme } from '@mui/material';
 import {
   GridToolbarColumnsButton,
   GridToolbarContainer,
@@ -52,7 +52,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ handleSave }) => {
   const [saveStatus, setSaveStatus] = useState(true);
 
   const Theme = useTheme();
-  const { blocked } = useStatusContext();
+  const { blocked, unsavedStateUpdate, unsaved } = useStatusContext();
 
   useEffect(() => {
     const handleWorkspaceFileSaveFeedback = (data: { status: 'success' | 'error' }) => {
@@ -73,10 +73,17 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ handleSave }) => {
       <GridToolbarDensitySelector />
       {/* <GridToolbarExport /> */}
       <Box sx={{ flexGrow: 1 }} />
+      {unsaved && (
+        <Typography sx={{ fontSize: '0.9rem', color: alpha(Theme.palette.text.primary, 0.5), pr: '0.5rem' }}>
+          Changes not saved
+        </Typography>
+      )}
+
       <Button
         onClick={() => {
           setIsSaving(true);
           handleSave();
+          unsavedStateUpdate(false);
         }}
         disabled={blocked}
         startIcon={

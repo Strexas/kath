@@ -1,3 +1,4 @@
+import { EditorConfirmLeave } from '@/features/editor/components/editorView';
 import { FileTreeItemContextMenu, FileTreeItemLabel } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTypes } from '@/features/editor/types';
@@ -136,7 +137,7 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     icon = getIconFromFileType(item.fileType);
   }
 
-  const { fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
+  const { fileStateUpdate, filesHistoryStateUpdate, file } = useWorkspaceContext();
   const { blocked } = useStatusContext();
   const [contextMenu, setContextMenu] = useState<(EventTarget & HTMLDivElement) | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ top: number; left: number }>({
@@ -166,6 +167,13 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
     setContextMenuPosition({ top: 0, left: 0 });
   };
 
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const { unsaved } = useStatusContext();
+  const handleConfirm = () => {
+    handleClick(item.id, item.label, item.fileType);
+    setIsConfirmDialogOpen(false);
+  };
+
   return (
     <TreeItem2Provider itemId={itemId}>
       <StyledFileTreeItemRoot {...getRootProps(other)}>
@@ -174,7 +182,11 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
             onClick: (event) => {
               if (!blocked) {
                 if (getContentProps().onClick) getContentProps().onClick(event);
-                handleClick(item.id, item.label, item.fileType);
+                if (unsaved) {
+                  if (item.fileType !== FileTypes.FOLDER && item.id !== file.id) setIsConfirmDialogOpen(true);
+                } else {
+                  handleClick(item.id, item.label, item.fileType);
+                }
               }
             },
 
@@ -204,6 +216,11 @@ export const FileTreeItem = React.forwardRef(function CustomTreeItem(
           onClose={handleCloseContextMenu}
         />
         {children && <TransitionComponent {...getGroupTransitionProps()} />}
+        <EditorConfirmLeave
+          isOpen={isConfirmDialogOpen}
+          onClose={() => setIsConfirmDialogOpen(false)}
+          onConfirm={handleConfirm}
+        />
       </StyledFileTreeItemRoot>
     </TreeItem2Provider>
   );

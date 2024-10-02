@@ -32,7 +32,7 @@ from .data.constants import (
 )
 
 # DATA COLLECTION IMPORT
-from .data.collection import (
+from .data.downloading import (
     # Custom exceptions
     BadResponseException,
     DownloadError,
@@ -46,7 +46,7 @@ from .data.collection import (
     download_database_for_eys_gene,
 
     # Functions for storing databases
-    store_database_for_eys_gene
+    download_selected_database_for_eys_gene
 )
 
 # DATA REFACTORING IMPORT

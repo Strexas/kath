@@ -1,4 +1,9 @@
-import { EditorColumnMenu, EditorHeader, EditorToolbar } from '@/features/editor/components/editorView';
+import {
+  EditorColumnMenu,
+  EditorConfirmLeave,
+  EditorHeader,
+  EditorToolbar,
+} from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import {
   FileContentAggregationActions,
@@ -62,7 +67,7 @@ export const EditorView: React.FC = () => {
 
   const { connected } = useSessionContext();
   const { file, fileContent, filePagination, fileStateUpdate } = useWorkspaceContext();
-  const { blocked, blockedStateUpdate } = useStatusContext();
+  const { blocked, blockedStateUpdate, unsaved, unsavedStateUpdate } = useStatusContext();
   const ref = useGridApiRef();
 
   const handleSave = async () => {
@@ -143,6 +148,10 @@ export const EditorView: React.FC = () => {
     }
 
     fileStateUpdate(undefined, { ...fileContent, sorts: { [column]: sort } }, undefined);
+  };
+  
+  const onCellEditStart = () => {
+    unsavedStateUpdate(true);
   };
 
   const getWorkspaceFile = useCallback(async () => {
@@ -231,46 +240,90 @@ export const EditorView: React.FC = () => {
     );
   }, [fileContentResponse, fileContent.aggregations, fileContent.sorts]);
 
+  // Browser tab close/refresh warning if there are unsaved changes effect
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (unsaved) event.preventDefault();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [unsaved]);
+
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingModel, setPendingModel] = useState<{ page: number; pageSize: number } | null>(null);
+
+  const [paginationModel, setPaginationModel] = useState({
+    page: filePagination.page,
+    pageSize: filePagination.rowsPerPage,
+  });
+
+  const handleConfirm = () => {
+    if (pendingModel) {
+      fileStateUpdate(undefined, undefined, {
+        page: pendingModel.page,
+        rowsPerPage: pendingModel.pageSize,
+        totalRows: filePagination.totalRows,
+      });
+      setPaginationModel(pendingModel);
+      setPendingModel(null);
+    }
+    setIsConfirmDialogOpen(false);
+  };
+
+  const handleCancel = () => {
+    setPendingModel(null);
+    setIsConfirmDialogOpen(false);
+  };
+
   return (
-    <DataGrid
-      sx={{ height: '100%', border: 'none' }}
-      loading={blocked || isLoading}
-      rows={fileContent.rows}
-      columns={fileContent.columns}
-      pagination
-      paginationMode='server'
-      rowCount={filePagination.totalRows}
-      disableColumnSorting
-      initialState={{
-        pagination: {
-          paginationModel: { pageSize: filePagination.rowsPerPage, page: filePagination.page },
-        },
-      }}
-      disableColumnMenu={blocked}
-      pageSizeOptions={[25, 50, 100]}
-      onPaginationModelChange={(model) => {
-        fileStateUpdate(undefined, undefined, {
-          page: model.page,
-          rowsPerPage: model.pageSize,
-          totalRows: filePagination.totalRows,
-        });
-      }}
-      slots={{
-        toolbar: (props) => <EditorToolbar {...props} disabled={blocked || !file.id} handleSave={handleSave} />,
-        columnMenu: (props) => (
-          <EditorColumnMenu
-            {...props}
-            disabled={blocked}
-            handleAggregation={handleAggregation}
-            handleSort={handleSort}
-          />
-        ),
-        pagination: (props) => <GridPagination disabled={blocked} {...props} />,
-      }}
-      slotProps={{
-        toolbar: {},
-      }}
-      apiRef={ref}
-    />
+    <>
+      <DataGrid
+        sx={{ height: '100%', border: 'none' }}
+        loading={blocked || isLoading}
+        rows={fileContent.rows}
+        columns={fileContent.columns}
+        pagination
+        paginationMode='server'
+        rowCount={filePagination.totalRows}
+        disableColumnSorting
+        pageSizeOptions={[25, 50, 100]}
+        paginationModel={paginationModel}
+        onPaginationModelChange={(model) => {
+          if (unsaved) {
+            setPendingModel(model);
+            setIsConfirmDialogOpen(true);
+          } else {
+            fileStateUpdate(undefined, undefined, {
+              page: model.page,
+              rowsPerPage: model.pageSize,
+              totalRows: filePagination.totalRows,
+            });
+            setPaginationModel(model);
+          }
+        }}
+        slots={{
+          toolbar: (props) => <EditorToolbar {...props} disabled={blocked || !file.id} handleSave={handleSave} />,
+          columnMenu: (props) => (
+            <EditorColumnMenu
+              {...props}
+              disabled={blocked}
+              handleAggregation={handleAggregation}
+              handleSort={handleSort}
+            />
+          ),
+          pagination: (props) => <GridPagination disabled={blocked} {...props} />,
+        }}
+        slotProps={{
+          toolbar: {},
+        }}
+        apiRef={ref}
+        onCellEditStart={onCellEditStart}
+      />
+      <EditorConfirmLeave isOpen={isConfirmDialogOpen} onClose={handleCancel} onConfirm={handleConfirm} />
+    </>
   );
 };

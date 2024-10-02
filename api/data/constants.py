@@ -8,6 +8,7 @@ LOVD_URL_EYS = LOVD_URL + "EYS"
 LOVD_FILE_URL = "https://databases.lovd.nl/shared/download/all/gene/"
 LOVD_FILE_URL_EYS = LOVD_FILE_URL + "EYS"
 STORE_AS_LOVD = "../data/lovd/lovd_data.txt"
+STORE_AS_GNOMAD = "../data/gnomad/gnomad_data.csv"
 
 GNOMAD_URL = "https://gnomad.broadinstitute.org/gene"
 GNOMAD_URL_EYS = "https://gnomad.broadinstitute.org/gene/ENSG00000188107?dataset=gnomad_r4"
@@ -25,6 +26,7 @@ DATA_PATH = os.path.join(__file__[:__file__.index("kath") + 4], "data/")
 LOVD_PATH = os.path.join(DATA_PATH, "lovd/")
 GNOMAD_PATH = os.path.join(DATA_PATH, "gnomad/")
 CLINVAR_PATH = os.path.join(DATA_PATH, "clinvar/")
+DEFAULT_SAVE_PATH = os.path.join(DATA_PATH, "merged_data/")
 
 # variable data types
 LOVD_TABLES_DATA_TYPES = {

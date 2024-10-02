@@ -1,3 +1,4 @@
+import { EditorConfirmLeave } from '@/features/editor/components/editorView';
 import {
   FileTreeItemContextMenuConfirmationDialog,
   FileTreeItemContextMenuFileImportDialog,
@@ -5,6 +6,7 @@ import {
 } from '@/features/editor/components/fileTreeView/fileTreeItem';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileTreeItemContextMenuActions, FileTreeViewItemProps, FileTypes } from '@/features/editor/types';
+import { useStatusContext } from '@/hooks';
 import { axios, socket } from '@/lib';
 import { Endpoints, Events } from '@/types';
 import { getSID, getUUID } from '@/utils';
@@ -56,12 +58,51 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
   onClose,
 }) => {
   const { file, fileStateUpdate, filesHistoryStateUpdate } = useWorkspaceContext();
+  const { unsaved } = useStatusContext();
   const [newFileDialogOpen, setNewFileDialogOpen] = useState(false);
   const [newFolderDialogOpen, setNewFolderDialogOpen] = useState(false);
   const [fileImportDialogOpen, setFileImportDialogOpen] = useState(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const menuItems = [];
+
+  const [confirmAction, setConfirmAction] = useState<'rename' | 'export' | null>(null);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+
+  const handleRenameClick = () => {
+    if (item.id === file.id && unsaved) {
+      setConfirmAction('rename');
+      setIsConfirmDialogOpen(true);
+    } else {
+      handleActionContextMenu('rename');
+    }
+  };
+
+  const handleExportClick = () => {
+    if (item.id === file.id && unsaved) {
+      setConfirmAction('export');
+      setIsConfirmDialogOpen(true);
+    } else {
+      handleActionContextMenu('export');
+    }
+  };
+
+  const handleRenameConfirm = () => {
+    handleActionContextMenu('rename');
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  };
+
+  const handleExportConfirm = () => {
+    handleActionContextMenu('export');
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  };
+
+  const handleConfirmDialogCancel = () => {
+    setIsConfirmDialogOpen(false);
+    setConfirmAction(null);
+  };
 
   if (item.fileType === undefined || item.fileType === FileTypes.FOLDER) {
     menuItems.push(
@@ -78,7 +119,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
     );
   } else {
     menuItems.push(
-      <MenuItem key='export' onClick={() => handleActionContextMenu('export')}>
+      <MenuItem key='export' onClick={handleExportClick}>
         Export...
       </MenuItem>,
       <Divider key='divider-export' />
@@ -91,7 +132,7 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
 
   if (item.fileType !== undefined) {
     menuItems.push(
-      <MenuItem key='rename' onClick={() => handleActionContextMenu('rename')}>
+      <MenuItem key='rename' onClick={handleRenameClick}>
         Rename...
       </MenuItem>,
       <MenuItem key='delete' onClick={() => handleActionContextMenu('delete')}>
@@ -241,6 +282,11 @@ export const FileTreeItemContextMenu: React.FC<FileTreeItemContextMenuProps> = (
         content={{ text: 'Are you sure you want to delete ', boldText: item.label }}
         onClose={() => setDeleteDialogOpen(false)}
         onConfirm={handleDeleteConfirm}
+      />
+      <EditorConfirmLeave
+        isOpen={isConfirmDialogOpen}
+        onClose={handleConfirmDialogCancel}
+        onConfirm={confirmAction === 'rename' ? handleRenameConfirm : handleExportConfirm}
       />
     </>
   );
