@@ -18,12 +18,16 @@ itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
 packaging==24.1
+pandas==2.2.3
 pycparser==2.22
+pyliftover==0.4.1
 python-dotenv==1.0.1
 python-engineio==4.9.1
 python-socketio==5.11.3
 redis==5.0.8
+requests==2.32.3
 simple-websocket==1.0.0
+selenium==4.25.0
 Werkzeug==3.0.3
 wsproto==1.2.0
 zope.event==5.0
