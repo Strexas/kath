@@ -10,38 +10,53 @@ from pandas import DataFrame
 
 from pyliftover import LiftOver
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, \
-    DEFAULT_SAVE_PATH
+from .constants import LOVD_PATH,GNOMAD_PATH
 
+
+def safe_to_numeric(series):
+    """
+    Convert a Pandas Series to integer or numeric, returning the original series on failure.
+    This function first tries to convert the Series to integer.
+    If that fails, it attempts to convert it to numeric (float).
+    Args:
+        series (pd.Series): The Pandas Series to be converted to numeric types.
+    Returns:
+        pd.Series: A Series converted to integer or numeric type, or the original Series
+        if conversion is unsuccessful.
+    """
+    try:
+        return  pd.to_numeric(series,downcast="integer")
+    except (ValueError, TypeError):
+        try:
+            return pd.to_numeric(series)  # Fallback to float
+        except (ValueError, TypeError):
+            return series
 
 def set_lovd_dtypes(df_dict):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables saved as DataFrame
+    :param dict[str, DataFrame] df_dict: Dictionary of tables saved as DataFrame
     """
 
-    for table_name in df_dict:
-        frame: DataFrame = df_dict[table_name]
+    for table_name, frame in df_dict.items():
+        frame = frame.convert_dtypes()
         for column in frame.columns:
-            if column not in LOVD_TABLES_DATA_TYPES[table_name]:
-                raise ValueError(f"Column {column} is undefined in LOVD_TABLES_DATA_TYPES")
-
-            match LOVD_TABLES_DATA_TYPES[table_name][column]:
-                case "Date":
+            frame[column] = safe_to_numeric(frame[column])
+            match frame[column].dtype:
+                case pd.Int64Dtype() | pd.Int32Dtype() | pd.Int16Dtype() | pd.Int8Dtype():
+                    frame[column] = frame[column].astype('Int64')
+                case pd.Float64Dtype():
+                    frame[column] = frame[column].astype('float64')
+                case pd.BooleanDtype():
+                    frame[column] = frame[column].map({"0": False, "1": True}).astype('boolean')
+                case _ if pd.api.types.is_datetime64_any_dtype(frame[column]):
                     frame[column] = pd.to_datetime(frame[column], errors='coerce')
-                case "Boolean":
-                    frame[column] = frame[column].map({"0": False, "1": True})
-                case "String":
+                case pd.StringDtype():
                     frame[column] = frame[column].astype('string')
-                case "Integer":
-                    frame[column] = pd.to_numeric(frame[column]).astype('Int64')
-                case "Double":
-                    frame[column] = pd.to_numeric(frame[column]).astype('float')
                 case _:
-                    raise ValueError(f"Undefined data type: "
-                                     f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
-
+                    raise ValueError(f"Undefined data type for column '{column}': {frame[column].dtype}")
+        df_dict[table_name] = frame
 
 def set_gnomad_dtypes(df):
     """
@@ -50,22 +65,22 @@ def set_gnomad_dtypes(df):
     :param DataFrame df: DataFrame containing gnomAD data
     """
 
+    df = df.convert_dtypes()
+
     for column in df.columns:
-        if column not in GNOMAD_TABLES_DATA_TYPES:
-            raise ValueError(f"Column {column} is undefined in GNOMAD_TABLES_DATA_TYPES")
-        match GNOMAD_TABLES_DATA_TYPES[column]:
-            case "Date":
-                df[column] = pd.to_datetime(df[column], errors='coerce')
-            case "Boolean":
-                df[column] = df[column].map({"0": False, "1": True})
-            case "String":
+        match df[column].dtype:
+            case pd.Int64Dtype():
+                df[column] = df[column].astype('Int64')
+            case pd.Float64Dtype():
+                df[column] = df[column].astype('float')
+            case pd.StringDtype():
                 df[column] = df[column].astype('string')
-            case "Integer":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('Int64')
-            case "Double":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
+            case _ if pd.api.types.is_datetime64_any_dtype(df[column]):
+                df[column] = pd.to_datetime(df[column], errors='coerce')
+            case pd.BooleanDtype():
+                df[column] = df[column].map({"0": False, "1": True}).astype('boolean')
             case _:
-                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[column]}")
+                raise ValueError(f"Undefined data type for column '{column}': {df[column].dtype}")
 
 
 def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
@@ -281,7 +296,7 @@ def merge_gnomad_lovd(lovd, gnomad):
         gnomad,
         how="outer",
         left_on="hg38_gnomad_format",
-        right_on="gnomAD ID_gnomad"
+        right_on="variant_id_gnomad"
     )
 
     return merged_frame
