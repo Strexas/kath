@@ -79,7 +79,7 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     score = fetch_cadd_scores(cadd_version, chromosome, position)
 
     if score is None or not isinstance(score, list) or len(score) < 2:
-        raise ValueError("CADD score unavailable or invalid format")
+        return "CADD score unavailable" #intended
 
     try:
         score_df = pd.DataFrame(score[1:], columns=score[0])
@@ -95,21 +95,21 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     return highest_score_row.loc['PHRED']
 
 
-def prepare_data_cadd(data):
+def prepare_data_cadd(data:pd.DataFrame):
     """
     Prepares the DataFrame for CADD evaluation by extracting chromosome
-    and position from the 'variant_id' column.
+    and position from the 'variant_id_gnomad' column.
 
-    :param data: DataFrame containing the 'variant_id' column.
-    :return: Updated DataFrame with 'chromosome' and 'position' columns.
+    :param data: DataFrame.
+    :return: Updated DataFrame with 'Chromosome_gnomad' and 'Position_gnomad' columns.
     """
-
-    data[['Chromosome_gnomad', 'Position_gnomad']] = data['variant_id_gnomad'].str.split('-', n=2).iloc[:, 0:2]
-    data['Position_gnomad'] = data['Position_gnomad'].astype(int)
-
+    data[['Chromosome_gnomad', 'Position_gnomad']] = data['variant_id_gnomad'].str.split('-', n=2, expand=True)[[0, 1]]
+    data['Chromosome_gnomad'] = data['Chromosome_gnomad'].astype('Int64')
+    data['Position_gnomad'] = data['Position_gnomad'].astype('Int64')
     return data
 
-def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
+
+def add_cadd_eval_column(data:pd.DataFrame, cadd_version="GRCh38-v1.7"):
     """
     Adds a column 'cadd_eval' to the DataFrame based on CADD score evaluations for each row.
 
@@ -117,6 +117,7 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     :param str cadd_version: The version of the CADD model to use for score fetching.
     :return: The updated DataFrame with the 'cadd_eval' column.
     """
+
     data = prepare_data_cadd(data)
     data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
     return data
