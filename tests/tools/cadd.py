@@ -95,6 +95,20 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     return highest_score_row.loc['PHRED']
 
 
+def prepare_data_cadd(data):
+    """
+    Prepares the DataFrame for CADD evaluation by extracting chromosome
+    and position from the 'variant_id' column.
+
+    :param data: DataFrame containing the 'variant_id' column.
+    :return: Updated DataFrame with 'chromosome' and 'position' columns.
+    """
+
+    data[['Chromosome_gnomad', 'Position_gnomad']] = data['variant_id_gnomad'].str.split('-', n=2).iloc[:, 0:2]
+    data['Position_gnomad'] = data['Position_gnomad'].astype(int)
+
+    return data
+
 def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     """
     Adds a column 'cadd_eval' to the DataFrame based on CADD score evaluations for each row.
@@ -103,6 +117,7 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     :param str cadd_version: The version of the CADD model to use for score fetching.
     :return: The updated DataFrame with the 'cadd_eval' column.
     """
+    data = prepare_data_cadd(data)
     data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
     return data
 
