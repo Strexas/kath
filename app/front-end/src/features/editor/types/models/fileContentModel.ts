@@ -1,4 +1,4 @@
-import { FileContentAggregationModel } from '@/features/editor/types';
+import { FileContentAggregationModel, FileContentSortModel } from '@/features/editor/types';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
 
 /**
@@ -11,4 +11,5 @@ export interface FileContentModel {
   columns: GridColDef[];
   rows: GridRowsProp;
   aggregations: FileContentAggregationModel;
+  sorts: FileContentSortModel;
 }

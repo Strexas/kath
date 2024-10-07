@@ -1,10 +1,12 @@
-import { FileContentAggregationModel } from '@/features/editor/types';
+import { FileContentAggregationModel, FileContentSortModel, SortEnum } from '@/features/editor/types';
+import { ArrowDownward as ArrowDownwardIcon, ArrowUpward as ArrowUpwardIcon } from '@mui/icons-material';
 import { Box, Typography, useTheme } from '@mui/material';
 import React from 'react';
 
 export interface EditorHeaderProps {
   columnName: string;
   gridColumnsAggregation: FileContentAggregationModel;
+  gridColumnsSort: FileContentSortModel;
 }
 
 /**
@@ -20,11 +22,15 @@ export interface EditorHeaderProps {
  *
  * @component
  */
-export const EditorHeader: React.ElementType<EditorHeaderProps> = ({ columnName, gridColumnsAggregation }) => {
+export const EditorHeader: React.ElementType<EditorHeaderProps> = ({
+  columnName,
+  gridColumnsAggregation,
+  gridColumnsSort,
+}) => {
   const Theme = useTheme();
 
-  if (!gridColumnsAggregation[columnName])
-    return <Typography sx={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{columnName}</Typography>;
+  // if (!gridColumnsAggregation[columnName])
+  //   return <Typography sx={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{columnName}</Typography>;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -36,12 +42,27 @@ export const EditorHeader: React.ElementType<EditorHeaderProps> = ({ columnName,
             color: Theme.palette.primary.main,
           }}
         >
-          {gridColumnsAggregation[columnName].action.toUpperCase()}
+          {gridColumnsAggregation[columnName]?.action.toUpperCase()}
         </Typography>
         <Typography sx={{ fontSize: '0.875rem', fontWeight: 'bold' }}>{columnName}</Typography>
+        {gridColumnsSort[columnName] === SortEnum.ASC ? (
+          <ArrowUpwardIcon
+            sx={{
+              fontSize: '1.25rem',
+              color: Theme.palette.primary.main,
+            }}
+          />
+        ) : gridColumnsSort[columnName] === SortEnum.DESC ? (
+          <ArrowDownwardIcon
+            sx={{
+              fontSize: '1.25rem',
+              color: Theme.palette.primary.main,
+            }}
+          />
+        ) : null}
       </Box>
       <Typography sx={{ fontSize: '0.75rem', fontWeight: 'bold', color: Theme.palette.primary.main }}>
-        {gridColumnsAggregation[columnName].value}
+        {gridColumnsAggregation[columnName]?.value}
       </Typography>
     </Box>
   );

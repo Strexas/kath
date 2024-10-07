@@ -27,7 +27,7 @@ export interface WorkspaceContextProps {
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
   // File state defaults
   file: { id: '', label: '', type: FileTypes.FOLDER },
-  fileContent: { columns: [], rows: [], aggregations: {} },
+  fileContent: { columns: [], rows: [], aggregations: {}, sorts: {} },
   filePagination: { page: 0, rowsPerPage: 100, totalRows: 0 },
   fileStateReset: () => {},
   fileStateUpdate: () => {},
@@ -91,7 +91,12 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
 
   // File state
   const [file, setFile] = useState<FileModel>({ id: '', label: '', type: FileTypes.FOLDER });
-  const [fileContent, setFileContent] = useState<FileContentModel>({ columns: [], rows: [], aggregations: {} });
+  const [fileContent, setFileContent] = useState<FileContentModel>({
+    columns: [],
+    rows: [],
+    aggregations: {},
+    sorts: {},
+  });
   const [filePagination, setFilePagination] = useState<FilePaginationModel>({
     page: 0,
     rowsPerPage: 100,
@@ -106,7 +111,7 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
 
   const fileStateReset = useCallback(() => {
     setFile({ id: '', label: '', type: FileTypes.FOLDER });
-    setFileContent({ columns: [], rows: [], aggregations: {} });
+    setFileContent({ columns: [], rows: [], aggregations: {}, sorts: {} });
     setFilePagination({ page: 0, rowsPerPage: 100, totalRows: 0 });
   }, []);
 

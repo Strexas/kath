@@ -5,7 +5,12 @@ import {
   EditorToolbar,
 } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
-import { FileContentAggregationActions, FileDataRequestDTO, FileDataResponseDTO } from '@/features/editor/types';
+import {
+  FileContentAggregationActions,
+  FileDataRequestDTO,
+  FileDataResponseDTO,
+  SortEnum,
+} from '@/features/editor/types';
 import { useSessionContext, useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
@@ -78,8 +83,13 @@ export const EditorView: React.FC = () => {
     };
 
     try {
-      const fileContentResponse = await axios.put<FileDataResponseDTO>(`${Endpoints.WORKSPACE_FILE}/${file.id}`, data);
-      setFileContentResponse(fileContentResponse.data);
+      await axios.put<FileDataResponseDTO>(`${Endpoints.WORKSPACE_FILE}/${file.id}`, data, {
+        params: {
+          sorts: JSON.stringify(fileContent.sorts),
+        },
+      });
+
+      await getWorkspaceFile();
 
       const responseAggregate = await axios.get(`${Endpoints.WORKSPACE_AGGREGATE}/all/${file.id}`, {
         params: {
@@ -130,6 +140,16 @@ export const EditorView: React.FC = () => {
     }
   };
 
+  const handleSort = async (column: string, sort: SortEnum) => {
+    if (sort === SortEnum.NONE) {
+      console.log('Unsort column:', column);
+      fileStateUpdate(undefined, { ...fileContent, sorts: {} }, undefined);
+      return;
+    }
+
+    fileStateUpdate(undefined, { ...fileContent, sorts: { [column]: sort } }, undefined);
+  };
+  
   const onCellEditStart = () => {
     unsavedStateUpdate(true);
   };
@@ -147,6 +167,7 @@ export const EditorView: React.FC = () => {
         params: {
           page: filePagination.page,
           rowsPerPage: filePagination.rowsPerPage,
+          sorts: JSON.stringify(fileContent.sorts),
         },
       });
 
@@ -157,7 +178,7 @@ export const EditorView: React.FC = () => {
       setIsLoading(false);
       blockedStateUpdate(false);
     }
-  }, [file.id, filePagination.page, filePagination.rowsPerPage]);
+  }, [filePagination.page, filePagination.rowsPerPage, fileContent.sorts]);
 
   // File content fetching effect
   useEffect(() => {
@@ -166,7 +187,11 @@ export const EditorView: React.FC = () => {
 
   // Aggregation reset effect
   useEffect(() => {
-    fileStateUpdate(undefined, { columns: fileContent.columns, rows: fileContent.rows, aggregations: {} }, undefined);
+    fileStateUpdate(
+      undefined,
+      { columns: fileContent.columns, rows: fileContent.rows, aggregations: {}, sorts: {} },
+      undefined
+    );
   }, [file.id]);
 
   // Parse file content response effect
@@ -174,7 +199,11 @@ export const EditorView: React.FC = () => {
     const { totalRows, header, rows } = fileContentResponse;
 
     if (!header) {
-      fileStateUpdate(undefined, { columns: [], rows: [], aggregations: fileContent.aggregations }, undefined);
+      fileStateUpdate(
+        undefined,
+        { columns: [], rows: [], aggregations: fileContent.aggregations, sorts: fileContent.sorts },
+        undefined
+      );
       return;
     }
 
@@ -185,7 +214,13 @@ export const EditorView: React.FC = () => {
         flex: 1,
         minWidth: 150,
         editable: true,
-        renderHeader: () => <EditorHeader columnName={value} gridColumnsAggregation={fileContent.aggregations} />,
+        renderHeader: () => (
+          <EditorHeader
+            columnName={value}
+            gridColumnsAggregation={fileContent.aggregations}
+            gridColumnsSort={fileContent.sorts}
+          />
+        ),
       };
     });
 
@@ -200,10 +235,10 @@ export const EditorView: React.FC = () => {
 
     fileStateUpdate(
       undefined,
-      { columns: parsedColumns, rows: parsedRows, aggregations: fileContent.aggregations },
+      { columns: parsedColumns, rows: parsedRows, aggregations: fileContent.aggregations, sorts: fileContent.sorts },
       { page: filePagination.page, rowsPerPage: filePagination.rowsPerPage, totalRows: totalRows }
     );
-  }, [fileContentResponse, fileContent.aggregations]);
+  }, [fileContentResponse, fileContent.aggregations, fileContent.sorts]);
 
   // Browser tab close/refresh warning if there are unsaved changes effect
   useEffect(() => {
@@ -273,7 +308,12 @@ export const EditorView: React.FC = () => {
         slots={{
           toolbar: (props) => <EditorToolbar {...props} disabled={blocked || !file.id} handleSave={handleSave} />,
           columnMenu: (props) => (
-            <EditorColumnMenu {...props} disabled={blocked} handleAggregation={handleAggregation} />
+            <EditorColumnMenu
+              {...props}
+              disabled={blocked}
+              handleAggregation={handleAggregation}
+              handleSort={handleSort}
+            />
           ),
           pagination: (props) => <GridPagination disabled={blocked} {...props} />,
         }}

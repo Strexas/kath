@@ -68,7 +68,7 @@ def socketio_emit_to_user_session(event, data, uuid, sid):
     )
 
 
-def build_workspace_structure(path, user_workspace_dir):
+def build_workspace_structure(path: str, user_workspace_dir):
     """
     Recursively build the directory structure for the workspace.
 
@@ -92,17 +92,36 @@ def build_workspace_structure(path, user_workspace_dir):
             - "children" (list): # A list of child items, which is empty for files and populated
                 with nested dictionaries for directories.
     """
+    file_type = (
+        "folder"
+        if os.path.isdir(path)
+        else (
+            "txt" if path.endswith(".txt") else ("csv" if path.endswith(".csv") else "unsupported")
+        )
+    )
+
+    if file_type == "unsupported":
+        return None
+
     workspace_structure = {
         "id": os.path.relpath(path, user_workspace_dir),
         "label": os.path.basename(path),
-        "fileType": "folder" if os.path.isdir(path) else "csv",
+        "fileType": file_type,
         "children": [],
     }
 
-    if os.path.isdir(path):
+    if file_type == "folder":
         workspace_structure["children"] = [
-            build_workspace_structure(os.path.join(path, child), user_workspace_dir)
+            # build_workspace_structure(os.path.join(path, child), user_workspace_dir)
+            # for child in os.listdir(path)
+            child_structure
             for child in os.listdir(path)
+            if (
+                child_structure := build_workspace_structure(
+                    os.path.join(path, child), user_workspace_dir
+                )
+            )
+            is not None
         ]
 
     return workspace_structure
@@ -126,3 +145,11 @@ def is_number(value):
         return True
     except ValueError:
         return False
+
+
+def convert_to_number(value):
+    """Helper function to convert a value to float if possible, otherwise return the original value."""
+    try:
+        return float(value)
+    except ValueError:
+        return value
