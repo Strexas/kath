@@ -96,7 +96,7 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
             styleOverrides: {
               root: {
                 fontFamily: 'Nunito',
-                fontSize: '20px',
+                fontSize: '1rem',
                 color: mode === 'light' ? Colors.textPrimaryLight : Colors.textPrimaryDark,
                 fontWeight: '400',
                 overflow: 'hidden',
@@ -145,6 +145,13 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               root: {
                 fontFamily: 'Nunito',
                 textTransform: 'none',
+              },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              rounded: {
+                borderRadius: '1rem',
               },
             },
           },

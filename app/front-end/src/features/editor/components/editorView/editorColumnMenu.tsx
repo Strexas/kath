@@ -1,12 +1,21 @@
 import { EditorColumnMenuAggregationItem, EditorColumnMenuSortItem } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileContentAggregationActions, SortEnum } from '@/features/editor/types';
+import { Colors } from '@/types';
 import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
+import './dataGridStyles.css';
 
 const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.main,
+  borderRadius: '1rem',
+  backgroundColor: theme.palette.mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark,
+  '& .MuiTypography-root': {
+    fontSize: '0.9rem',
+  },
+  boxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
+  WebkitBoxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
+  MozBoxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
 }));
 
 interface GridColumnMenuContainerProps extends GridColumnMenuProps {
