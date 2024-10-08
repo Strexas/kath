@@ -79,7 +79,7 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     score = fetch_cadd_scores(cadd_version, chromosome, position)
 
     if score is None or not isinstance(score, list) or len(score) < 2:
-        raise ValueError("CADD score unavailable or invalid format")
+        return "CADD score unavailable" #intended
 
     try:
         score_df = pd.DataFrame(score[1:], columns=score[0])
@@ -95,7 +95,34 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
     return highest_score_row.loc['PHRED']
 
 
-def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
+def prepare_data_cadd(data:pd.DataFrame):
+    """
+    Prepares the DataFrame for CADD evaluation by extracting chromosome
+    and position from the 'variant_id_gnomad' column.
+
+    :param data: DataFrame.
+    :return: Updated DataFrame with 'Chromosome_gnomad' and 'Position_gnomad' columns.
+    """
+    if 'variant_id_gnomad' not in data.columns:
+        raise KeyError("The 'variant_id_gnomad' column is missing from the DataFrame.")
+    try:
+        split_data = data['variant_id_gnomad'].str.split('-', n=2, expand=True)
+        data[['Chromosome_gnomad', 'Position_gnomad']] = split_data[[0, 1]]
+    except ValueError as e:
+        raise ValueError(
+            f"Error processing 'variant_id_gnomad': {e}. "
+            f"This may be due to unexpected formatting or delimiters.")
+
+    data['Chromosome_gnomad'] = data['Chromosome_gnomad'].astype('Int64')
+    data['Position_gnomad'] = data['Position_gnomad'].astype('Int64')
+
+    if 'Chromosome_gnomad' not in data.columns or 'Position_gnomad' not in data.columns:
+        raise RuntimeError("The columns 'Chromosome_gnomad' or 'Position_gnomad' "
+                           "were not created successfully.")
+    return data
+
+
+def add_cadd_eval_column(data:pd.DataFrame, cadd_version="GRCh38-v1.7"):
     """
     Adds a column 'cadd_eval' to the DataFrame based on CADD score evaluations for each row.
 
@@ -103,7 +130,16 @@ def add_cadd_eval_column(data, cadd_version="GRCh38-v1.7"):
     :param str cadd_version: The version of the CADD model to use for score fetching.
     :return: The updated DataFrame with the 'cadd_eval' column.
     """
-    data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
+    data = prepare_data_cadd(data)
+    try:
+        data["cadd_eval(PHRED)"] = data.apply(evaluate_cadd_score, axis=1, cadd_version=cadd_version)
+    except ValueError as e:
+        raise ValueError(
+            f"Error occurred while applying 'evaluate_cadd_score': {e}. "
+            f"This may be due to incorrect data types or NaN values in the input DataFrame.")
+    if "cadd_eval(PHRED)" not in data.columns:
+        raise RuntimeError("CADD evaluation column 'cadd_eval(PHRED)' was not created successfully.")
+
     return data
 
 
