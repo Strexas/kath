@@ -1,4 +1,4 @@
-import { FileContentModel, FileModel, FilePaginationModel, FileTypes } from '@/features/editor/types';
+import { ConsoleFeedback, FileContentModel, FileModel, FilePaginationModel, FileTypes } from '@/features/editor/types';
 import { getWorkspaceArray } from '@/features/editor/utils';
 import { useSessionContext, useStatusContext } from '@/hooks';
 import { axios, socket } from '@/lib';
@@ -22,6 +22,11 @@ export interface WorkspaceContextProps {
   fileTreeIsLoading: boolean;
   fileTree: TreeViewBaseItem<FileModel>[];
   fileTreeArray: FileModel[];
+
+  // Console feedback state properties
+  consoleFeedback: ConsoleFeedback[];
+  consoleFeedbackReset: () => void;
+  consoleFeedbackStateUpdate: (add: ConsoleFeedback) => void;
 }
 
 export const WorkspaceContext = createContext<WorkspaceContextProps>({
@@ -40,6 +45,11 @@ export const WorkspaceContext = createContext<WorkspaceContextProps>({
   fileTreeIsLoading: true,
   fileTree: [],
   fileTreeArray: [],
+
+  // Console feedback state defaults
+  consoleFeedback: [],
+  consoleFeedbackReset: () => {},
+  consoleFeedbackStateUpdate: () => {},
 });
 
 interface Props {
@@ -192,6 +202,17 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     };
   }, [connected, getWorkspace]);
 
+  // Console feedback state
+  const [consoleFeedback, setConsoleFeedback] = useState<ConsoleFeedback[]>([]);
+  
+  const consoleFeedbackReset = () => {
+    setConsoleFeedback([]);
+  };
+
+  const consoleFeedbackStateUpdate = (add: ConsoleFeedback) => {
+    setConsoleFeedback((prev) => [...prev, add]);
+  }
+
   const WorkspaceContextValue: WorkspaceContextProps = {
     file,
     fileContent,
@@ -205,6 +226,10 @@ export const WorkspaceContextProvider: React.FC<Props> = ({ children }) => {
     fileTreeIsLoading,
     fileTree,
     fileTreeArray,
+
+    consoleFeedback,
+    consoleFeedbackReset,
+    consoleFeedbackStateUpdate,
   };
 
   return <WorkspaceContext.Provider value={WorkspaceContextValue}>{children}</WorkspaceContext.Provider>;
