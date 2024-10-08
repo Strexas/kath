@@ -1,5 +1,6 @@
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { Divider, Menu, MenuItem } from '@mui/material';
+import { generateTimestamp } from '@/features/editor/utils';
 
 export interface ConsoleGroupContextMenuProps {
   anchorPosition: { top: number; left: number };
@@ -12,14 +13,14 @@ export const ConsoleGroupContextMenu: React.FC<ConsoleGroupContextMenuProps> = (
   open,
   onClose,
 }) => {
-  const { consoleFeedbackReset } = useWorkspaceContext();
+  const { consoleFeedback, consoleFeedbackReset } = useWorkspaceContext();
 
   const menuItems = [
     <MenuItem key='clear' onClick={() => handleActionContextMenu('clear')}>
       Clear
     </MenuItem>,
     <Divider key='divider-clear' />,
-    <MenuItem key='export' disabled onClick={() => handleActionContextMenu('export')}>
+    <MenuItem key='export' onClick={() => handleActionContextMenu('export')}>
       Export...
     </MenuItem>
   ];
@@ -44,7 +45,23 @@ export const ConsoleGroupContextMenu: React.FC<ConsoleGroupContextMenuProps> = (
   }
 
   const handleExportAction = () => {
-    // TODO: Implement export action
+    const csvHeader = 'timestamp,type,message\n';
+    const csvContent = consoleFeedback.map(feedback => `${feedback.timestamp},${feedback.type.toUpperCase()},"${feedback.message}"`).join('\n');
+    const blob = new Blob([csvHeader.concat(csvContent)], { type: 'text/csv;charset=utf-8;' });
+
+    const timestamp = generateTimestamp();
+
+    // Create a link element to trigger the download
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `console_feedback_${timestamp}.csv`);
+
+    // Append the link to the document body and trigger the download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   return (
