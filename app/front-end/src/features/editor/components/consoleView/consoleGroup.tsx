@@ -3,6 +3,7 @@ import React from 'react';
 
 export interface ConsoleGroupProps {
   children?: React.ReactNode;
+  onContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 /**
@@ -26,9 +27,14 @@ export interface ConsoleGroupProps {
  *   <ConsoleGroupItem ... />
  * </ConsoleGroup>
  */
-export const ConsoleGroup = React.forwardRef<HTMLDivElement, ConsoleGroupProps>(({ children }, ref) => {
+export const ConsoleGroup = React.forwardRef<HTMLDivElement, ConsoleGroupProps>(({ children, onContextMenu }, ref ) => {
   return (
     <Box
+      onContextMenu={(event) => {
+        if (onContextMenu) {
+          onContextMenu(event);
+        }
+      }}
       ref={ref}
       sx={{
         display: 'flex',
