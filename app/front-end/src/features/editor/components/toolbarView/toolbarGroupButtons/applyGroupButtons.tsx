@@ -1,5 +1,6 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
+import { defaultSaveTo } from '@/features/editor/stores';
 import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
@@ -24,12 +25,12 @@ export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `spliceai_${timestamp}.csv`);
+      const savePath = saveTo.id !== defaultSaveTo.id ? saveTo.id : findUniqueFileName(fileTree, `spliceai_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_APPLY}/spliceai/${savePath}`, {
         params: {
           override,
-          applyTo,
+          "applyTo": applyTo.id,
         },
       });
     } catch (error) {
@@ -49,12 +50,12 @@ export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `cadd_${timestamp}.csv`);
+      const savePath = saveTo.id !== defaultSaveTo.id ? saveTo.id : findUniqueFileName(fileTree, `cadd_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_APPLY}/cadd/${savePath}`, {
         params: {
           override,
-          applyTo,
+          "applyTo": applyTo.id,
         },
       });
     } catch (error) {
