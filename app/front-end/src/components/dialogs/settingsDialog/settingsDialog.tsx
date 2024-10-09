@@ -37,7 +37,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ open, onClose })
               pl: '1.5rem',
               pt: '1.5rem',
               fontWeight: '700',
-              fontSize: '1.25rem',
+              fontSize: '1.2rem',
             }}
           >
             Settings

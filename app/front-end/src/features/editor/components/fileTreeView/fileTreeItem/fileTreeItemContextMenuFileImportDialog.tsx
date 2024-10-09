@@ -98,7 +98,9 @@ export const FileTreeItemContextMenuFileImportDialog: React.FC<FileTreeItemConte
       <DialogTitle>
         <Grid container spacing={2} justifyContent='center' alignItems='center'>
           <Grid item xs={9}>
-            <Typography sx={{ color: Theme.palette.primary.main, fontWeight: '700' }}>Import</Typography>
+            <Typography sx={{ color: Theme.palette.primary.main, fontWeight: '700', fontSize: '1.2rem' }}>
+              Import
+            </Typography>
           </Grid>
           <Grid item xs={3} textAlign={'right'}>
             <IconButton
