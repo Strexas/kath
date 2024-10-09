@@ -7,11 +7,12 @@ import time
 
 import requests
 import pandas as pd
+from pandas.core.interchange.dataframe_protocol import DataFrame
 from requests import RequestException
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 from .constants import (LOVD_FILE_URL,
@@ -31,7 +32,7 @@ class DownloadError(Exception):
     """Custom exception for download errors."""
 
 
-def get_file_from_url(url, save_to, override=False):
+def get_file_from_url(url:str, save_to:str, override:bool=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
@@ -67,7 +68,7 @@ def get_file_from_url(url, save_to, override=False):
         f.write(response.content)
 
 
-def download_lovd_database_for_eys_gene(save_to=STORE_AS_LOVD, override=False):
+def download_lovd_database_for_eys_gene(save_to:str = STORE_AS_LOVD, override:bool=False):
     """
     Gets file from url and saves it into provided path. Overrides, if override is True.
 
@@ -100,7 +101,7 @@ def download_lovd_database_for_eys_gene(save_to=STORE_AS_LOVD, override=False):
         f.write(response.content)
 
 
-def download_genes_lovd(gene_list: list, folder_path=LOVD_PATH, raise_exception=False):
+def download_genes_lovd(gene_list: list, folder_path:str=LOVD_PATH, raise_exception:bool=False):
     """
     Downloads data into txt files from gene_list.
 
@@ -130,7 +131,7 @@ def download_genes_lovd(gene_list: list, folder_path=LOVD_PATH, raise_exception=
             logging.error("Symbol: %s does not exist in the LOVD database", gene)
 
 
-def download_database_for_eys_gene(database_name, override=False):
+def download_database_for_eys_gene(database_name:str, override:bool=False):
     """
     downloads chosen database
     and handles where it should be saved,
@@ -166,7 +167,7 @@ def download_database_for_eys_gene(database_name, override=False):
 
     driver = webdriver.Firefox(options=firefox_options)
     driver.get(url)
-    WebDriverWait(driver, 30).until(EC.element_to_be_clickable((By.XPATH, clickable)))
+    WebDriverWait(driver, 30).until(ec.element_to_be_clickable((By.XPATH, clickable)))
     driver.execute_script(button_location)
 
     time.sleep(30)
@@ -177,7 +178,7 @@ def download_database_for_eys_gene(database_name, override=False):
     os.rename(latest_file, os_path)
 
 
-def download_selected_database_for_eys_gene(database_name, save_path="", override=False):
+def download_selected_database_for_eys_gene(database_name:str, save_path:str="", override:bool=False):
     """
     Calls a function to download a database.
 
@@ -209,7 +210,7 @@ def download_selected_database_for_eys_gene(database_name, save_path="", overrid
         raise IndexError(f"Requested for {database_name} is not yet supported")
 
 
-def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
+def prepare_popmax_calculation(df:pd.DataFrame, pop_data:dict, name:str, pop_ids:list[str], index:int):
     """
     prepares the calculation of popmax and popmax population for a variant.
     genome and exome data of ac and an.
@@ -231,7 +232,7 @@ def prepare_popmax_calculation(df, pop_data, name, pop_ids, index):
             df.loc[index, f'{name}_an_{variant_id}'] = pop['an']
 
 
-def download_data_from_gnomad_eys(path=STORE_AS_GNOMAD, override=False):
+def download_data_from_gnomad_eys(path:str=STORE_AS_GNOMAD, override:bool=False):
     """
     Requests gnomAD API for data about a specific gene containing:
     - variant_id
@@ -242,9 +243,14 @@ def download_data_from_gnomad_eys(path=STORE_AS_GNOMAD, override=False):
     - popmax
     - popmax population
 
-    :param str path: path to save the data (default: 'data/gnomad/gnomad_eys.csv')
+    :param str path: path to save the data (default: 'app/back-end/src/workspace/gnomad/gnomad_data.csv')
     :param bool override: should an existing file be overriden with a new one
     """
+
+    # Ensure the directory exists
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
     if os.path.exists(path) and not override:
         print(f"The file at {path} already exists.")
