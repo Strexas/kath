@@ -151,6 +151,20 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
           MuiPaper: {
             styleOverrides: {
               rounded: {
+                // Primarily used by csv editor's menus
+                borderRadius: '1rem',
+              },
+              root: {
+                // Primarily used by csv editor's menus
+                backgroundColor:
+                  (mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark) + '!important',
+                backgroundImage: 'none',
+              },
+            },
+          },
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
                 borderRadius: '1rem',
               },
             },

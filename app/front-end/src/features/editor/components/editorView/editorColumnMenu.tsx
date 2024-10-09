@@ -5,7 +5,6 @@ import { Colors } from '@/types';
 import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
-import './dataGridStyles.css';
 
 const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }) => ({
   borderRadius: '1rem',
