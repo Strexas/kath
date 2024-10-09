@@ -49,7 +49,15 @@ export const ShortcutsDialog = ({ open, onClose }: ShortcutsDialogProps) => {
     <BootstrapDialog onClose={onClose} open={open}>
       <Grid container spacing={2} justifyContent='center' alignItems='center'>
         <Grid item xs={8}>
-          <DialogTitle sx={{ color: Theme.palette.primary.main, pl: '1.5rem', pt: '1.5rem', fontWeight: '700' }}>
+          <DialogTitle
+            sx={{
+              color: Theme.palette.primary.main,
+              pl: '1.5rem',
+              pt: '1.5rem',
+              fontWeight: '700',
+              fontSize: '1.25rem',
+            }}
+          >
             Shortcuts
           </DialogTitle>
         </Grid>
