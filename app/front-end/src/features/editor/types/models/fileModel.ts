@@ -23,4 +23,5 @@ export interface FileModel {
   id: string;
   label: string;
   type: FileTypes;
+  parent?: FileModel; 
 }

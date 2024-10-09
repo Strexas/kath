@@ -67,7 +67,7 @@ export const getFileExtension = (filename: string): string => {
   return dotIndex !== -1 ? filename.substring(dotIndex + 1).toLowerCase() : '';
 };
 
-export const getWorkspaceArray = (fileTreeView: TreeViewBaseItem<FileTreeViewItemProps>[]): FileModel[] => {
+export const getWorkspaceArray = (fileTreeView: TreeViewBaseItem<FileTreeViewItemProps>[], parent?: TreeViewBaseItem<FileTreeViewItemProps>): FileModel[] => {
   const workspaceArray: FileModel[] = [];
   fileTreeView.sort((a, b) => {
     if (a.fileType === FileTypes.FOLDER || b.fileType === FileTypes.FOLDER) {
@@ -82,9 +82,9 @@ export const getWorkspaceArray = (fileTreeView: TreeViewBaseItem<FileTreeViewIte
   });
 
   for (const item of fileTreeView) {
-    workspaceArray.push({ id: item.id, label: item.label, type: item.fileType });
+    workspaceArray.push({ id: item.id, label: item.label, type: item.fileType, parent: parent ? { id: parent.id, label: parent.label, type: parent.fileType } : undefined });
     if (item.children && item.children.length !== 0) {
-      workspaceArray.push(...getWorkspaceArray(item.children));
+      workspaceArray.push(...getWorkspaceArray(item.children, item));
     }
   }
 
