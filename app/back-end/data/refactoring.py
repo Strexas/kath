@@ -10,72 +10,65 @@ from pandas import DataFrame
 
 from pyliftover import LiftOver
 
-from .constants import LOVD_TABLES_DATA_TYPES, LOVD_PATH, GNOMAD_TABLES_DATA_TYPES, GNOMAD_PATH, \
-    DEFAULT_SAVE_PATH
+from .constants import LOVD_PATH, GNOMAD_PATH
 
 
 def set_lovd_dtypes(df_dict):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
-    :param dict[str, tuple[DataFrame, list[str]] df_dict: Dictionary of tables saved as DataFrame
+    :param dict[str, DataFrame] df_dict: Dictionary of tables saved as DataFrame
     """
 
-    for table_name in df_dict:
-        frame: DataFrame = df_dict[table_name]
-        for column in frame.columns:
-            if column not in LOVD_TABLES_DATA_TYPES[table_name]:
-                raise ValueError(f"Column {column} is undefined in LOVD_TABLES_DATA_TYPES")
-
-            match LOVD_TABLES_DATA_TYPES[table_name][column]:
-                case "Date":
-                    frame[column] = pd.to_datetime(frame[column], errors='coerce')
-                case "Boolean":
-                    frame[column] = frame[column].map({"0": False, "1": True})
-                case "String":
-                    frame[column] = frame[column].astype('string')
-                case "Integer":
-                    frame[column] = pd.to_numeric(frame[column]).astype('Int64')
-                case "Double":
-                    frame[column] = pd.to_numeric(frame[column]).astype('float')
-                case _:
-                    raise ValueError(f"Undefined data type: "
-                                     f"{LOVD_TABLES_DATA_TYPES[table_name][column]}")
-
+    for table_name, frame in df_dict.items():
+        try:
+            frame = frame.convert_dtypes()
+        except Exception as e:
+            raise Exception(f"Failed to convert data types for LOVD table '{table_name}': {e}") from e
+        df_dict[table_name] = frame
 
 def set_gnomad_dtypes(df):
     """
     Convert data from gnomAD format table to desired data format based on specified data types.
 
     :param DataFrame df: DataFrame containing gnomAD data
+    :raises GnomadDtypeConversionError: if there is an error during data type conversion
     """
-
-    for column in df.columns:
-        if column not in GNOMAD_TABLES_DATA_TYPES:
-            raise ValueError(f"Column {column} is undefined in GNOMAD_TABLES_DATA_TYPES")
-        match GNOMAD_TABLES_DATA_TYPES[column]:
-            case "Date":
-                df[column] = pd.to_datetime(df[column], errors='coerce')
-            case "Boolean":
-                df[column] = df[column].map({"0": False, "1": True})
-            case "String":
-                df[column] = df[column].astype('string')
-            case "Integer":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('Int64')
-            case "Double":
-                df[column] = pd.to_numeric(df[column], errors='coerce').astype('float')
-            case _:
-                raise ValueError(f"Undefined data type: {GNOMAD_TABLES_DATA_TYPES[column]}")
+    try:
+        df.convert_dtypes()
+    except Exception as e:
+        raise Exception(f"Failed to convert gnomAD data types: {e}") from e
 
 
-def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
+def infer_type(value):
+    """
+    Infer the type of given value based on its content.
+   This function attempts to convert the input value into an
+   integer or a float based on its string representation. If the
+   conversion is not possible, it returns the original value as a
+   string.
+    Args:
+        value: The value to infer the type for, expected to be a string.
+
+    Returns: The value converted to int, float, or string based on the inferred type.
+    """
+    try:
+        if '.' in value or 'E-' in value or 'E+' in value:
+            return float(value)
+        else:
+            return int(value)
+    except ValueError:
+        return value  # Return as string if it cannot be converted
+
+
+def parse_lovd(path=LOVD_PATH + '/lovd_data_text.txt'):
     """
     Converts data from text file with LOVD format to dictionary of tables.
 
     Key is name of table, value is data saved as pandas DataFrame.
     Notes for each table are displayed with log.
 
-    **IMPORTANT:** It doesn't provide types for data inside. Use convert_lovd_to_datatype for this.
+    **IMPORTANT:** It doesn't provide types for data inside. Use set_lovd_dtypes for this.
 
     :param str path: path to text file
     :returns: dictionary of tables
@@ -124,6 +117,9 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data.txt'):
                 observation = DataFrame([variables], columns=table_header)
                 frame = pd.concat([frame, observation], ignore_index=True)
                 line = f.readline()
+
+            for col in frame.columns:
+                frame[col] = frame[col].apply(infer_type)
 
             d[table_name] = frame
 
@@ -281,7 +277,7 @@ def merge_gnomad_lovd(lovd, gnomad):
         gnomad,
         how="outer",
         left_on="hg38_gnomad_format",
-        right_on="gnomAD ID_gnomad"
+        right_on="variant_id_gnomad"
     )
 
     return merged_frame
