@@ -5,6 +5,7 @@ workspace.
 """
 
 # pylint: disable=import-error
+# pylint: disable=broad-exception-caught
 
 import os
 import time  # TODO: Remove this import once the apply logic is implemented
@@ -102,7 +103,9 @@ def get_workspace_apply_spliceai(relative_path):
 
     except FileNotFoundError as e:
         logger.error(
-            "FileNotFoundError: %s while applying SpliceAI algorithm %s", e, destination_path
+            "FileNotFoundError: %s while applying SpliceAI algorithm %s",
+            e,
+            destination_path,
         )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -118,7 +121,9 @@ def get_workspace_apply_spliceai(relative_path):
         return jsonify({"error": "Requested file not found"}), 404
     except PermissionError as e:
         logger.error(
-            "PermissionError: %s while applying SpliceAI algorithm %s", e, destination_path
+            "PermissionError: %s while applying SpliceAI algorithm %s",
+            e,
+            destination_path,
         )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -134,7 +139,9 @@ def get_workspace_apply_spliceai(relative_path):
         return jsonify({"error": "Permission denied"}), 403
     except UnexpectedError as e:
         logger.error(
-            "UnexpectedError: %s while applying SpliceAI algorithm %s", e.message, destination_path
+            "UnexpectedError: %s while applying SpliceAI algorithm %s",
+            e.message,
+            destination_path,
         )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -142,6 +149,24 @@ def get_workspace_apply_spliceai(relative_path):
             {
                 "type": "errr",
                 "message": f"UnexpectedError: {e.message} while applying SpliceAI algorithm"
+                + f"{destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+    except Exception as e:
+        logger.error(
+            "UnexpectedError: %s while applying SpliceAI algorithm %s",
+            e,
+            destination_path,
+        )
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e} while applying SpliceAI algorithm"
                 + f"{destination_path}",
             },
             uuid,
@@ -230,7 +255,11 @@ def get_workspace_apply_cadd(relative_path):
         )
 
     except FileNotFoundError as e:
-        logger.error("FileNotFoundError: %s while applying CADD algorithm %s", e, destination_path)
+        logger.error(
+            "FileNotFoundError: %s while applying CADD algorithm %s",
+            e,
+            destination_path,
+        )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -244,7 +273,9 @@ def get_workspace_apply_cadd(relative_path):
         )
         return jsonify({"error": "Requested file not found"}), 404
     except PermissionError as e:
-        logger.error("PermissionError: %s while applying CADD algorithm %s", e, destination_path)
+        logger.error(
+            "PermissionError: %s while applying CADD algorithm %s", e, destination_path
+        )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
@@ -258,7 +289,9 @@ def get_workspace_apply_cadd(relative_path):
         return jsonify({"error": "Permission denied"}), 403
     except UnexpectedError as e:
         logger.error(
-            "UnexpectedError: %s while applying CADD algorithm %s", e.message, destination_path
+            "UnexpectedError: %s while applying CADD algorithm %s",
+            e.message,
+            destination_path,
         )
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -266,6 +299,24 @@ def get_workspace_apply_cadd(relative_path):
             {
                 "type": "errr",
                 "message": f"UnexpectedError: {e.message} while applying CADD algorithm "
+                + f"{destination_path}",
+            },
+            uuid,
+            sid,
+        )
+        return jsonify({"error": "An internal error occurred"}), 500
+    except Exception as e:
+        logger.error(
+            "UnexpectedError: %s while applying CADD algorithm %s",
+            e,
+            destination_path,
+        )
+        # Emit a feedback to the user's console
+        socketio_emit_to_user_session(
+            CONSOLE_FEEDBACK_EVENT,
+            {
+                "type": "errr",
+                "message": f"UnexpectedError: {e} while applying CADD algorithm "
                 + f"{destination_path}",
             },
             uuid,
