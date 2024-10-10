@@ -13,7 +13,7 @@ from pyliftover import LiftOver
 from .constants import LOVD_PATH, GNOMAD_PATH
 
 
-def set_lovd_dtypes(df_dict):
+def set_lovd_dtypes(df_dict: dict[str, pd.DataFrame]):
     """
     Convert data from LOVD format table to desired data format based on specified data types.
 
@@ -27,7 +27,7 @@ def set_lovd_dtypes(df_dict):
             raise Exception(f"Failed to convert data types for LOVD table '{table_name}': {e}") from e
         df_dict[table_name] = frame
 
-def set_gnomad_dtypes(df):
+def set_gnomad_dtypes(df:pd.DataFrame):
     """
     Convert data from gnomAD format table to desired data format based on specified data types.
 
@@ -40,7 +40,7 @@ def set_gnomad_dtypes(df):
         raise Exception(f"Failed to convert gnomAD data types: {e}") from e
 
 
-def infer_type(value):
+def infer_type(value:str):
     """
     Infer the type of given value based on its content.
    This function attempts to convert the input value into an
@@ -61,7 +61,7 @@ def infer_type(value):
         return value  # Return as string if it cannot be converted
 
 
-def parse_lovd(path=LOVD_PATH + '/lovd_data_text.txt'):
+def parse_lovd(path:str=LOVD_PATH + '/lovd_data.txt'):
     """
     Converts data from text file with LOVD format to dictionary of tables.
 
@@ -129,7 +129,7 @@ def parse_lovd(path=LOVD_PATH + '/lovd_data_text.txt'):
     return d
 
 
-def parse_gnomad(path=GNOMAD_PATH + '/gnomad_data.csv'):
+def parse_gnomad(path:str=GNOMAD_PATH + '/gnomad_data.csv'):
     """
     Parses data from a gnomAD format text file into a pandas DataFrame.
 
@@ -150,7 +150,7 @@ def parse_gnomad(path=GNOMAD_PATH + '/gnomad_data.csv'):
         raise e
 
 
-def from_clinvar_name_to_cdna_position(name):
+def from_clinvar_name_to_cdna_position(name:str):
     """
     Custom cleaner to extract cDNA position from Clinvar `name` variable.
 
@@ -254,7 +254,7 @@ def convert_to_gnomad_gen(variant: str):
     return "?"
 
 
-def merge_gnomad_lovd(lovd, gnomad):
+def merge_gnomad_lovd(lovd:pd.DataFrame, gnomad:pd.DataFrame):
     """
     Merge LOVD and gnomAD dataframes on genomic positions.
 
@@ -283,7 +283,7 @@ def merge_gnomad_lovd(lovd, gnomad):
     return merged_frame
 
 
-def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
+def save_lovd_as_vcf(data:pd.DataFrame, save_to:str="./lovd.vcf"):
     """
     Gets hg38 variants from LOVD and saves as VCF file.
     :param DataFrame data: LOVD DataFrame with data
@@ -312,7 +312,7 @@ def save_lovd_as_vcf(data, save_to="./lovd.vcf"):
             f.write("\n")
 
 
-def find_popmax_in_gnomad(data):
+def find_popmax_in_gnomad(data:pd.DataFrame):
     """
     Finds popmax in gnomad data
     :param DataFrame data: Gnomad data.

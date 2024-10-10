@@ -24,9 +24,6 @@ from .constants import (
   # Paths for data storage
   DATA_PATH, LOVD_PATH, GNOMAD_PATH, CLINVAR_PATH,
 
-  # Data types for tables
-  LOVD_TABLES_DATA_TYPES,
-
   # Paths for database downloads
   DATABASES_DOWNLOAD_PATHS,
 
