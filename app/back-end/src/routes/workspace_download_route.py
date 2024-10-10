@@ -77,7 +77,7 @@ def get_workspace_download(relative_path):
             {
                 "type": "info",
                 "message": f"Downloading '{source}' database data for gene '{gene}'"
-                + " to '{relative_path}' with override: '{override}'...",
+                + f" to '{relative_path}' with override: '{override}'...",
             },
             uuid,
             sid,
