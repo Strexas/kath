@@ -228,7 +228,9 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
       <DialogTitle>
         <Grid container spacing={2} justifyContent='center' alignItems='center'>
           <Grid item xs={9}>
-            <Typography sx={{ color: Theme.palette.primary.main, fontWeight: '700' }}>{title}</Typography>
+            <Typography sx={{ color: Theme.palette.primary.main, fontWeight: '700', fontSize: '1.2rem' }}>
+              {title}
+            </Typography>
           </Grid>
           <Grid item xs={3} textAlign={'right'}>
             <IconButton
@@ -256,7 +258,6 @@ export const FileTreeItemContextMenuTextfieldDialog: React.FC<FileTreeItemContex
             error={Boolean(error)}
             sx={{
               ':hover': { borderColor: Theme.palette.primary.main },
-              backgroundColor: Theme.palette.background.paper,
               justifyItems: 'center',
             }}
           />

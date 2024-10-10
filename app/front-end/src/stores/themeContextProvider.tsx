@@ -96,7 +96,7 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
             styleOverrides: {
               root: {
                 fontFamily: 'Nunito',
-                fontSize: '20px',
+                fontSize: '1rem',
                 color: mode === 'light' ? Colors.textPrimaryLight : Colors.textPrimaryDark,
                 fontWeight: '400',
                 overflow: 'hidden',
@@ -145,6 +145,27 @@ export const ThemeContextProvider: React.FC<Props> = ({ children }) => {
               root: {
                 fontFamily: 'Nunito',
                 textTransform: 'none',
+              },
+            },
+          },
+          MuiPaper: {
+            styleOverrides: {
+              rounded: {
+                // Primarily used by csv editor's menus
+                borderRadius: '1rem',
+              },
+              root: {
+                // Primarily used by csv editor's menus
+                backgroundColor:
+                  (mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark) + '!important',
+                backgroundImage: 'none',
+              },
+            },
+          },
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: {
+                borderRadius: '1rem',
               },
             },
           },

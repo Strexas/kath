@@ -62,9 +62,16 @@ export const EditorColumnMenuAggregationItem: React.FC<EditorColumnMenuAggregati
       }}
     >
       <FunctionsIcon sx={{ color: Theme.palette.text.secondary }} />
-      <FormControl fullWidth>
-        <InputLabel sx={{ color: Theme.palette.text.primary }}>Aggregation</InputLabel>
-        <Select id={'aggregation-select'} label={'Aggregation'} value={value} onChange={handleChange}>
+      <FormControl fullWidth size='small'>
+        <InputLabel sx={{ color: Theme.palette.text.primary, fontSize: '0.9rem' }}>Aggregation</InputLabel>
+        <Select
+          id={'aggregation-select'}
+          label={'Aggregation'}
+          value={value}
+          onChange={handleChange}
+          size='small'
+          style={{ fontSize: '0.9rem' }}
+        >
           <MenuItem value={FileContentAggregationActions.NONE} onClick={onClick}>
             ...
           </MenuItem>

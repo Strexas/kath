@@ -6,7 +6,14 @@ import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
 
 const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }) => ({
-  backgroundColor: theme.palette.secondary.main,
+  borderRadius: '1rem',
+  backgroundColor: theme.palette.background.default,
+  '& .MuiTypography-root': {
+    fontSize: '0.9rem',
+  },
+  boxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
+  WebkitBoxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
+  MozBoxShadow: '0px 0px 10px 1px rgba(0,0,0,0.15)',
 }));
 
 interface GridColumnMenuContainerProps extends GridColumnMenuProps {
