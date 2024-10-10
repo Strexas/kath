@@ -1,14 +1,13 @@
 import { EditorColumnMenuAggregationItem, EditorColumnMenuSortItem } from '@/features/editor/components/editorView';
 import { useWorkspaceContext } from '@/features/editor/hooks';
 import { FileContentAggregationActions, SortEnum } from '@/features/editor/types';
-import { Colors } from '@/types';
 import { Divider } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { GridColumnMenuContainer, GridColumnMenuHideItem, GridColumnMenuProps } from '@mui/x-data-grid';
 
 const StyledGridColumnMenuContainer = styled(GridColumnMenuContainer)(({ theme }) => ({
   borderRadius: '1rem',
-  backgroundColor: theme.palette.mode === 'light' ? Colors.backgroundPrimaryLight : Colors.backgroundPrimaryDark,
+  backgroundColor: theme.palette.background.default,
   '& .MuiTypography-root': {
     fontSize: '0.9rem',
   },
