@@ -1,24 +1,21 @@
+import { Autocomplete, TextField } from "@mui/material";
 import {
-  GroupParamsInputLabel,
   GroupParamsTypography,
-  StyledGroupParamsListSubheader,
-  StyledGroupParamsMenuItem,
   StyledGroupParamsMenuItemTypography,
   StyledGroupParamsMenuItemTypographyBold,
-  StyledGroupParamsSelect,
 } from '@/features/editor/components/toolbarView/toolbarGroupParams';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
 import { FileModel, FileTypes } from '@/features/editor/types';
 import { getWorkspaceArray } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
-import { Box, Checkbox, FormControl, FormControlLabel, SelectChangeEvent, useTheme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { defaultSaveTo } from "@/features/editor/stores";
 
 export interface ApplyGroupParamsProps {}
 
 export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
   const { blocked } = useStatusContext();
-  const Theme = useTheme();
   const { fileTree, fileTreeArray } = useWorkspaceContext();
   const { saveTo, saveToStateUpdate, applyTo, applyToStateUpdate, applyError, applyErrorStateUpdate } =
     useToolbarContext();
@@ -26,11 +23,11 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
   //
   // Apply state
   //
-  const [applyToValue, setApplyToValue] = useState<string>(applyTo);
+  const [applyToState, setApplyToState] = useState<FileModel | null>(applyTo);
 
-  const handleApplyToChange = (event: SelectChangeEvent<any>) => {
-    setApplyToValue(event.target.value);
-    applyToStateUpdate(event.target.value);
+  const handleApplyToChange = (value: FileModel) => {
+    setApplyToState(value);
+    applyToStateUpdate(value);
     applyErrorStateUpdate('');
   };
 
@@ -38,18 +35,18 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
   // Save To state
   //
   const [fileArray, setFileArray] = useState<FileModel[]>(fileTreeArray);
-  const [saveToValue, setSaveToValue] = useState<string>(saveTo);
-  const [overrideValue, setOverrideValue] = useState<boolean>(false);
+  const [saveToState, setSaveToState] = useState<FileModel>(saveTo);
+  const [overrideState, setOverrideState] = useState<boolean>(false);
 
-  const handleSaveToChange = (event: SelectChangeEvent<any>) => {
-    setSaveToValue(event.target.value);
-    saveToStateUpdate(event.target.value, false);
-    setOverrideValue(false);
+  const handleSaveToChange = (value: FileModel) => {
+    setSaveToState(value);
+    saveToStateUpdate(value, false);
+    setOverrideState(false);
   };
 
   const handleOverrideChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setOverrideValue(event.target.checked);
-    saveToStateUpdate(saveToValue, event.target.checked);
+    setOverrideState(event.target.checked);
+    saveToStateUpdate(saveToState, event.target.checked);
   };
 
   //
@@ -60,114 +57,93 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
   }, [fileTree]);
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '50% 50%', p: '1rem' }}>
-      <Box
-        sx={{
-          height: '100%',
-          display: 'grid',
-          flexDirection: 'column',
-          alignItems: 'start',
-          gap: '1rem',
-        }}
-      >
-        <FormControl sx={{ width: '90%' }} size='small'>
-          <GroupParamsInputLabel label={'Apply To'} error={applyError} />
-          <StyledGroupParamsSelect
-            id={'lovd-file-select'}
-            name={'lovd-file-select'}
-            label={'Lovd File'}
-            value={applyToValue}
-            onChange={handleApplyToChange}
-            error={Boolean(applyError)}
-            disabled={blocked}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  maxWidth: '15.7rem',
-                  maxHeight: '20rem',
-                  bgcolor: Theme.palette.background.default,
-                },
-              },
-            }}
-          >
-            <StyledGroupParamsListSubheader key={'root'}>
-              <StyledGroupParamsMenuItemTypographyBold>root:</StyledGroupParamsMenuItemTypographyBold>
-            </StyledGroupParamsListSubheader>
-            {fileArray.map((file) => {
-              if (file.type === FileTypes.FOLDER) {
-                return (
-                  <StyledGroupParamsListSubheader key={file.id}>
-                    <StyledGroupParamsMenuItemTypographyBold>{file.id}:</StyledGroupParamsMenuItemTypographyBold>
-                  </StyledGroupParamsListSubheader>
-                );
-              }
-
-              return (
-                <StyledGroupParamsMenuItem key={file.id} value={file.id}>
-                  <StyledGroupParamsMenuItemTypography>{file.label}</StyledGroupParamsMenuItemTypography>
-                </StyledGroupParamsMenuItem>
-              );
-            })}
-          </StyledGroupParamsSelect>
-        </FormControl>
+    <Box sx={{ display: 'flex', flexDirection: 'row', columnGap: '1rem', p: '1rem'}}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '1rem', width: '50%'}}>
+        <Autocomplete
+          size="small"
+          sx={(theme) => ({
+            '& fieldset': {
+              borderColor: theme.palette.text.primary,
+              borderRadius: '1rem',
+            },
+          })}
+          value={applyToState}
+          onChange={(_event, value) => {
+            if (value)
+              handleApplyToChange(value)
+          }}
+          disabled={blocked}
+          options={fileArray.filter((file) => file.type !== FileTypes.FOLDER)}
+          groupBy={(option) => option.parent?.id || 'root'}
+          getOptionLabel={(option) => option.label}
+          isOptionEqualToValue={(option, value) => option.id === value.id}
+          renderInput={(params) => 
+            <TextField
+              {...params}
+              label="Apply To"
+              error={Boolean(applyError)}
+            />
+          }
+          renderGroup={(params) => (
+            <li key={params.key}>
+              <Box sx={{ px: '0.5rem' }}>
+                <StyledGroupParamsMenuItemTypographyBold>{`${params.group}:`}</StyledGroupParamsMenuItemTypographyBold>
+              </Box>
+              <StyledGroupParamsMenuItemTypography>{params.children}</StyledGroupParamsMenuItemTypography>
+            </li>
+          )}
+        />
       </Box>
-      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'end', rowGap: '2.16rem' }}>
-        <FormControl sx={{ width: '90%' }} size='small'>
-          <GroupParamsInputLabel label={'Save To'} />
-          <StyledGroupParamsSelect
-            id={'save-to-select'}
-            name={'save-to'}
-            label={'Save To'}
-            value={saveToValue}
-            onChange={handleSaveToChange}
-            disabled={blocked}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  maxWidth: '15.7rem',
-                  maxHeight: '20rem',
-                  bgcolor: Theme.palette.background.default,
-                },
+      <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '1rem', width: '50%', flexGrow: '1'}}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '0.25rem'}}>
+          <Autocomplete
+            size="small"
+            sx={(theme) => ({
+              '& fieldset': {
+                borderColor: theme.palette.text.primary,
+                borderRadius: '1rem',
               },
-            }}
-          >
-            <StyledGroupParamsMenuItem key={'new-file'} value={'/'}>
-              <StyledGroupParamsMenuItemTypography>New file...</StyledGroupParamsMenuItemTypography>
-            </StyledGroupParamsMenuItem>
-            <StyledGroupParamsListSubheader key={'root'}>
-              <StyledGroupParamsMenuItemTypographyBold>root:</StyledGroupParamsMenuItemTypographyBold>
-            </StyledGroupParamsListSubheader>
-            {fileArray.map((file) => {
-              if (file.type === FileTypes.FOLDER) {
-                return (
-                  <StyledGroupParamsListSubheader key={file.id}>
-                    <StyledGroupParamsMenuItemTypographyBold>{file.id}:</StyledGroupParamsMenuItemTypographyBold>
-                  </StyledGroupParamsListSubheader>
-                );
-              }
-
-              return (
-                <StyledGroupParamsMenuItem key={file.id} value={file.id}>
-                  <StyledGroupParamsMenuItemTypography>{file.label}</StyledGroupParamsMenuItemTypography>
-                </StyledGroupParamsMenuItem>
-              );
             })}
-          </StyledGroupParamsSelect>
-        </FormControl>
-        {saveToValue !== '/' && (
-          <FormControlLabel
-            control={
-              <Checkbox
-                id='override-checkbox'
-                checked={overrideValue}
-                onChange={handleOverrideChange}
-                disabled={blocked}
+            value={saveToState}
+            onChange={(_event, value) => {
+              if (value)
+                handleSaveToChange(value)
+            }}
+            disabled={blocked}
+            options={[defaultSaveTo, ...fileArray.filter((file) => file.type !== FileTypes.FOLDER)]}
+            groupBy={(option) => option.parent?.id || 'root'}
+            getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => 
+              <TextField
+                {...params}
+                label="Save To"
               />
             }
-            label={<GroupParamsTypography label={'Override File'} />}
-            labelPlacement='start'
+            renderGroup={(params) => (
+              <li key={params.key}>
+                <Box sx={{ px: '0.5rem' }}>
+                  <StyledGroupParamsMenuItemTypographyBold>{`${params.group}:`}</StyledGroupParamsMenuItemTypographyBold>
+                </Box>
+                <StyledGroupParamsMenuItemTypography>{params.children}</StyledGroupParamsMenuItemTypography>
+              </li>
+            )}
           />
-        )}
+          {saveToState.id !== defaultSaveTo.id && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id='override-checkbox'
+                  checked={overrideState}
+                  onChange={handleOverrideChange}
+                  disabled={blocked}
+                />
+              }
+              label={<GroupParamsTypography label={'Override File'} />}
+              labelPlacement='start'
+            />
+          )}
+        </Box>
       </Box>
     </Box>
   );

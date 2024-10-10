@@ -1,53 +1,50 @@
+import { Autocomplete, TextField } from "@mui/material";
 import {
-  GroupParamsInputLabel,
   GroupParamsTypography,
-  StyledGroupParamsListSubheader,
-  StyledGroupParamsMenuItem,
   StyledGroupParamsMenuItemTypography,
   StyledGroupParamsMenuItemTypographyBold,
-  StyledGroupParamsSelect,
 } from '@/features/editor/components/toolbarView/toolbarGroupParams';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
-import { FileModel, FileTypes, GenesEnum } from '@/features/editor/types';
+import { FileModel, FileTypes, GenesEnum, GenesEnumArray } from '@/features/editor/types';
 import { getWorkspaceArray } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
-import { Box, Checkbox, FormControl, FormControlLabel, SelectChangeEvent, useTheme } from '@mui/material';
+import { Box, Checkbox, FormControlLabel } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { defaultSaveTo } from "@/features/editor/stores";
 
 export interface DownloadGroupParamsProps {}
 
 export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
   const { blocked } = useStatusContext();
-  const Theme = useTheme();
   const { fileTree, fileTreeArray } = useWorkspaceContext();
   const { saveTo, saveToStateUpdate, gene, geneStateUpdate } = useToolbarContext();
 
   //
   // Gene state
   //
-  const [geneValue, setGeneValue] = useState<GenesEnum>(gene);
+  const [geneState, setGeneState] = useState<GenesEnum>(gene);
 
-  const handleGeneChange = (event: SelectChangeEvent<any>) => {
-    setGeneValue(event.target.value);
-    geneStateUpdate(event.target.value);
+  const handleGeneChange = (value: GenesEnum) => {
+    setGeneState(value);
+    geneStateUpdate(value);
   };
 
   //
   // Save To state
   //
   const [fileArray, setFileArray] = useState<FileModel[]>(fileTreeArray);
-  const [saveToValue, setSaveToValue] = useState<string>(saveTo);
-  const [overrideValue, setOverrideValue] = useState<boolean>(false);
+  const [saveToState, setSaveToState] = useState<FileModel>(saveTo);
+  const [overrideState, setOverrideState] = useState<boolean>(false);
 
-  const handleSaveToChange = (event: SelectChangeEvent<any>) => {
-    setSaveToValue(event.target.value);
-    saveToStateUpdate(event.target.value, false);
-    setOverrideValue(false);
+  const handleSaveToChange = (value: FileModel) => {
+    setSaveToState(value);
+    saveToStateUpdate(value, false);
+    setOverrideState(false);
   };
 
   const handleOverrideChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setOverrideValue(event.target.checked);
-    saveToStateUpdate(saveToValue, event.target.checked);
+    setOverrideState(event.target.checked);
+    saveToStateUpdate(saveToState, event.target.checked);
   };
 
   //
@@ -58,98 +55,89 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
   }, [fileTree]);
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: '50% 50%', p: '1rem' }}>
-      <Box
-        sx={{
-          height: '100%',
-          display: 'grid',
-          flexDirection: 'column',
-          alignItems: 'start',
-          gap: '1rem',
-        }}
-      >
-        <FormControl sx={{ width: '60%' }} size='small'>
-          <GroupParamsInputLabel label={'Gene'} />
-          <StyledGroupParamsSelect
-            id={'gene-select'}
-            name={'gene-select'}
-            label={'Gene'}
-            value={geneValue}
-            onChange={handleGeneChange}
-            disabled={blocked}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  maxWidth: '10rem',
-                  maxHeight: '15rem',
-                  bgcolor: Theme.palette.background.default,
-                },
-              },
-            }}
-          >
-            <StyledGroupParamsMenuItem key={GenesEnum.EYS} value={GenesEnum.EYS}>
-              <StyledGroupParamsMenuItemTypography>{GenesEnum.EYS.toUpperCase()}</StyledGroupParamsMenuItemTypography>
-            </StyledGroupParamsMenuItem>
-          </StyledGroupParamsSelect>
-        </FormControl>
+    <Box sx={{ display: 'flex', flexDirection: 'row', columnGap: '1rem', p: '1rem'}}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '1rem', width: '50%'}}>
+        <Autocomplete
+          size="small"
+          sx={(theme) => ({
+            '& fieldset': {
+              borderColor: theme.palette.text.primary,
+              borderRadius: '1rem',
+            },
+          })}
+          value={geneState}
+          onChange={(_event, value) => {
+            if (value)
+              handleGeneChange(value)
+          }}
+          disabled={blocked}
+          options={GenesEnumArray}
+          renderInput={(params) => 
+            <TextField
+              {...params}
+              label="Gene"
+            />
+          }
+          renderGroup={(params) => (
+            <li key={params.key}>
+              <Box sx={{ px: '0.5rem' }}>
+                <StyledGroupParamsMenuItemTypographyBold>{`${params.group}:`}</StyledGroupParamsMenuItemTypographyBold>
+              </Box>
+              <StyledGroupParamsMenuItemTypography>{params.children}</StyledGroupParamsMenuItemTypography>
+            </li>
+          )}
+        />
       </Box>
-      <Box sx={{ height: '100%', display: 'grid', flexDirection: 'column', alignItems: 'start', rowGap: '2.16rem' }}>
-        <FormControl sx={{ width: '90%', justifyContent: 'center' }} size='small'>
-          <GroupParamsInputLabel label={'Save To'} />
-          <StyledGroupParamsSelect
-            id={'save-to-select'}
-            name={'save-to'}
-            label={'Save To'}
-            value={saveToValue}
-            onChange={handleSaveToChange}
-            disabled={blocked}
-            MenuProps={{
-              PaperProps: {
-                sx: {
-                  maxWidth: '15.7rem',
-                  maxHeight: '20rem',
-                  bgcolor: Theme.palette.background.default,
-                },
+      <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '1rem', width: '50%', flexGrow: '1'}}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: '0.25rem'}}>
+          <Autocomplete
+            size="small"
+            sx={(theme) => ({
+              '& fieldset': {
+                borderColor: theme.palette.text.primary,
+                borderRadius: '1rem',
               },
-            }}
-          >
-            <StyledGroupParamsMenuItem key={'new-file'} value={'/'}>
-              <StyledGroupParamsMenuItemTypography>New file...</StyledGroupParamsMenuItemTypography>
-            </StyledGroupParamsMenuItem>
-            <StyledGroupParamsListSubheader key={'root'}>
-              <StyledGroupParamsMenuItemTypographyBold>root:</StyledGroupParamsMenuItemTypographyBold>
-            </StyledGroupParamsListSubheader>
-            {fileArray.map((file) => {
-              if (file.type === FileTypes.FOLDER) {
-                return (
-                  <StyledGroupParamsListSubheader key={file.id}>
-                    <StyledGroupParamsMenuItemTypographyBold>{file.id}:</StyledGroupParamsMenuItemTypographyBold>
-                  </StyledGroupParamsListSubheader>
-                );
-              }
-
-              return (
-                <StyledGroupParamsMenuItem key={file.id} value={file.id}>
-                  <StyledGroupParamsMenuItemTypography>{file.label}</StyledGroupParamsMenuItemTypography>
-                </StyledGroupParamsMenuItem>
-              );
             })}
-          </StyledGroupParamsSelect>
-        </FormControl>
-        {saveToValue !== '/' && (
-          <FormControlLabel
-            control={
-              <Checkbox
-                id='override-checkbox'
-                checked={overrideValue}
-                onChange={handleOverrideChange}
-                disabled={blocked}
+            value={saveToState}
+            onChange={(_event, value) => {
+              if (value)
+                handleSaveToChange(value)
+            }}
+            disabled={blocked}
+            options={[defaultSaveTo, ...fileArray.filter((file) => file.type !== FileTypes.FOLDER)]}
+            groupBy={(option) => option.parent?.id || 'root'}
+            getOptionLabel={(option) => option.label}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => 
+              <TextField
+                {...params}
+                label="Save To"
               />
             }
-            label={<GroupParamsTypography label={'Override File'} />}
-            labelPlacement='start'
+            renderGroup={(params) => (
+              <li key={params.key}>
+                <Box sx={{ px: '0.5rem' }}>
+                  <StyledGroupParamsMenuItemTypographyBold>{`${params.group}:`}</StyledGroupParamsMenuItemTypographyBold>
+                </Box>
+                <StyledGroupParamsMenuItemTypography>{params.children}</StyledGroupParamsMenuItemTypography>
+              </li>
+            )}
           />
-        )}
+          {saveToState.id !== defaultSaveTo.id && (
+            <FormControlLabel
+              control={
+                <Checkbox
+                  id='override-checkbox'
+                  checked={overrideState}
+                  onChange={handleOverrideChange}
+                  disabled={blocked}
+                />
+              }
+              label={<GroupParamsTypography label={'Override File'} />}
+              labelPlacement='start'
+            />
+          )}
+        </Box>
       </Box>
     </Box>
   );

@@ -24,9 +24,7 @@ export const StyledGroupParamsListSubheader = styled(ListSubheader)(({ theme }) 
 }));
 
 export const StyledGroupParamsMenuItemTypography = styled(Typography)({
-  width: '100%',
   fontSize: '1rem',
-  textAlign: 'right',
   overflowWrap: 'break-word',
 });
 

@@ -1,13 +1,13 @@
-import { GenesEnum } from '@/features/editor/types';
+import { FileModel, FileTypes, GenesEnum } from '@/features/editor/types';
 import React, { createContext, useState } from 'react';
 
 export interface ToolbarContextProps {
   //
   // Universal state properties
   //
-  saveTo: string;
+  saveTo: FileModel;
   override: boolean;
-  saveToStateUpdate: (saveTo: string, override?: boolean) => void;
+  saveToStateUpdate: (saveTo: FileModel, override?: boolean) => void;
 
   //
   // Download state properties
@@ -18,10 +18,10 @@ export interface ToolbarContextProps {
   //
   // Merge state properties
   //
-  lovdFile: string;
-  clinvarFile: string;
-  gnomadFile: string;
-  mergeStateUpdate: (lovdFile: string, clinvarFile: string, gnomadFile: string) => void;
+  lovdFile: FileModel | null;
+  clinvarFile: FileModel | null;
+  gnomadFile: FileModel | null;
+  mergeStateUpdate: (lovdFile?: FileModel, clinvarFile?: FileModel, gnomadFile?: FileModel) => void;
 
   lovdError: string;
   lovdErrorStateUpdate: (lovdFileError: string) => void;
@@ -33,18 +33,20 @@ export interface ToolbarContextProps {
   //
   // Apply state properties
   //
-  applyTo: string;
-  applyToStateUpdate: (applyTo: string) => void;
+  applyTo: FileModel | null;
+  applyToStateUpdate: (applyTo: FileModel) => void;
 
   applyError: string;
   applyErrorStateUpdate: (applyError: string) => void;
 }
 
+export const defaultSaveTo: FileModel = { id: '/', label: 'New file...', type: FileTypes.FILE };
+
 export const ToolbarContext = createContext<ToolbarContextProps>({
   //
   // Universal state defaults
   //
-  saveTo: '/', // Root directory (new file)
+  saveTo: defaultSaveTo, // Root directory (new file)
   override: false,
   saveToStateUpdate: () => {},
 
@@ -57,9 +59,9 @@ export const ToolbarContext = createContext<ToolbarContextProps>({
   //
   // Merge state defaults
   //
-  lovdFile: '',
-  clinvarFile: '',
-  gnomadFile: '',
+  lovdFile: null,
+  clinvarFile: null,
+  gnomadFile: null,
   mergeStateUpdate: () => {},
 
   lovdError: '',
@@ -72,7 +74,7 @@ export const ToolbarContext = createContext<ToolbarContextProps>({
   //
   // Apply state defaults
   //
-  applyTo: '',
+  applyTo: null,
   applyToStateUpdate: () => {},
 
   applyError: '',
@@ -91,10 +93,10 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
   //
   // Universal state
   //
-  const [saveTo, setSaveTo] = useState<string>('/');
+  const [saveTo, setSaveTo] = useState<FileModel>(defaultSaveTo);
   const [override, setOverride] = useState<boolean>(false);
 
-  const saveToStateUpdate = (saveTo: string, override?: boolean) => {
+  const saveToStateUpdate = (saveTo: FileModel, override?: boolean) => {
     setSaveTo(saveTo);
     if (override !== undefined) setOverride(override);
   };
@@ -111,14 +113,17 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
   //
   // Merge state
   //
-  const [lovdFile, setLovdFile] = useState<string>('');
-  const [clinvarFile, setClinvarFile] = useState<string>('');
-  const [gnomadFile, setGnomadFile] = useState<string>('');
+  const [lovdFile, setLovdFile] = useState<FileModel | null>(null);
+  const [clinvarFile, setClinvarFile] = useState<FileModel | null>(null);
+  const [gnomadFile, setGnomadFile] = useState<FileModel | null>(null);
 
-  const mergeStateUpdate = (lovdFile: string, clinvarFile: string, gnomadFile: string) => {
-    setLovdFile(lovdFile);
-    setClinvarFile(clinvarFile);
-    setGnomadFile(gnomadFile);
+  const mergeStateUpdate = (lovdFile?: FileModel, clinvarFile?: FileModel, gnomadFile?: FileModel) => {
+    if (lovdFile)
+      setLovdFile(lovdFile);
+    if (clinvarFile)
+      setClinvarFile(clinvarFile);
+    if (gnomadFile)
+      setGnomadFile(gnomadFile);
   };
 
   const [lovdError, setLovdError] = useState<string>('');
@@ -142,9 +147,9 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
   //
   // Apply state
   //
-  const [applyTo, setApplyTo] = useState<string>('');
+  const [applyTo, setApplyTo] = useState<FileModel | null>(null);
 
-  const applyToStateUpdate = (applyTo: string) => {
+  const applyToStateUpdate = (applyTo: FileModel) => {
     setApplyTo(applyTo);
   };
 

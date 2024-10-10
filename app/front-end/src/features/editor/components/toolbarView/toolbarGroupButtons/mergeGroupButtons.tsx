@@ -1,5 +1,6 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
+import { defaultSaveTo } from '@/features/editor/stores';
 import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
@@ -34,13 +35,13 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_gnomad_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_gnomad_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_MERGE}/lovd_gnomad/${savePath}`, {
         params: {
           override,
-          lovdFile,
-          gnomadFile,
+          "lovdFile": lovdFile.id,
+          "gnomadFile": gnomadFile.id,
         },
       });
     } catch (error) {
@@ -61,13 +62,13 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_clinvar_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_clinvar_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_MERGE}/lovd_clinvar/${savePath}`, {
         params: {
           override,
-          lovdFile,
-          clinvarFile,
+          "lovdFile": lovdFile.id,
+          "clinvarFile": clinvarFile.id,
         },
       });
     } catch (error) {

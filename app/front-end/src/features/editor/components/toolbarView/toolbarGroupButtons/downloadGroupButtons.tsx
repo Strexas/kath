@@ -1,5 +1,6 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
+import { defaultSaveTo } from '@/features/editor/stores';
 import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
@@ -19,7 +20,7 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `lovd_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/lovd/${savePath}`, {
         params: {
@@ -39,7 +40,7 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `clinvar_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `clinvar_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/clinvar/${savePath}`, {
         params: {
@@ -59,7 +60,7 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== '/' ? saveTo : findUniqueFileName(fileTree, `gnomad_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `gnomad_${timestamp}.csv`);
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/gnomad/${savePath}`, {
         params: {
