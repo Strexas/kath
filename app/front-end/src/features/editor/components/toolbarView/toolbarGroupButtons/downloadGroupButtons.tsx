@@ -22,8 +22,9 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
       const timestamp = generateTimestamp();
       const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_${timestamp}.csv`);
 
-      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/lovd/${savePath}`, {
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {
+          source: 'lovd',
           override,
           gene,
         },
@@ -42,8 +43,9 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
       const timestamp = generateTimestamp();
       const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `clinvar_${timestamp}.csv`);
 
-      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/clinvar/${savePath}`, {
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {
+          source: 'clinvar',
           override,
           gene,
         },
@@ -62,8 +64,9 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
       const timestamp = generateTimestamp();
       const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `gnomad_${timestamp}.csv`);
 
-      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/gnomad/${savePath}`, {
+      await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {
+          source: 'gnomad',
           override,
           gene,
         },
