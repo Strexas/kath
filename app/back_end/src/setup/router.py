@@ -11,8 +11,6 @@ Dependencies:
 - src.routes.workspace_route: Contains the blueprint for workspace-related routes.
 """
 
-# pylint: disable=import-error
-
 from flask import Blueprint
 
 from src.routes.workspace_route import workspace_route_bp

@@ -11,16 +11,16 @@ import time  # TODO: Remove this import once the download logic is implemented
 from flask import Blueprint, request, jsonify
 
 
-from ..setup.extensions import logger
-from ..utils.helpers import socketio_emit_to_user_session
-from ..utils.exceptions import UnexpectedError
-from ..constants import (
+from src.setup.extensions import logger
+from src.utils.helpers import socketio_emit_to_user_session
+from src.utils.exceptions import UnexpectedError
+from src.constants import (
     WORKSPACE_DOWNLOAD_ROUTE,
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
-from app.back_end.data.downloading import download_selected_database_for_eys_gene
+from data.downloading import download_selected_database_for_eys_gene
 
 workspace_download_route_bp = Blueprint("workspace_download_route", __name__)
 

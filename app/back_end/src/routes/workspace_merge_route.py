@@ -21,7 +21,9 @@ from src.constants import (
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
-from data import set_lovd_dtypes, set_gnomad_dtypes, parse_lovd, parse_gnomad, merge_gnomad_lovd
+
+from data.refactoring import set_lovd_dtypes, set_gnomad_dtypes, parse_lovd, parse_gnomad, merge_gnomad_lovd
+
 
 workspace_merge_route_bp = Blueprint("workspace_merge_route", __name__)
 

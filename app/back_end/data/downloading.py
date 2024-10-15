@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from .constants import (LOVD_FILE_URL,
+from data.constants import (LOVD_FILE_URL,
                         LOVD_PATH,
                         DATABASES_DOWNLOAD_PATHS,
                         LOVD_FILE_URL_EYS,
