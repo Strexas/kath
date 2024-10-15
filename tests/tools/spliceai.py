@@ -188,11 +188,11 @@ def parse_spliceai_vcf(vcf_file: str):
                                 "Delta score (acceptor loss)": ds_al,
                                 "Delta score (donor gain)": ds_dg,
                                 "Delta score (donor loss)": ds_dl,
-                                "Delta position (acceptor gain)": dp_ag,
-                                "Delta position (acceptor loss)": dp_al,
-                                "Delta position (donor gain)": dp_dg,
-                                "Delta position (donor loss)": dp_dl,
-                                "Max_Delta_Score": max_delta_score,
+                                "Delta position (acceptor gain)": int(columns[1]) + dp_ag,
+                                "Delta position (acceptor loss)": int(columns[1]) + dp_al,
+                                "Delta position (donor gain)": int(columns[1]) + dp_dg,
+                                "Delta position (donor loss)": int(columns[1]) + dp_dl,
+                                "Max_Delta_Score": max_delta_score
                             }
                             spliceai_scores.append(scores)
         return spliceai_scores
@@ -220,20 +220,17 @@ def add_spliceai_eval_columns(data: pd.DataFrame, fasta_path: str) -> pd.DataFra
                         SpliceAI execution.
     """
     data_copy = data.copy()
-
     input_vcf = write_vcf(data_copy)
-    # try:
-    output_vcf = run_spliceai(input_vcf, fasta_path)
-    spliceai_scores = parse_spliceai_vcf(output_vcf)
+    try:
+        output_vcf = run_spliceai(input_vcf, fasta_path)
+        spliceai_scores = parse_spliceai_vcf(output_vcf)
 
-    scores_df = pd.DataFrame(spliceai_scores)
-    scores_df.columns = [f"{col}_spliceai" for col in scores_df.columns]
-    data_copy = pd.concat([data_copy.reset_index(drop=True),
-                           scores_df.reset_index(drop=True)], axis=1)
-
-    # finally:
-         # Cleanup temporary VCF files
-        # os.remove(input_vcf)
-        # os.remove(output_vcf)
+        scores_df = pd.DataFrame(spliceai_scores)
+        scores_df.columns = [f"{col}_spliceai" for col in scores_df.columns]
+        data_copy = pd.concat([data_copy.reset_index(drop=True),
+                               scores_df.reset_index(drop=True)], axis=1)
+    finally:
+        os.remove(input_vcf)
+        os.remove(output_vcf)
 
     return data_copy
