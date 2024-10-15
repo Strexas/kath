@@ -6,10 +6,12 @@ Retrieves REVEL scores for specific variants based on chromosomeand position fro
 import os
 import pandas as pd
 
+REVEL_SAVE_PATH = "../../data/revel"
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 revel_file = os.path.join(current_script_dir, 'revel_with_transcript_ids')
 
-def get_revel_scores(chromosome, position):
+
+def get_revel_scores(chromosome, position, save_Path=REVEL_SAVE_PATH):
     """
     Retrieve REVEL scores for variants at a specific chromosome and position.
     
@@ -24,5 +26,12 @@ def get_revel_scores(chromosome, position):
         (revel_data['chr'] == chromosome) &
         (revel_data['hg19_pos'] == position)
     ]
+
+    if not os.path.isdir(save_Path):
+        os.mkdir(save_Path)
+
+    file_name = os.path.join(save_Path, "Revel_output")
+
+    variants.to_csv(file_name)
 
     return variants

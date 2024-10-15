@@ -1,4 +1,4 @@
-# Development Server Setup Guide
+ Development Server Setup Guide
 
 This guide provides instructions on setting up and running a Flask-based development server using Gunicorn, Gevent, Socket.IO, CORS and Redis on a Windows operating system with WSL (Windows Subsystem for Linux).
 
@@ -91,7 +91,7 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Navigate to Application:**
    ```bash
-   cd app/back-end
+   cd app/back_end
    ```
    
    You should see something like `ubuntu_user@windows_user:/mnt/c/Users/YourUsername/Path/To/Project/app/back-end$`.

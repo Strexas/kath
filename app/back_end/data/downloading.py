@@ -178,6 +178,7 @@ def download_database_for_eys_gene(database_name, override=False):
 
 
 def download_selected_database_for_eys_gene(database_name, save_path="", override=False):
+
     """
     Calls a function to download a database.
 

@@ -10,15 +10,17 @@ import os
 import time  # TODO: Remove this import once the download logic is implemented
 from flask import Blueprint, request, jsonify
 
-from src.setup.extensions import logger
-from src.utils.helpers import socketio_emit_to_user_session
-from src.utils.exceptions import UnexpectedError
-from src.constants import (
+
+from ..setup.extensions import logger
+from ..utils.helpers import socketio_emit_to_user_session
+from ..utils.exceptions import UnexpectedError
+from ..constants import (
     WORKSPACE_DOWNLOAD_ROUTE,
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
+from app.back_end.data.downloading import download_selected_database_for_eys_gene
 
 workspace_download_route_bp = Blueprint("workspace_download_route", __name__)
 
@@ -69,14 +71,7 @@ def get_workspace_download_lovd(relative_path):
             uuid,
             sid,
         )
-
-        #
-        # TODO: Implement LOVD data download and save logic using defined parameters
-        # [destination_path, override, gene]
-        #
-
-        # TODO: Remove this sleep statement once the download logic is implemented
-        time.sleep(1)  # Simulate a delay for the download process
+        download_selected_database_for_eys_gene(save_path=destination_path, override=override, database_name='lovd')
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
@@ -302,13 +297,7 @@ def get_workspace_download_gnomad(relative_path):
             sid,
         )
 
-        #
-        # TODO: Implement gnomAD data download and save logic using defined parameters
-        # [destination_path, override, gene]
-        #
-
-        # TODO: Remove this sleep statement once the download logic is implemented
-        time.sleep(1)  # Simulate a delay for the download process
+        download_selected_database_for_eys_gene(save_path=destination_path, override=override, database_name='gnomad')
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(

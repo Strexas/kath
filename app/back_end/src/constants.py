@@ -26,7 +26,7 @@ WORKSPACE_DIR = os.path.join(SRC_DIR, "workspace")
 WORKSPACE_TEMPLATE_DIR = os.path.join(WORKSPACE_DIR, "template")
 
 # Routes
-BASE_ROUTE = "/api/v1"
+BASE_ROUTE = "/external-tools/v1"
 WORKSPACE_ROUTE = "/workspace"
 WORKSPACE_FILE_ROUTE = "/workspace/file"
 WORKSPACE_CREATE_ROUTE = "/workspace/create"

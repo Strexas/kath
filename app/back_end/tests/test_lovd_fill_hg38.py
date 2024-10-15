@@ -1,5 +1,5 @@
 """
-Module for testing the `lovd_fill_hg38` function from the `api.data.refactoring` module.
+Module for testing the `lovd_fill_hg38` function from the `external-tools.data.refactoring` module.
 """
 import unittest
 import pandas as pd
