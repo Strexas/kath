@@ -84,15 +84,15 @@ import csv
 from ast import literal_eval
 from flask import Blueprint, request, jsonify
 
-from src.setup.extensions import compress, logger
-from src.utils.helpers import (
+from ..setup.extensions import (compress, logger)
+from ..utils.helpers import (
     socketio_emit_to_user_session,
     build_workspace_structure,
     is_number,
     convert_to_number,
 )
-from src.utils.exceptions import UnexpectedError
-from src.constants import (
+from ..utils.exceptions import UnexpectedError
+from ..constants import (
     WORKSPACE_DIR,
     WORKSPACE_TEMPLATE_DIR,
     WORKSPACE_ROUTE,

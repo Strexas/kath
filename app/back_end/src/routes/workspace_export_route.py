@@ -17,10 +17,10 @@ Routes:
 import os
 from flask import Blueprint, request, jsonify, send_file
 
-from src.setup.extensions import compress, logger
-from src.utils.helpers import socketio_emit_to_user_session
-from src.utils.exceptions import UnexpectedError
-from src.constants import (
+from ..setup.extensions import compress, logger
+from ..utils.helpers import socketio_emit_to_user_session
+from ..utils.exceptions import UnexpectedError
+from ..constants import (
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_EXPORT_ROUTE,
