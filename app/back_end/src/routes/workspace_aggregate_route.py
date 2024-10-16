@@ -18,17 +18,16 @@ Routes:
 Exceptions are handled to provide feedback through the user’s console using Socket.IO.
 """
 
-# pylint: disable=import-error
 
 import os
 import csv
 from ast import literal_eval
 from flask import Blueprint, request, jsonify
 
-from src.setup.extensions import logger
-from src.utils.helpers import socketio_emit_to_user_session, is_number
-from src.utils.exceptions import UnexpectedError
-from src.constants import WORKSPACE_AGGREGATE_ROUTE, CONSOLE_FEEDBACK_EVENT, WORKSPACE_DIR
+from ..setup.extensions import logger
+from ..utils.helpers import socketio_emit_to_user_session, is_number
+from ..utils.exceptions import UnexpectedError
+from ..constants import WORKSPACE_AGGREGATE_ROUTE, CONSOLE_FEEDBACK_EVENT, WORKSPACE_DIR
 
 
 workspace_aggregate_route_bp = Blueprint("workspace_aggregate_route", __name__)

@@ -21,6 +21,7 @@ from .constants import (LOVD_FILE_URL,
                         LOVD_FILE_URL_EYS,
                         STORE_AS_LOVD,
                         STORE_AS_GNOMAD)
+from .refactoring import parse_lovd
 
 
 # EXCEPTIONS
@@ -204,6 +205,7 @@ def download_selected_database_for_eys_gene(database_name:str, save_path:str="",
     # download the database
     if database_name == "lovd":
         download_lovd_database_for_eys_gene(save_path, override)
+        parse_lovd(save_path, save_path[:-4])
     elif database_name == "gnomad":
         download_data_from_gnomad_eys(save_path, override)
     else:

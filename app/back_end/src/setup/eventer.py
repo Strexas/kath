@@ -32,10 +32,10 @@ Logging:
 # pylint: disable=import-error
 
 from flask import request
-from src.setup.extensions import socketio, logger, socket_manager
+from ..setup.extensions import socketio, logger, socket_manager
 
 # Import all event modules here
-from src.events.workspace_export_event import workspace_export_event_handler
+from ..events.workspace_export_event import workspace_export_event_handler
 
 
 def eventer():

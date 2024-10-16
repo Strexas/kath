@@ -18,9 +18,9 @@ Functions:
 
 # pylint: disable=import-error
 
-from src.setup.extensions import socketio
-from src.utils.helpers import socketio_emit_to_user_session
-from src.constants import WOKRSPACE_EXPORT_FEEDBACK_EVENT, CONSOLE_FEEDBACK_EVENT
+from ..setup.extensions import socketio
+from ..utils.helpers import socketio_emit_to_user_session
+from ..constants import WOKRSPACE_EXPORT_FEEDBACK_EVENT, CONSOLE_FEEDBACK_EVENT
 
 
 def workspace_export_event_handler():

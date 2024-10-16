@@ -35,8 +35,8 @@ from flask_compress import Compress
 from flask_socketio import SocketIO
 from flask_cors import CORS
 
-from src.config import Env
-from src.utils.socket_manager import SocketManager
+from ..config import Env
+from ..utils.socket_manager import SocketManager
 
 
 # Configure logging
