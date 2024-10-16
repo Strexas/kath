@@ -243,7 +243,7 @@ def download_data_from_gnomad_eys(path:str=STORE_AS_GNOMAD, override:bool=False)
     - popmax
     - popmax population
 
-    :param str path: path to save the data (default: 'app/back-end/src/workspace/gnomad/gnomad_data.csv')
+    :param str path: path to save the data (default: 'app/back_end/src/workspace/gnomad/gnomad_data.csv')
     :param bool override: should an existing file be overriden with a new one
     """
 
