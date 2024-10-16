@@ -20,6 +20,8 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
   const {
     saveTo,
     saveToStateUpdate,
+    saveToError,
+    saveToErrorStateUpdate,
     lovdFile,
     clinvarFile,
     gnomadFile,
@@ -68,6 +70,7 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
     setSaveToState(value);
     saveToStateUpdate(value, false);
     setOverrideState(false);
+    saveToErrorStateUpdate('');
   };
 
   const handleOverrideChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,6 +215,8 @@ export const MergeGroupParams: React.FC<MergeGroupParamsProps> = () => {
               <TextField
                 {...params}
                 label="Save To"
+                error={Boolean(saveToError)}
+                helperText={saveToError}
               />
             }
             renderGroup={(params) => (

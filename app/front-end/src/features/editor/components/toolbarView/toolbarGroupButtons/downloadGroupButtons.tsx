@@ -1,7 +1,7 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
 import { defaultSaveTo } from '@/features/editor/stores';
-import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
+import { findUniqueFileName, generateTimestamp, getFileExtension } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
@@ -13,14 +13,19 @@ export interface DownloadGroupButtonsProps {}
 export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
   const { blockedStateUpdate } = useStatusContext();
   const { fileTree } = useWorkspaceContext();
-  const { saveTo, override, gene } = useToolbarContext();
+  const { saveTo, saveToErrorStateUpdate, override, gene } = useToolbarContext();
 
   const handleDownloadLovdClick = useCallback(async () => {
     blockedStateUpdate(true);
 
     try {
       const timestamp = generateTimestamp();
-      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_${timestamp}.csv`);
+      const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `lovd_${timestamp}.txt`);
+      if (getFileExtension(savePath) !== 'txt') {
+        saveToErrorStateUpdate('Select .txt');
+        return
+      }
+      saveToErrorStateUpdate('');
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {
@@ -42,6 +47,11 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
     try {
       const timestamp = generateTimestamp();
       const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `clinvar_${timestamp}.csv`);
+      if (getFileExtension(savePath) !== 'csv') {
+        saveToErrorStateUpdate('Select .csv');
+        return
+      }
+      saveToErrorStateUpdate('');
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {
@@ -63,6 +73,11 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
     try {
       const timestamp = generateTimestamp();
       const savePath = saveTo !== defaultSaveTo ? saveTo.id : findUniqueFileName(fileTree, `gnomad_${timestamp}.csv`);
+      if (getFileExtension(savePath) !== 'csv') {
+        saveToErrorStateUpdate('Select .csv');
+        return
+      }
+      saveToErrorStateUpdate('');
 
       await axios.get(`${Endpoints.WORKSPACE_DOWNLOAD}/${savePath}`, {
         params: {

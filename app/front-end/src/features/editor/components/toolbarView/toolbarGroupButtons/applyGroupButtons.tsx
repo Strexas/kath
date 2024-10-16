@@ -1,7 +1,7 @@
 import { ToolbarGroupItem, ToolbarGroupItemProps } from '@/features/editor/components/toolbarView';
 import { useToolbarContext, useWorkspaceContext } from '@/features/editor/hooks';
 import { defaultSaveTo } from '@/features/editor/stores';
-import { findUniqueFileName, generateTimestamp } from '@/features/editor/utils';
+import { findUniqueFileName, generateTimestamp, getFileExtension } from '@/features/editor/utils';
 import { useStatusContext } from '@/hooks';
 import { axios } from '@/lib';
 import { Endpoints } from '@/types';
@@ -13,7 +13,7 @@ export interface ApplyGroupButtonsProps {}
 export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
   const { blockedStateUpdate } = useStatusContext();
   const { fileTree } = useWorkspaceContext();
-  const { saveTo, override, applyTo, applyErrorStateUpdate } = useToolbarContext();
+  const { saveTo, saveToErrorStateUpdate, override, applyTo, applyErrorStateUpdate } = useToolbarContext();
 
   const applySpliceAiClick = useCallback(async () => {
     if (!applyTo) {
@@ -26,6 +26,10 @@ export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
     try {
       const timestamp = generateTimestamp();
       const savePath = saveTo.id !== defaultSaveTo.id ? saveTo.id : findUniqueFileName(fileTree, `spliceai_${timestamp}.csv`);
+      if (getFileExtension(savePath) !== 'csv') {
+        saveToErrorStateUpdate('Select .csv');
+        return
+      }
 
       await axios.get(`${Endpoints.WORKSPACE_APPLY}/spliceai/${savePath}`, {
         params: {
@@ -51,6 +55,10 @@ export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
     try {
       const timestamp = generateTimestamp();
       const savePath = saveTo.id !== defaultSaveTo.id ? saveTo.id : findUniqueFileName(fileTree, `cadd_${timestamp}.csv`);
+      if (getFileExtension(savePath) !== 'csv') {
+        saveToErrorStateUpdate('Select .csv');
+        return
+      }
 
       await axios.get(`${Endpoints.WORKSPACE_APPLY}/cadd/${savePath}`, {
         params: {

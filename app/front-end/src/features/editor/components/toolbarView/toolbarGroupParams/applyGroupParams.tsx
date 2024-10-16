@@ -17,7 +17,7 @@ export interface ApplyGroupParamsProps {}
 export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
   const { blocked } = useStatusContext();
   const { fileTree, fileTreeArray } = useWorkspaceContext();
-  const { saveTo, saveToStateUpdate, applyTo, applyToStateUpdate, applyError, applyErrorStateUpdate } =
+  const { saveTo, saveToStateUpdate, saveToError, saveToErrorStateUpdate, applyTo, applyToStateUpdate, applyError, applyErrorStateUpdate } =
     useToolbarContext();
 
   //
@@ -42,6 +42,7 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
     setSaveToState(value);
     saveToStateUpdate(value, false);
     setOverrideState(false);
+    saveToErrorStateUpdate('');
   };
 
   const handleOverrideChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +119,8 @@ export const ApplyGroupParams: React.FC<ApplyGroupParamsProps> = () => {
               <TextField
                 {...params}
                 label="Save To"
+                error={Boolean(saveToError)}
+                helperText={saveToError}
               />
             }
             renderGroup={(params) => (
