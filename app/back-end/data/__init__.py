@@ -41,7 +41,7 @@ from .downloading import (
 
     # Functions for downloading databases
     download_lovd_database_for_eys_gene,
-    download_genes_lovd,
+    download_selected_database_for_eys_gene,
     download_database_for_eys_gene,
     download_data_from_gnomad_eys,
 
