@@ -11,6 +11,7 @@ import os
 import time  # TODO: Remove this import once the download logic is implemented
 from flask import Blueprint, request, jsonify
 
+from data.downloading import download_selected_database_for_eys_gene
 from src.setup.extensions import logger
 from src.utils.helpers import socketio_emit_to_user_session
 from src.utils.exceptions import UnexpectedError
@@ -82,14 +83,8 @@ def get_workspace_download(relative_path):
             uuid,
             sid,
         )
-
-        #
-        # TODO: Implement data download and save logic using defined parameters
-        # [source, destination_path, override, gene]
-        #
-
-        # TODO: Remove this sleep statement once the download logic is implemented
-        time.sleep(1)  # Simulate a delay for the download process
+        
+        download_selected_database_for_eys_gene(database_name=source, save_path=destination_path, override=override)
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(

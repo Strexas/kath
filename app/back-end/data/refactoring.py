@@ -61,7 +61,7 @@ def infer_type(value:str):
         return value  # Return as string if it cannot be converted
 
 
-def parse_lovd(path:str=LOVD_PATH + '/lovd_data.txt'):
+def parse_lovd(path:str=LOVD_PATH + '/lovd_data.txt', save_to:str=LOVD_PATH):
     """
     Converts data from text file with LOVD format to dictionary of tables.
 
@@ -122,6 +122,12 @@ def parse_lovd(path:str=LOVD_PATH + '/lovd_data.txt'):
                 frame[col] = frame[col].apply(infer_type)
 
             d[table_name] = frame
+            
+            
+            file_location = os.path.join(save_to, f"{table_name}.csv")
+            if not os.path.exists(save_to):
+                os.makedirs(save_to)
+            frame.to_csv(file_location, index=False)      
 
             # skip inter tables lines
             [f.readline() for _ in range(1)]  # pylint: disable=expression-not-assigned

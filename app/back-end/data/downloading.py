@@ -9,6 +9,7 @@ import requests
 import pandas as pd
 from pandas.core.interchange.dataframe_protocol import DataFrame
 from requests import RequestException
+from .refactoring import parse_lovd
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -101,34 +102,38 @@ def download_lovd_database_for_eys_gene(save_to:str = STORE_AS_LOVD, override:bo
         f.write(response.content)
 
 
-def download_genes_lovd(gene_list: list, folder_path:str=LOVD_PATH, raise_exception:bool=False):
+def download_selected_database_for_eys_gene(database_name:str, save_path:str="", override:bool=False):
     """
-    Downloads data into txt files from gene_list.
+    Calls a function to download a database.
 
-    :param list gene_list: list of gene's symbols
-    :param str folder_path: folder to save the data
-    :param bool raise_exception: raise exception if True, otherwise log
+    :param database_name: the name of the database that should be downloaded
+    :param save_path: path to save the data
+    :param override: should be already existing file be overwritten
     """
+    if not isinstance(database_name, str):
+        raise TypeError("Database name should be a string")
 
-    for gene in gene_list:
-        file_path = os.path.join(folder_path, gene + ".txt")
-        url = LOVD_FILE_URL + gene
-        try:
-            response = requests.get(url, timeout=10)
-        except RequestException as e:
-            raise DownloadError(f"Error while downloading file from {url}") from e
+    database_name = database_name.lower()
 
-        if response.status_code != 200:
-            raise BadResponseException(f"Bad response from {url}."
-                                       f" Status code: {response.status_code}")
-        # If gene does not exist, the first word of the file will be Error
-        valid = 'Error' not in response.text[:6]
-        if valid:
-            get_file_from_url(url, file_path)
-        elif raise_exception:
-            raise ValueError(f"Symbol: {gene} does not exist in the LOVD database")
-        else:
-            logging.error("Symbol: %s does not exist in the LOVD database", gene)
+    # if save_path is not provided, save to default location
+    if database_name == "lovd" and save_path == "":
+        save_path = STORE_AS_LOVD
+    elif database_name == "gnomad" and save_path == "":
+        save_path = STORE_AS_GNOMAD
+
+    # check if database_name is supported
+    if database_name not in DATABASES_DOWNLOAD_PATHS:
+        raise IndexError(f"Requested for {database_name} database is not supported")
+
+    # download the database
+    if database_name == "lovd":
+        download_lovd_database_for_eys_gene(override=override)
+        parse_lovd(path=STORE_AS_LOVD, save_to=save_path)
+        
+    elif database_name == "gnomad":
+        download_data_from_gnomad_eys(save_path, override)
+    else:
+        raise IndexError(f"Requested for {database_name} is not yet supported")
 
 
 def download_database_for_eys_gene(database_name:str, override:bool=False):
@@ -176,38 +181,6 @@ def download_database_for_eys_gene(database_name:str, override:bool=False):
     list_of_files = glob.glob(os.path.join(os.getcwd(), "..", "data", database_name, '*'))
     latest_file = max(list_of_files, key=os.path.getctime)
     os.rename(latest_file, os_path)
-
-
-def download_selected_database_for_eys_gene(database_name:str, save_path:str="", override:bool=False):
-    """
-    Calls a function to download a database.
-
-    :param database_name: the name of the database that should be downloaded
-    :param save_path: path to save the data
-    :param override: should be already existing file be overwritten
-    """
-    if not isinstance(database_name, str):
-        raise TypeError("Database name should be a string")
-
-    database_name = database_name.lower()
-
-    # if save_path is not provided, save to default location
-    if database_name == "lovd" and save_path == "":
-        save_path = STORE_AS_LOVD
-    elif database_name == "gnomad" and save_path == "":
-        save_path = STORE_AS_GNOMAD
-
-    # check if database_name is supported
-    if database_name not in DATABASES_DOWNLOAD_PATHS:
-        raise IndexError(f"Requested for {database_name} database is not supported")
-
-    # download the database
-    if database_name == "lovd":
-        download_lovd_database_for_eys_gene(save_path, override)
-    elif database_name == "gnomad":
-        download_data_from_gnomad_eys(save_path, override)
-    else:
-        raise IndexError(f"Requested for {database_name} is not yet supported")
 
 
 def prepare_popmax_calculation(df:pd.DataFrame, pop_data:dict, name:str, pop_ids:list[str], index:int):
