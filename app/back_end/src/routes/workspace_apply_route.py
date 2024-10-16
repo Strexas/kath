@@ -13,17 +13,17 @@ import time  # TODO: Remove this import once the apply logic is implemented
 import pandas as pd
 from flask import Blueprint, request, jsonify
 
-from src.setup.extensions import logger
-from src.utils.helpers import socketio_emit_to_user_session
-from src.utils.exceptions import UnexpectedError
-from src.constants import (
+from app.back_end.src.setup.extensions import logger
+from app.back_end.src.utils.helpers import socketio_emit_to_user_session
+from app.back_end.src.utils.exceptions import UnexpectedError
+from app.back_end.src.constants import (
     WORKSPACE_APPLY_ROUTE,
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
 
-from tools import (
+from app.back_end.tools import (
     add_spliceai_eval_columns,
 )
 
