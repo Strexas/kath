@@ -18,7 +18,6 @@ Routes:
 Exceptions are handled to provide feedback through the user’s console using Socket.IO.
 """
 
-# pylint: disable=import-error
 
 import os
 import csv

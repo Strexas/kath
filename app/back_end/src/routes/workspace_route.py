@@ -75,7 +75,6 @@ Errors and Feedback:
     errors, and unexpected exceptions.
 """
 
-# pylint: disable=import-error
 # pylint: disable=too-many-lines
 
 import os

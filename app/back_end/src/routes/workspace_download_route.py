@@ -21,6 +21,8 @@ from ..constants import (
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
 
+from ..data.downloading import download_selected_database_for_eys_gene
+
 workspace_download_route_bp = Blueprint("workspace_download_route", __name__)
 
 
@@ -83,13 +85,7 @@ def get_workspace_download(relative_path):
             sid,
         )
 
-        #
-        # TODO: Implement data download and save logic using defined parameters
-        # [source, destination_path, override, gene]
-        #
-
-        # TODO: Remove this sleep statement once the download logic is implemented
-        time.sleep(1)  # Simulate a delay for the download process
+        download_selected_database_for_eys_gene(database_name=source, save_path=destination_path, override=override)
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(

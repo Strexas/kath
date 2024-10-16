@@ -12,7 +12,6 @@ Routes:
     GET /workspace_export/<path:relative_path>: Exports the requested file.
 """
 
-# pylint: disable=import-error
 
 import os
 from flask import Blueprint, request, jsonify, send_file

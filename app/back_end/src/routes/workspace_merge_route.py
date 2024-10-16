@@ -4,7 +4,6 @@ This module defines routes for merging data from different sources and saving th
 the user's workspace.
 """
 
-# pylint: disable=import-error
 # pylint: disable=broad-exception-caught
 
 import os
@@ -22,7 +21,7 @@ from ..constants import (
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
-from data import (
+from ..data.refactoring import (
     set_lovd_dtypes,
     set_gnomad_dtypes,
     parse_lovd,

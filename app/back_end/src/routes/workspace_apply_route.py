@@ -4,7 +4,6 @@ This module defines routes for applying algorithms to files and saving the resul
 workspace.
 """
 
-# pylint: disable=import-error
 # pylint: disable=broad-exception-caught
 
 import os

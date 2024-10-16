@@ -14,7 +14,6 @@ Routes:
     POST /workspace_import/<path:relative_path>: Imports a file to the specified folder.
 """
 
-# pylint: disable=import-error
 
 import os
 from flask import Blueprint, request, jsonify
