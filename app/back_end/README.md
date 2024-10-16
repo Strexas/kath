@@ -45,14 +45,14 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Update Package List:**
    ```bash
-   sudo apt-get update
+   sudo apt update
    ```
 
    Wait for the system to update.
 
 3. **Install Required Packages:**
    ```bash
-   sudo apt-get install python3 python3-pip python3-venv redis
+   sudo apt install python3 python3-pip python3-venv redis
    ```
 
    With any prompts type `y` and press `enter`.
@@ -91,7 +91,7 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Navigate to Application:**
    ```bash
-   cd app/back-end
+   cd app/back_end
    ```
    
    You should see something like `ubuntu_user@windows_user:/mnt/c/Users/YourUsername/Path/To/Project/app/back-end$`.
