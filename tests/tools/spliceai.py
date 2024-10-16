@@ -55,7 +55,6 @@ class SpliceAIError(Exception):
 def write_vcf(data: pd.DataFrame) -> str:
     """
     Writes all variant information into a temporary VCF file.
-
     This function extracts chromosome and variant information from the
     provided DataFrame and formats it into VCF format, writing it to a
     temporary input VCF file.
@@ -70,30 +69,33 @@ def write_vcf(data: pd.DataFrame) -> str:
     """
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix='.vcf') as vcf:
-            vcf.write(b"##fileformat=VCFv4.2\n")
-            vcf.write(b"##fileDate=20231001\n")
-            vcf.write(b"##reference=GRCh38\n")
+            lines = [
+                "##fileformat=VCFv4.2\n",
+                "##fileDate=20231001\n",
+                "##reference=GRCh38\n"
+            ]
+            variant_column = data['hg38_gnomad_format'].combine_first(
+                data['variant_id_gnomad']).fillna('0-0-0-0')
+            chromosomes = variant_column.str.split('-', n=1).str[0].unique()
+            lines.extend([f"##contig=<ID={chromosome}>\n" for chromosome in chromosomes])
+            lines.append("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
 
-            # Extract chromosomes from both columns, fallback to variant_id_gnomad when needed
-            chromosomes = data.apply(lambda row: str(
-                row["hg38_gnomad_format"] if not pd.isna(row["hg38_gnomad_format"]) else row[
-                    "variant_id_gnomad"]).split("-", maxsplit=1)[0], axis=1).unique()
-            for chromosome in chromosomes:
-                vcf.write(f"##contig=<ID={chromosome}>\n".encode())
+            split_data = variant_column.str.split('-', expand=True)
+            split_data[1] = pd.to_numeric(split_data[1], errors='coerce').fillna(0).astype(int)
 
-            vcf.write(b"#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
+            valid_rows = split_data[split_data[3].notna()]
 
-            for _, row in data.iterrows():
-                position_data = row["hg38_gnomad_format"] if not pd.isna(row["hg38_"
-                 "gnomad_format"]) else row["variant_id_gnomad"]
-                split_data = position_data.split('-')
-                if len(split_data) >= 4:
-                    chromosome, position, ref_allele, alt_allele = split_data[0],\
-                        split_data[1], split_data[2], split_data[3]
-                    vcf.write(f"{chromosome}\t{position}\t."
-                              f"\t{ref_allele}\t{alt_allele}\t.\t.\t.\n".encode())
+            rows = (
+                valid_rows[0] + "\t" +  # CHROM
+                valid_rows[1].astype(str) + "\t.\t" +  # POS
+                valid_rows[2] + "\t" +  # REF allele
+                valid_rows[3] + "\t.\t.\t.\n"  # ALT allele, QUAL, FILTER, INFO
+            )
+            lines.extend(rows.tolist())
+            vcf.write("".join(lines).encode('utf-8'))
 
-            return vcf.name  # Return the path to the temporary VCF file
+            return vcf.name
+
     except Exception as e:
         raise SpliceAIError(f"Failed to create input VCF file: {e}") from e
 
