@@ -223,6 +223,7 @@ def add_spliceai_eval_columns(data: pd.DataFrame, fasta_path: str) -> pd.DataFra
     """
     data_copy = data.copy()
     input_vcf = write_vcf(data_copy)
+    output_vcf = "spliceai_output.vcf"
     try:
         output_vcf = run_spliceai(input_vcf, fasta_path)
         spliceai_scores = parse_spliceai_vcf(output_vcf)
@@ -232,7 +233,8 @@ def add_spliceai_eval_columns(data: pd.DataFrame, fasta_path: str) -> pd.DataFra
         data_copy = pd.concat([data_copy.reset_index(drop=True),
                                scores_df.reset_index(drop=True)], axis=1)
     finally:
-        os.remove(input_vcf)
-        os.remove(output_vcf)
-
+        if os.path.exists(input_vcf):
+            os.remove(input_vcf)
+        if os.path.exists(output_vcf):
+            os.remove(output_vcf)
     return data_copy
