@@ -69,11 +69,12 @@ def evaluate_cadd_score(row, cadd_version="GRCh38-v1.7"):
      on the highest PHRED score, or an error message.
     """
     position = row.loc["hg38_gnomad_format"]
-    chromosome = row.loc["chromosome"]
-    if pd.isna(chromosome) or pd.isna(position):
+
+    if  pd.isna(position):
         chromosome = row.loc["Chromosome_gnomad"]
         position= row.loc["Position_gnomad"]
     else:
+        chromosome = row.loc["hg38_gnomad_format"].split('-')[0]
         position = row.loc["hg38_gnomad_format"].split('-')[1]
 
     score = fetch_cadd_scores(cadd_version, chromosome, position)

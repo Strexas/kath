@@ -67,6 +67,9 @@ def write_vcf(data: pd.DataFrame) -> str:
     Returns:
         str: Path to the temporary VCF file created.
     """
+    if 'hg38_gnomad_format' not in data.columns and 'variant_id' not in data.columns:
+        raise SpliceAIError("DataFrame must contain 'hg38_gnomad_format' or 'variant_id' column.")
+
     try:
         with tempfile.NamedTemporaryFile(delete=False, suffix='.vcf') as vcf:
             lines = [
@@ -74,8 +77,13 @@ def write_vcf(data: pd.DataFrame) -> str:
                 "##fileDate=20231001\n",
                 "##reference=GRCh38\n"
             ]
-            variant_column = data['hg38_gnomad_format'].combine_first(
-                data['variant_id_gnomad']).fillna('0-0-0-0')
+            if 'hg38_gnomad_format' in data.columns and 'variant_id_gnomad' in data.columns:
+                variant_column = data['hg38_gnomad_format'].combine_first(
+                    data['variant_id_gnomad']).fillna('0-0-0-0')
+            else:
+                variant_column = data['variant_id'].fillna('0-0-0-0')
+
+
             chromosomes = variant_column.str.split('-', n=1).str[0].unique()
             lines.extend([f"##contig=<ID={chromosome}>\n" for chromosome in chromosomes])
             lines.append("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n")
