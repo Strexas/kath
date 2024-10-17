@@ -7,7 +7,6 @@ workspace.
 # pylint: disable=broad-exception-caught
 
 import os
-import time  # TODO: Remove this import once the apply logic is implemented
 import pandas as pd
 from flask import Blueprint, request, jsonify
 
@@ -21,8 +20,9 @@ from ..constants import (
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
 
-from app.back_end.tools import (
-    add_spliceai_eval_columns
+from ..tools import (
+    add_spliceai_eval_columns,
+    add_cadd_eval_column
 )
 
 workspace_apply_route_bp = Blueprint("workspace_apply_route", __name__)
@@ -90,8 +90,11 @@ def get_workspace_apply_spliceai(relative_path):
             else:
                 existing_data = pd.read_csv(destination_path)
 
-        fasta_path = os.path.join(WORKSPACE_DIR, uuid, "fasta", "hg38.fa")
-        result_data_spliceai = add_spliceai_eval_columns(pd.read_csv(apply_to), fasta_path)
+        fasta_path = os.path.join(WORKSPACE_DIR,"fasta", "hg38.fa")
+        temp = pd.read_csv(apply_to)
+
+        #Delete after pitch(now limited to 50)
+        result_data_spliceai = add_spliceai_eval_columns(temp[:50], fasta_path)
 
         if not existing_data.empty:
             result_data_spliceai = pd.concat([existing_data, result_data_spliceai], ignore_index=True)
@@ -249,10 +252,26 @@ def get_workspace_apply_cadd(relative_path):
         #
         # TODO: Implement CADD algorithm apply and save logic using defined parameters
         # [destination_path, override, apply_to]
-        #
 
-        # TODO: Remove this sleep statement once the apply logic is implemented
-        time.sleep(1)  # Simulate a delay for the apply process
+        existing_data = pd.DataFrame()
+        if os.path.exists(destination_path):
+            if override:
+                os.remove(destination_path)
+            else:
+                existing_data = pd.read_csv(destination_path)
+
+        temp = pd.read_csv(apply_to)
+
+        # Delete after pitch(now limited to 50)
+        result_data_cadd = add_cadd_eval_column(temp[:50])
+
+        if not existing_data.empty:
+            result_data_cadd = pd.concat([existing_data, result_data_cadd], ignore_index=True)
+
+        try:
+            result_data_cadd.to_csv(destination_path, index=False)
+        except OSError as e:
+            raise RuntimeError(f"Error saving file: {e}")
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(
