@@ -174,8 +174,9 @@ def get_workspace():
 
         # Build and return the workspace structure as a JSON object
         workspace_structure = [
-            build_workspace_structure(os.path.join(user_workspace_dir, child), user_workspace_dir)
+            child_structure
             for child in os.listdir(user_workspace_dir)
+            if (child_structure := build_workspace_structure(os.path.join(user_workspace_dir, child), user_workspace_dir)) is not None
         ]
 
         # Emit a feedback to the user's console
