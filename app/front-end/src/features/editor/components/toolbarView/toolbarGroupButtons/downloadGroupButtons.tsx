@@ -106,6 +106,7 @@ export const DownloadGroupButtons: React.FC<DownloadGroupButtonsProps> = () => {
         icon: DownloadIcon,
         label: 'ClinVar',
         onClick: handleDownloadClinvarClick,
+        disabled: true,
       },
       {
         group: 'download',

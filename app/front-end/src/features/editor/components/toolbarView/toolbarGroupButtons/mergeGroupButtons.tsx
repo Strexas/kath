@@ -100,6 +100,7 @@ export const MergeGroupButtons: React.FC<MergeGroupButtonsProps> = () => {
         icon: MergeTypeIcon,
         label: 'Merge LOVD & ClinVar',
         onClick: mergeLovdAndClinvarClick,
+        disabled: true,
       },
     ],
     [mergeLovdAndGnomadClick, mergeLovdAndClinvarClick]
