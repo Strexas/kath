@@ -74,7 +74,6 @@ Errors and Feedback:
 - Errors include detailed logging and console feedback for issues such as missing files, permission
     errors, and unexpected exceptions.
 """
-
 # pylint: disable=too-many-lines
 
 import os

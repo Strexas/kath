@@ -124,7 +124,7 @@ This guide provides instructions on setting up and running a Flask-based develop
    - Open the Command Palette `Ctrl+Shift+P`, type `>Python: Select Interpreter`, and select the Python interpreter from your WSL virtual environment:
       - Select `Enter interpreter path...`
       - Select `Find...`
-      - Open `/mnt/c/Users/YourUsername/Path/To/Project/app/back-end/.venv/bin/python3.10`
+      - Open `/mnt/c/Users/YourUsername/Path/To/Project/app/back_end/.venv/bin/python3.10`
 
 ## Step 6: Run the Development Server
 
@@ -154,7 +154,13 @@ This guide provides instructions on setting up and running a Flask-based develop
    
    This will stop the Redis server.
 
-2. **Run the application**
+2. **Download FASTA file for SpliceAI**
+   ```powershell
+   mkdir -p app/back_end/src/workspace/fasta && cd app/back_end/src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz
+   ```
+   This will download FASTA "hg38.fa" file that is required for correct work of SpliceAI
+
+3. **Run the application**
    ```powershell
    gunicorn -c gunicorn_config.py --timeout 600 run:app
    ```
