@@ -35,7 +35,7 @@ above.
 import os
 from datetime import datetime
 
-from src.setup.extensions import socketio, socket_manager
+from ..setup.extensions import socketio, socket_manager
 
 
 def socketio_emit_to_user_session(event, data, uuid, sid):

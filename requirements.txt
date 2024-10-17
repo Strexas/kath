@@ -1,7 +1,0 @@
-requests
-pandas
-selenium
-spliceai
-tensorflow
-flask
-pyliftover

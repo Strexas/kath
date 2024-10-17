@@ -9,6 +9,9 @@ export interface ToolbarContextProps {
   override: boolean;
   saveToStateUpdate: (saveTo: FileModel, override?: boolean) => void;
 
+  saveToError: string;
+  saveToErrorStateUpdate: (saveToFileError: string) => void;
+
   //
   // Download state properties
   //
@@ -49,6 +52,9 @@ export const ToolbarContext = createContext<ToolbarContextProps>({
   saveTo: defaultSaveTo, // Root directory (new file)
   override: false,
   saveToStateUpdate: () => {},
+
+  saveToError: '',
+  saveToErrorStateUpdate: () => {},
 
   //
   // Download state defaults
@@ -99,6 +105,12 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
   const saveToStateUpdate = (saveTo: FileModel, override?: boolean) => {
     setSaveTo(saveTo);
     if (override !== undefined) setOverride(override);
+  };
+
+  const [saveToError, setSaveToError] = useState<string>('');
+
+  const saveToErrorStateUpdate = (saveToFileError: string) => {
+    setSaveToError(saveToFileError);
   };
 
   //
@@ -166,6 +178,9 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
     saveTo,
     override,
     saveToStateUpdate,
+
+    saveToError,
+    saveToErrorStateUpdate,
 
     //
     // Download state

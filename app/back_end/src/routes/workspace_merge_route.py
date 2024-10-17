@@ -4,7 +4,6 @@ This module defines routes for merging data from different sources and saving th
 the user's workspace.
 """
 
-# pylint: disable=import-error
 # pylint: disable=broad-exception-caught
 
 import os
@@ -13,16 +12,16 @@ import time  # TODO: Remove this import once the merge logic is implemented
 import pandas as pd
 from flask import Blueprint, request, jsonify
 
-from app.back_end.src.setup.extensions import logger
-from app.back_end.src.utils.helpers import socketio_emit_to_user_session
-from app.back_end.src.utils.exceptions import UnexpectedError
-from app.back_end.src.constants import (
+from ..setup.extensions import logger
+from ..utils.helpers import socketio_emit_to_user_session
+from ..utils.exceptions import UnexpectedError
+from ..constants import (
     WORKSPACE_MERGE_ROUTE,
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
-from app.back_end.data import (
+from ..data.refactoring import (
     set_lovd_dtypes,
     set_gnomad_dtypes,
     parse_lovd,

@@ -17,7 +17,7 @@ export interface DownloadGroupParamsProps {}
 export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
   const { blocked } = useStatusContext();
   const { fileTree, fileTreeArray } = useWorkspaceContext();
-  const { saveTo, saveToStateUpdate, gene, geneStateUpdate } = useToolbarContext();
+  const { saveTo, saveToStateUpdate, saveToError, saveToErrorStateUpdate, gene, geneStateUpdate } = useToolbarContext();
 
   //
   // Gene state
@@ -40,6 +40,7 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
     setSaveToState(value);
     saveToStateUpdate(value, false);
     setOverrideState(false);
+    saveToErrorStateUpdate('');
   };
 
   const handleOverrideChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +113,8 @@ export const DownloadGroupParams: React.FC<DownloadGroupParamsProps> = () => {
               <TextField
                 {...params}
                 label="Save To"
+                error={Boolean(saveToError)}
+                helperText={saveToError}
               />
             }
             renderGroup={(params) => (

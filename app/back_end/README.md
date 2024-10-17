@@ -45,14 +45,14 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Update Package List:**
    ```bash
-   sudo apt-get update
+   sudo apt update
    ```
 
    Wait for the system to update.
 
 3. **Install Required Packages:**
    ```bash
-   sudo apt-get install python3 python3-pip python3-venv redis
+   sudo apt install python3 python3-pip python3-venv redis
    ```
 
    With any prompts type `y` and press `enter`.
@@ -124,7 +124,7 @@ This guide provides instructions on setting up and running a Flask-based develop
    - Open the Command Palette `Ctrl+Shift+P`, type `>Python: Select Interpreter`, and select the Python interpreter from your WSL virtual environment:
       - Select `Enter interpreter path...`
       - Select `Find...`
-      - Open `/mnt/c/Users/YourUsername/Path/To/Project/app/back-end/.venv/bin/python3.10`
+      - Open `/mnt/c/Users/YourUsername/Path/To/Project/app/back_end/.venv/bin/python3.10`
 
 ## Step 6: Run the Development Server
 
@@ -156,17 +156,13 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Download FASTA file for SpliceAI**
    ```powershell
-   mkdir -p app/back-end/src/workspace/fasta && cd app/back-end/src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz
+   mkdir -p app/back_end/src/workspace/fasta && cd app/back_end/src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz
    ```
    This will download FASTA "hg38.fa" file that is required for correct work of SpliceAI
 
 3. **Run the application**
    ```powershell
-   gunicorn -c gunicorn_config.py run:app
+   gunicorn -c gunicorn_config.py --timeout 600 run:app
    ```
 
    This will run the Flask application with Gunicorn. To shutdown the application press `Ctrl+C` in VS Code terminal.
-
-
-
-   

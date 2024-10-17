@@ -4,19 +4,17 @@ This module defines routes for applying algorithms to files and saving the resul
 workspace.
 """
 
-# pylint: disable=import-error
 # pylint: disable=broad-exception-caught
 
 import os
 import time  # TODO: Remove this import once the apply logic is implemented
-
 import pandas as pd
 from flask import Blueprint, request, jsonify
 
-from app.back_end.src.setup.extensions import logger
-from app.back_end.src.utils.helpers import socketio_emit_to_user_session
-from app.back_end.src.utils.exceptions import UnexpectedError
-from app.back_end.src.constants import (
+from ..setup.extensions import logger
+from ..utils.helpers import socketio_emit_to_user_session
+from ..utils.exceptions import UnexpectedError
+from ..constants import (
     WORKSPACE_APPLY_ROUTE,
     WORKSPACE_DIR,
     CONSOLE_FEEDBACK_EVENT,
@@ -25,7 +23,7 @@ from app.back_end.src.constants import (
 
 from app.back_end.tools import (
     add_spliceai_eval_columns,
-)
+
 
 workspace_apply_route_bp = Blueprint("workspace_apply_route", __name__)
 
@@ -102,7 +100,6 @@ def get_workspace_apply_spliceai(relative_path):
             result_data_spliceai.to_csv(destination_path, index=False)
         except OSError as e:
             raise RuntimeError(f"Error saving file: {e}")
-
 
         # Emit a feedback to the user's console
         socketio_emit_to_user_session(

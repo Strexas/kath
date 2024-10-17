@@ -26,10 +26,10 @@ Returns:
 import gevent.monkey
 from flask import Flask
 
-from src.setup.extensions import compress, socketio, cors, env
-from src.setup.router import router
-from src.setup.eventer import eventer
-from src.constants import BASE_ROUTE
+from .setup.extensions import compress, socketio, cors, env
+from .setup.router import router
+from .setup.eventer import eventer
+from .constants import BASE_ROUTE
 
 
 def create_app():
