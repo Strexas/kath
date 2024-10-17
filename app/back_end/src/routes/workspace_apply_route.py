@@ -22,8 +22,8 @@ from ..constants import (
 )
 
 from app.back_end.tools import (
-    add_spliceai_eval_columns,
-
+    add_spliceai_eval_columns
+)
 
 workspace_apply_route_bp = Blueprint("workspace_apply_route", __name__)
 
