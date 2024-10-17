@@ -226,7 +226,7 @@ export const EditorView: React.FC = () => {
 
     const parsedRows = rows.map((row, index) => {
       return {
-        id: index,
+        "internal_datagrid_id": index,
         ...row.reduce((acc, value, index) => {
           return { ...acc, [header[index]]: value };
         }, {}),
@@ -286,6 +286,7 @@ export const EditorView: React.FC = () => {
         loading={blocked || isLoading}
         rows={fileContent.rows}
         columns={fileContent.columns}
+        getRowId={(row) => row.internal_datagrid_id}
         pagination
         paginationMode='server'
         rowCount={filePagination.totalRows}
