@@ -22,7 +22,6 @@ import axios, { AxiosInstance } from 'axios';
  */
 export const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_URL,
-  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
     uuid: getUUID(),
