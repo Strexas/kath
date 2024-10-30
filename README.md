@@ -60,10 +60,17 @@ We proudly acknowledge our partners who contribute their expertise and resources
 
 ### ⚙️ Setup Instructions
 
-For setup instructions, please refer to the `README.md` files in both `app/front_end` and `app/back_end` directories.
+For a complete setup, follow these steps and refer to the `README.md` files in `app/front_end` and `app/back_end` for detailed configurations.
 
 1. **Clone the Repository**
 
     ```bash
     git clone https://github.com/your-repo/kath.git
     ```
+
+2. **Complete Front-end and Back-end Setup**
+
+    - Go to the `app/front_end` and `app/back_end` directories.
+    - Open the `README.md` file in each directory and follow the specific installation and configuration steps provided.
+
+After completing these steps, your environment should be set up and ready to run.
