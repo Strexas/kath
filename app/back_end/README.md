@@ -156,13 +156,13 @@ This guide provides instructions on setting up and running a Flask-based develop
 
 2. **Download FASTA file for SpliceAI**
    ```powershell
-   mkdir -p app/back_end/src/workspace/fasta && cd app/back_end/src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz
+   mkdir -p src/workspace/fasta && cd src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz && cd ../../..
    ```
    This will download FASTA "hg38.fa" file that is required for correct work of SpliceAI
 
 3. **Run the application**
    ```powershell
-   gunicorn -c gunicorn_config.py --timeout 600 run:app
+   gunicorn -c gunicorn_config.py run:app
    ```
 
    This will run the Flask application with Gunicorn. To shutdown the application press `Ctrl+C` in VS Code terminal.

@@ -28,3 +28,6 @@ worker_connections = 1
 
 # Number of worker processes
 workers = multiprocessing.cpu_count() * 2 + 1
+
+# Worker killed and restarted after the specified number of requests
+timeout = 600

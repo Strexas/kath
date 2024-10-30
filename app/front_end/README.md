@@ -36,7 +36,7 @@ This guide provides instructions on setting up and running a Vite-based developm
     - Press `` Ctrl+Shift+` `` to open the New Terminal. Then navigate to:
 
     ```bash
-    cd app/front-end
+    cd app/front_end
     ```
 
 4. **Install Dependencies:**
