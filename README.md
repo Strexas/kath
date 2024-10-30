@@ -20,7 +20,7 @@
 | Kazimieras Bagdonas | Kaunas University of Technology | Project Mentor |  | [kazbag](https://www.linkedin.com/in/kazbag/) | ✅ |
 | Ignas Sabaliauskas | Kaunas University of Technology | Communications Lead |  | [ignas-sabaliauskas](https://www.linkedin.com/in/ignas-sabaliauskas/) | ✅ |
 
-#### 🧩 Front End Team
+#### 🧩 Front End Team:
 
 | **Team Member** | **Institution** | **Role** | **GitHub** | **LinkedIn** | **Active** |
 |:-:|:-:|:-:|:-:|:-:|:-:|
