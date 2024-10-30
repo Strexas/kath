@@ -2,20 +2,6 @@
 
 ### 🌐 Project Overview
 
-<div style="border: 1px solid #555; border-radius: 8px; width: 300px; margin: 10px; padding: 15px; text-align: center;">
-  <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 100%; height: auto; border-radius: 5px;">
-  <h3><a href="https://www.harvard.edu" style="text-decoration: none; color: #fff;">Harvard University</a></h3>
-  <p style="font-size: 0.9em; color: #555;">Leading institution in education and research.</p>
-</div>
-
-<a href="https://www.harvard.edu">
-  <div align="center">
-    <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 200px; height: auto;">
-    <h3><a href="https://www.harvard.edu" style="text-decoration: none; color: #fff;">Harvard University</a></h3>
-    <p style="font-size: 0.9em; color: #555;">Leading institution in education and research.</p>
-  </div>
-</a>
-
 **kath** is a user-friendly GUI tool designed for the in-depth analysis of gene variation data sourced from LOVD, GNOMAD, and CLINVAR databases. It brings together a robust suite of functionalities that facilitate genetic research and analysis.
 
 <div align="center">
@@ -55,22 +41,23 @@
 
 ### 🤝 Partners
 
+| | |
+|:---:|:---:|
+| <div><img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 200px; height: auto; border-radius: 12px;"><h3><a href="https://www.harvard.edu">Harvard University</a></h3><p>Leading institution in education and research.</p></div> | <div><img src="docs/assets/genomika_logo_200.jpg" alt="Genomika Lietuva" style="width: 200px; height: auto; border-radius: 12px;"><h3><a href="https://genomika.lt">Genomika Lietuva</a></h3><p>Innovative solutions in genomics and biotechnology.</p></div> |
+
 We proudly acknowledge our partners who contribute their expertise and resources to support kath’s development:
 
-<div style="display: flex; justify-content: center; flex-wrap: nowrap;">
-
-  <div style="border: 1px solid #555; border-radius: 8px; width: 300px; margin: 10px; padding: 15px; text-align: center;">
-    <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 100%; height: auto; border-radius: 5px;">
-    <h3><a href="https://www.harvard.edu" style="text-decoration: none; color: #fff;">Harvard University</a></h3>
-    <p style="font-size: 0.9em; color: #555;">Leading institution in education and research.</p>
+<div align="center">
+  <div>
+    <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 200px; height: auto; border-radius: 12px;">
+    <h3><a href="https://www.harvard.edu">Harvard University</a></h3>
+    <p>Leading institution in education and research.</p>
   </div>
-
-  <div style="border: 1px solid #555; border-radius: 8px; width: 300px; margin: 10px; padding: 15px; text-align: center;">
-    <img src="docs/assets/genomika_logo_200.jpg" alt="Genomika Lietuva" style="width: 100%; height: auto; border-radius: 5px;">
-    <h3><a href="https://genomika.lt" style="text-decoration: none; color: #fff;">Genomika Lietuva</a></h3>
-    <p style="font-size: 0.9em; color: #555;">Innovative solutions in genomics and biotechnology.</p>
+  <div>
+    <img src="docs/assets/genomika_logo_200.jpg" alt="Genomika Lietuva" style="width: 200px; height: auto; border-radius: 12px;">
+    <h3><a href="https://genomika.lt">Genomika Lietuva</a></h3>
+    <p>Innovative solutions in genomics and biotechnology.</p>
   </div>
-
 </div>
 
 ---
