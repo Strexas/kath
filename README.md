@@ -1,11 +1,9 @@
 <div align="center">
-    <img src="https://github.com/user-attachments/assets/79dd1d58-5063-446b-af1d-5fa0fe31ffd4#gh-dark-mode-only" alt="kath logo" style="width: 600px; height: auto;">
+  <img src="https://github.com/user-attachments/assets/79dd1d58-5063-446b-af1d-5fa0fe31ffd4#gh-dark-mode-only" alt="kath logo" style="width: 600px; height: auto;">
 	<img src="https://github.com/user-attachments/assets/1ad9423b-c3b8-40eb-bf17-ae76bc00560e#gh-light-mode-only" alt="kath logo" style="width: 600px; height: auto;">
-    <h3>kath</h3>
-    <p>No Code Gene Analysis Tool</p>
 </div>
 
-### ![](docs/assets/kath_logo_24.svg) Project Overview
+### ![](docs/assets/kath_logo_16.svg) Project Overview
 
 **kath** is a user-friendly GUI tool designed for the in-depth analysis of gene variation data sourced from LOVD, GNOMAD, and CLINVAR databases. It brings together a robust suite of functionalities that facilitate genetic research and analysis.
 
