@@ -41,10 +41,6 @@
 
 ### 🤝 Partners
 
-| | |
-|:---:|:---:|
-| <div><img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 200px; height: auto; border-radius: 12px;"><h3><a href="https://www.harvard.edu">Harvard University</a></h3><p>Leading institution in education and research.</p></div> | <div><img src="docs/assets/genomika_logo_200.jpg" alt="Genomika Lietuva" style="width: 200px; height: auto; border-radius: 12px;"><h3><a href="https://genomika.lt">Genomika Lietuva</a></h3><p>Innovative solutions in genomics and biotechnology.</p></div> |
-
 We proudly acknowledge our partners who contribute their expertise and resources to support kath’s development:
 
 <div align="center">
