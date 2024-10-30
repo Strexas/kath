@@ -15,27 +15,27 @@
 
 #### 📣 Communications Team:
 
-| **Team Member** | **Role** | **GitHub** | **LinkedIn** | **Active** |
-|-|-|-|-|-|
-| Kazimieras Bagdonas | Project Mentor |  | [../kazbag](https://www.linkedin.com/in/kazbag/) | ✅ |
-| Ignas Sabaliauskas | Communications Lead |  | [../ignas-sabaliauskas](https://www.linkedin.com/in/ignas-sabaliauskas/) | ✅ |
+| **Team Member** | **Institution** | **Role** | **GitHub** | **LinkedIn** | **Active** |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| Kazimieras Bagdonas | Kaunas University of Technology | Project Mentor |  | [kazbag](https://www.linkedin.com/in/kazbag/) | ✅ |
+| Ignas Sabaliauskas | Kaunas University of Technology | Communications Lead |  | [ignas-sabaliauskas](https://www.linkedin.com/in/ignas-sabaliauskas/) | ✅ |
 
 #### 🧩 Front End Team
 
-| **Team Member** | **Role** | **GitHub** | **LinkedIn** | **Active** |
-|-|-|-|-|-|
-| Mantvydas Deltuva | Lead Frontend Developer | [../mantvydasdeltuva](https://github.com/mantvydasdeltuva/) | [../mantvydasdeltuva](https://www.linkedin.com/in/mantvydasdeltuva/) | ✅ |
-| Justinas Teselis | Frontend Developer | [../justinnas](https://github.com/justinnas/) | [../justinasteselis](https://www.linkedin.com/in/justinasteselis/) | ✅ |
-| Paulius Preikša | Frontend Developer | [../PauliusPreiksaCode](https://github.com/PauliusPreiksaCode) | [../paulius-preiksa](https://www.linkedin.com/in/paulius-preiksa/) | ❌ |
+| **Team Member** | **Institution** | **Role** | **GitHub** | **LinkedIn** | **Active** |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| Mantvydas Deltuva | Kaunas University of Technology | Lead Frontend Developer | [mantvydasdeltuva](https://github.com/mantvydasdeltuva/) | [mantvydasdeltuva](https://www.linkedin.com/in/mantvydasdeltuva/) | ✅ |
+| Justinas Teselis | Kaunas University of Technology | Frontend Developer | [justinnas](https://github.com/justinnas/) | [justinasteselis](https://www.linkedin.com/in/justinasteselis/) | ✅ |
+| Paulius Preikša | Kaunas University of Technology | Frontend Developer | [PauliusPreiksaCode](https://github.com/PauliusPreiksaCode) | [paulius-preiksa](https://www.linkedin.com/in/paulius-preiksa/) | ❌ |
 
 #### 🗄️ Back End Team:
 
-| **Team Member** | **Role** | **GitHub** | **LinkedIn** | **Active** |
-|-|-|-|-|-|
-| Dainius Kirsnauskas | Lead Backend Developer | [../Strexas](https://github.com/Strexas) | [../dainius-kirsnauskas-2b8915276](https://www.linkedin.com/in/dainius-kirsnauskas-2b8915276/) | ✅ |
-| Vladyslav Levchenko | Backend Developer | [../Akaud](https://github.com/Akaud) | [../vladyslav-levchenko-409656324](https://www.linkedin.com/in/vladyslav-levchenko-409656324/) | ✅ |
-| Kajus Černiauskas | Backend Developer | [../KajusC](https://github.com/KajusC) | [../kajus-%C4%8Derniauskas-a68506205](https://www.linkedin.com/in/kajus-%C4%8Derniauskas-a68506205/) | ✅ |
-| Nojus Sajauskas | Backend Developer | [../nojux-official](https://github.com/nojux-official) | [../nojus-sajauskas-7aa74b259](https://www.linkedin.com/in/nojus-sajauskas-7aa74b259/) | ❌ |
+| **Team Member** | **Institution** | **Role** | **GitHub** | **LinkedIn** | **Active** |
+|:-:|:-:|:-:|:-:|:-:|:-:|
+| Dainius Kirsnauskas | Kaunas University of Technology | Lead Backend Developer | [Strexas](https://github.com/Strexas) | [here](https://www.linkedin.com/in/dainius-kirsnauskas-2b8915276/) | ✅ |
+| Vladyslav Levchenko | Kaunas University of Technology | Backend Developer | [Akaud](https://github.com/Akaud) | [here](https://www.linkedin.com/in/vladyslav-levchenko-409656324/) | ✅ |
+| Kajus Černiauskas | Kaunas University of Technology | Backend Developer | [KajusC](https://github.com/KajusC) | [here](https://www.linkedin.com/in/kajus-%C4%8Derniauskas-a68506205/) | ✅ |
+| Nojus Sajauskas | Kaunas University of Technology | Backend Developer | [nojux-official](https://github.com/nojux-official) | [here](https://www.linkedin.com/in/nojus-sajauskas-7aa74b259/) | ❌ |
 
 ---
 
