@@ -86,7 +86,6 @@ export const ApplyGroupButtons: React.FC<ApplyGroupButtonsProps> = () => {
         icon: DeblurIcon,
         label: 'Apply CADD',
         onClick: applyCaddClick,
-        disabled: true,
       },
     ],
     [applySpliceAiClick, applyCaddClick]
