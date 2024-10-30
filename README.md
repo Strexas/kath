@@ -3,14 +3,24 @@
 ### 🌐 Project Overview
 
 <div style="border: 1px solid #555; border-radius: 8px; width: 300px; margin: 10px; padding: 15px; text-align: center;">
-  <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 100%; height: auto;">
+  <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 100%; height: auto; border-radius: 5px;">
+  <h3><a href="https://www.harvard.edu" style="text-decoration: none; color: #fff;">Harvard University</a></h3>
+  <p style="font-size: 0.9em; color: #555;">Leading institution in education and research.</p>
 </div>
+
+<a href="https://www.harvard.edu">
+  <div align="center">
+    <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 200px; height: auto;">
+    <h3><a href="https://www.harvard.edu" style="text-decoration: none; color: #fff;">Harvard University</a></h3>
+    <p style="font-size: 0.9em; color: #555;">Leading institution in education and research.</p>
+  </div>
+</a>
 
 **kath** is a user-friendly GUI tool designed for the in-depth analysis of gene variation data sourced from LOVD, GNOMAD, and CLINVAR databases. It brings together a robust suite of functionalities that facilitate genetic research and analysis.
 
 <div align="center">
-	<img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 400px; height: auto; display: inline-block; margin: 0 50px 0 50px;">
-  <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 400px; height: auto; display: inline-block; margin: 0 50px 0 50px;">
+	<img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 400px; height: auto;">
+  <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 400px; height: auto;">
 </div>
 
 ---
