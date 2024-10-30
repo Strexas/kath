@@ -2,6 +2,10 @@
 
 ### 🌐 Project Overview
 
+<div style="border: 1px solid #555; border-radius: 8px; width: 300px; margin: 10px; padding: 15px; text-align: center;">
+  <img src="docs/assets/harvard_logo_200.png" alt="Harvard University" style="width: 100%; height: auto;">
+</div>
+
 **kath** is a user-friendly GUI tool designed for the in-depth analysis of gene variation data sourced from LOVD, GNOMAD, and CLINVAR databases. It brings together a robust suite of functionalities that facilitate genetic research and analysis.
 
 <div align="center">
