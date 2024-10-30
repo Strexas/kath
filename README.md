@@ -4,17 +4,11 @@
 
 **kath** is a user-friendly GUI tool designed for the in-depth analysis of gene variation data sourced from LOVD, GNOMAD, and CLINVAR databases. It brings together a robust suite of functionalities that facilitate genetic research and analysis.
 
-<div style="display: flex; justify-content: center; flex-wrap: wrap;">
-
-  <div style="margin: 10px;">
-    <img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 300px; height: auto;">
-  </div>
-
-  <div style="margin: 10px;">
-    <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 300px; height: auto;">
-  </div>
-
-</div>
+<p style="text-align: center;">
+  <img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 300px; height: auto;">
+  <img>
+  <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 300px; height: auto;">
+</p>
 
 ---
 
