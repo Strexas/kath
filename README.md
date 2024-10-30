@@ -7,11 +7,11 @@
 <div style="display: flex; justify-content: center; flex-wrap: wrap;">
 
   <div style="margin: 10px;">
-    <img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 500px; height: auto;">
+    <img src="docs/assets/kath_screenshot_light.png" alt="Kath Screenshot Light" style="width: 300px; height: auto;">
   </div>
 
   <div style="margin: 10px;">
-    <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 500px; height: auto;">
+    <img src="docs/assets/kath_screenshot_dark.png" alt="Kath Screenshot Dark" style="width: 300px; height: auto;">
   </div>
 
 </div>
