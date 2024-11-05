@@ -12,6 +12,8 @@ from pyliftover import LiftOver
 
 from .constants import LOVD_PATH, GNOMAD_PATH
 
+from app.back_end.tools.revel.revel import get_single_revel_score
+
 
 def set_lovd_dtypes(df_dict: dict[str, pd.DataFrame]):
     """
@@ -342,3 +344,30 @@ def find_popmax_in_gnomad(data:pd.DataFrame):
                 max_id = population_id
         data.loc[i, 'Popmax'] = max_pop
         data.loc[i, 'Popmax population'] = population_mapping[max_id]
+
+
+def assign_revel_scores(data:pd.DataFrame):
+    """
+    Assigns REVEL scores to the data based on the genomic positions.
+
+    Parameters:
+    data : pd.DataFrame
+        DataFrame containing the data to which REVEL scores need to be assigned.
+    revel : pd.DataFrame
+        DataFrame containing REVEL scores.
+
+    Returns:
+    pd.DataFrame
+        DataFrame with REVEL scores assigned to the data.
+    """
+    
+    for i in range(data.shape[0]):
+        hg38_gnomad_format = data.loc[i, 'hg38_gnomad_format']
+        if pd.isna(hg38_gnomad_format):
+            data.loc[i, 'REVEL'] = pd.NA
+        else:
+            chromosome, position, ref, alt = hg38_gnomad_format.split('-')
+            data.loc[i, 'REVEL'] = get_single_revel_score(chromosome, position, ref, alt)
+    return data
+    
+    

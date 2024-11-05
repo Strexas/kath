@@ -4,7 +4,6 @@ import pandas as pd
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 revel_file = os.path.join(current_script_dir, 'revel_with_transcript_ids')
 
-import pandas as pd
 
 def get_revel_scores(revel_file, chromosome, grch38_position, ref=None, alt=None, amino_acid_ref=None, amino_acid_alt=None):
     """
@@ -38,3 +37,26 @@ def get_revel_scores(revel_file, chromosome, grch38_position, ref=None, alt=None
                 variants.append(row)
 
     return variants
+
+def get_single_revel_score(chromosome, grch38_position, ref, alt):
+    """
+    Retrieve REVEL score for a single variant based on criteria.
+    
+    Parameters:
+    - revel_file: Path to the REVEL data file.
+    - chromosome: Chromosome number of the variant (e.g., '1' for chromosome 1).
+    - grch38_position: Position of the variant on the chromosome (GRCh38 build).
+    - ref: Reference nucleotide base at the variant position.
+    - alt: Alternate nucleotide base at the variant position.
+    
+    Returns:
+    - List of matching variants with REVEL score.
+    """
+
+    revel_data = pd.read_csv(revel_file)
+    
+    for index, row in revel_data.iterrows():
+        if row['chr'] == chromosome and row['grch38_pos'] == grch38_position and row['ref'] == ref and row['alt'] == alt:
+            return row['REVEL']
+
+    return None
