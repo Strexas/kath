@@ -26,6 +26,7 @@
  * @property {string} WORKSPACE_DOWNLOAD - The endpoint path for downloading workspace items.
  * @property {string} WORKSPACE_MERGE - The endpoint path for merging workspace items.
  * @property {string} WORKSPACE_APPLY - The endpoint path for applying workspace items.
+ * @property {string} WORKSPACE_ALIGN - The endpoint path for aligning workspace items.
  *
  * @example
  * // Example usage of the Endpoints object
@@ -49,4 +50,5 @@ export const Endpoints = {
   WORKSPACE_DOWNLOAD: `/workspace/download`,
   WORKSPACE_MERGE: `/workspace/merge`,
   WORKSPACE_APPLY: `/workspace/apply`,
+  WORKSPACE_ALIGN: `/workspace/align`,
 };

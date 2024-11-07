@@ -22,6 +22,7 @@ from ..routes.workspace_import_route import workspace_import_route_bp
 from ..routes.workspace_download_route import workspace_download_route_bp
 from ..routes.workspace_merge_route import workspace_merge_route_bp
 from ..routes.workspace_apply_route import workspace_apply_route_bp
+from ..routes.workspace_align_route import workspace_align_route_bp
 
 
 def router(prefix):
@@ -41,6 +42,7 @@ def router(prefix):
 
     # Register API routes with the main router blueprint
     router_bp.register_blueprint(workspace_apply_route_bp)
+    router_bp.register_blueprint(workspace_align_route_bp)
     router_bp.register_blueprint(workspace_merge_route_bp)
     router_bp.register_blueprint(workspace_download_route_bp)
     router_bp.register_blueprint(workspace_export_route_bp)
