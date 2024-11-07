@@ -79,3 +79,14 @@ For a complete setup, follow these steps and refer to the `README.md` files in `
     - Open the `README.md` file in each directory and follow the specific installation and configuration steps provided.
 
 After completing these steps, your environment should be set up and ready to run.
+
+---
+
+### 🔮 Future Work
+
+For the upcoming **Alpha v1.2** development, kath will undergo a comprehensive UI redesign aimed at enhancing the user experience by making the interface even more intuitive and visually engaging. This redesign will streamline navigation and improve access to its advanced tools, allowing researchers to analyze gene variation data from LOVD, GNOMAD, and CLINVAR databases with greater ease.
+
+<div align="center">
+	<img src="docs/assets/kath_future_design_light.png" alt="Kath Future Design Light" style="width: 400px; height: auto; border-radius: 4px;">
+  <img src="docs/assets/kath_future_design_dark.png" alt="Kath Future Design Dark" style="width: 400px; height: auto; border-radius: 4px;">
+</div>
