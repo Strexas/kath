@@ -5,11 +5,13 @@ import {
   ToolbarGroupsSelectorItemProps,
 } from '@/features/editor/components/toolbarView';
 import {
+  AlignGroupButtons,
   ApplyGroupButtons,
   DownloadGroupButtons,
   MergeGroupButtons,
 } from '@/features/editor/components/toolbarView/toolbarGroupButtons';
 import {
+  AlignGroupParams,
   ApplyGroupParams,
   DownloadGroupParams,
   MergeGroupParams,
@@ -56,6 +58,11 @@ export const ToolbarView: React.FC = () => {
       label: 'Apply',
       onClick: () => setSelectedGroup('apply'),
     },
+    {
+      id: 'align',
+      label: 'Align',
+      onClick: () => setSelectedGroup('align'),
+    },
   ];
 
   // Combine the params groups into a dictionary for easy access
@@ -64,6 +71,7 @@ export const ToolbarView: React.FC = () => {
       download: <DownloadGroupParams />,
       merge: <MergeGroupParams />,
       apply: <ApplyGroupParams />,
+      align: <AlignGroupParams />,
     }),
     []
   );
@@ -74,6 +82,7 @@ export const ToolbarView: React.FC = () => {
       download: <DownloadGroupButtons />,
       merge: <MergeGroupButtons />,
       apply: <ApplyGroupButtons />,
+      align: <AlignGroupButtons />,
     }),
     [DownloadGroupButtons, MergeGroupButtons, ApplyGroupButtons]
   );

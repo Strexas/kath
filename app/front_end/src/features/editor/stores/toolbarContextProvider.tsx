@@ -41,6 +41,18 @@ export interface ToolbarContextProps {
 
   applyError: string;
   applyErrorStateUpdate: (applyError: string) => void;
+
+  //
+  // Align state properties
+  //
+  fastaFile: FileModel | null;
+  fastqFileFolder: FileModel | null;
+  alignStateUpdate: (fastaFile?: FileModel, fastqFileFolder?: FileModel) => void;
+
+  fastaError: string;
+  fastaErrorStateUpdate: (fastaFileError: string) => void;
+  fastqError: string;
+  fastqErrorStateUpdate: (fastqFileError: string) => void;
 }
 
 export const defaultSaveTo: FileModel = { id: '/', label: 'New file...', type: FileTypes.FILE };
@@ -85,6 +97,18 @@ export const ToolbarContext = createContext<ToolbarContextProps>({
 
   applyError: '',
   applyErrorStateUpdate: () => {},
+
+  //
+  // Align state defaults
+  //
+  fastaFile: null,
+  fastqFileFolder: null,
+  alignStateUpdate: () => {},
+
+  fastaError: '',
+  fastaErrorStateUpdate: () => {},
+  fastqError: '',
+  fastqErrorStateUpdate: () => {},
 });
 
 interface Props {
@@ -130,12 +154,9 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
   const [gnomadFile, setGnomadFile] = useState<FileModel | null>(null);
 
   const mergeStateUpdate = (lovdFile?: FileModel, clinvarFile?: FileModel, gnomadFile?: FileModel) => {
-    if (lovdFile)
-      setLovdFile(lovdFile);
-    if (clinvarFile)
-      setClinvarFile(clinvarFile);
-    if (gnomadFile)
-      setGnomadFile(gnomadFile);
+    if (lovdFile) setLovdFile(lovdFile);
+    if (clinvarFile) setClinvarFile(clinvarFile);
+    if (gnomadFile) setGnomadFile(gnomadFile);
   };
 
   const [lovdError, setLovdError] = useState<string>('');
@@ -169,6 +190,29 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
 
   const applyErrorStateUpdate = (applyError: string) => {
     setApplyError(applyError);
+  };
+
+  //
+  // Align state
+  //
+  const [fastaFile, setFastaFile] = useState<FileModel | null>(null);
+  const [fastqFileFolder, setFastqFileFolder] = useState<FileModel | null>(null);
+
+  const alignStateUpdate = (fastaFile?: FileModel, fastqFileFolder?: FileModel) => {
+    if (fastaFile) setFastaFile(fastaFile);
+    if (fastqFileFolder) setFastqFileFolder(fastqFileFolder);
+  };
+
+  const [fastaError, setFastaError] = useState<string>('');
+
+  const fastaErrorStateUpdate = (fastaFileError: string) => {
+    setFastaError(fastaFileError);
+  };
+
+  const [fastqError, setFastqError] = useState<string>('');
+
+  const fastqErrorStateUpdate = (fastqFileError: string) => {
+    setFastqError(fastqFileError);
   };
 
   const ToolbarContextValue: ToolbarContextProps = {
@@ -211,6 +255,18 @@ export const ToolbarContextProvider: React.FC<Props> = ({ children }) => {
 
     applyError,
     applyErrorStateUpdate,
+
+    //
+    // Align state
+    //
+    fastaFile,
+    fastqFileFolder,
+    alignStateUpdate,
+
+    fastaError,
+    fastaErrorStateUpdate,
+    fastqError,
+    fastqErrorStateUpdate,
   };
 
   return <ToolbarContext.Provider value={ToolbarContextValue}>{children}</ToolbarContext.Provider>;

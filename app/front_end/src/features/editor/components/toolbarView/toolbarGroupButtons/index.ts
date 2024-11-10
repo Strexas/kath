@@ -1,3 +1,5 @@
+export { AlignGroupButtons } from './alignGroupButtons';
+export type { AlignGroupButtonsProps } from './alignGroupButtons';
 export { ApplyGroupButtons } from './applyGroupButtons';
 export type { ApplyGroupButtonsProps } from './applyGroupButtons';
 export { DownloadGroupButtons } from './downloadGroupButtons';

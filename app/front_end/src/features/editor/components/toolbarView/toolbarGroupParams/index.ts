@@ -1,3 +1,5 @@
+export { AlignGroupParams } from './alignGroupParams';
+export type { AlignGroupParamsProps } from './alignGroupParams';
 export { ApplyGroupParams } from './applyGroupParams';
 export type { ApplyGroupParamsProps } from './applyGroupParams';
 export { DownloadGroupParams } from './downloadGroupParams';
