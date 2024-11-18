@@ -39,9 +39,9 @@ def get_revel_scores(revel_file, chromosome, grch38_position, ref=None, alt=None
 
     return variants
 
-def get_single_revel_score(chromosome, grch38_position, ref, alt, chunk_size=1000, revel_file=revel_file):
+def get_single_revel_score(chromosome, grch38_position, ref, alt, revel_file=revel_file):
     """
-    Retrieve REVEL score for a single variant based on criteria, with data type conversion for optimization.
+    Retrieve REVEL score for a single variant based on criteria.
     
     Parameters:
     - revel_file: Path to the REVEL data file.
@@ -53,28 +53,53 @@ def get_single_revel_score(chromosome, grch38_position, ref, alt, chunk_size=100
     Returns:
     - REVEL score for the matching variant or None if not found.
     """
-    # Load file as a Dask DataFrame, setting up dtypes as in your previous code
-    ddf = dd.read_csv(revel_file, dtype={
-        'chr': 'str',
-        'grch38_pos': 'int64',
-        'ref': 'str',
-        'alt': 'str',
-        'aaref': 'str',
-        'aaalt': 'str',
-        'REVEL': 'float32',
-        'Ensembl_transcriptid': 'str'
-    })
+    try:
+        # Read the CSV with Dask, treating 'grch38_pos' as string initially
+        ddf = dd.read_csv(revel_file, dtype={
+            'chr': 'str',
+            'grch38_pos': 'str',  # Read as string to handle non-integer values
+            'ref': 'str',
+            'alt': 'str',
+            'aaref': 'str',
+            'aaalt': 'str',
+            'REVEL': 'float32',
+            'Ensembl_transcriptid': 'str'
+        })
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+        return None
 
-    # Filter in parallel based on the criteria
-    filtered_ddf = ddf[
-        (ddf['chr'].str.strip() == str(chromosome)) &
-        (ddf['grch38_pos'] == grch38_position) &
-        (ddf['ref'].str.strip() == ref) &
-        (ddf['alt'].str.strip() == alt)
+    # Convert 'grch38_pos' to numeric, coercing errors to NaN
+    ddf['grch38_pos'] = dd.to_numeric(ddf['grch38_pos'], errors='coerce')
+
+    # Drop rows with NaN in 'grch38_pos'
+    ddf = ddf.dropna(subset=['grch38_pos'])
+
+    # Convert 'grch38_pos' to integer
+    ddf['grch38_pos'] = ddf['grch38_pos'].astype('int64')
+
+    # Ensure 'chr' is stripped of whitespace
+    ddf['chr'] = ddf['chr'].str.strip()
+
+    # Filter chromosomes less than the target (optional, for clarity)
+    ddf = ddf[ddf['chr'].astype(int) >= chromosome]
+
+    # Filter chromosomes equal to the target
+    target_chrom = ddf['chr'].astype(int) == chromosome
+    filtered_ddf = ddf[target_chrom]
+
+    # Further filter by position, ref, and alt
+    filtered_ddf = filtered_ddf[
+        (filtered_ddf['grch38_pos'] == grch38_position) &
+        (filtered_ddf['ref'].str.strip() == ref) &
+        (filtered_ddf['alt'].str.strip() == alt)
     ]
 
-    # Compute and bring the filtered result into memory
-    result = filtered_ddf[['REVEL']].compute()  # Brings the result into a Pandas DataFrame
+    # Compute the filtered result
+    result = filtered_ddf[['REVEL']].compute()
 
-    # Return the first matching REVEL score, if any
-    return result['REVEL'].iloc[0] if not result.empty else None
+    if not result.empty:
+        # Return the first matching REVEL score
+        return result['REVEL'].iloc[0]
+    else:
+        return None
