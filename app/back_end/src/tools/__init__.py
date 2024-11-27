@@ -1,4 +1,4 @@
-"""CADD and SpliceAI Tool Package Initialization."""
+"""CADD, SpliceAI, GATK Tools Package Initialization."""
 
 from .cadd import (
     BadResponseException,
@@ -15,6 +15,10 @@ from .spliceai import (
     run_spliceai,
     parse_spliceai_vcf,
     add_spliceai_eval_columns,
+)
+
+from .GATK import (
+    align_fasta_fastq_to_destination,
 )
 
 __all__ = [

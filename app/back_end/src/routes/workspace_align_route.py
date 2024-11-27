@@ -21,6 +21,9 @@ from ..constants import (
     CONSOLE_FEEDBACK_EVENT,
     WORKSPACE_UPDATE_FEEDBACK_EVENT,
 )
+from ..tools import (
+    align_fasta_fastq_to_destination
+)
 
 workspace_align_route_bp = Blueprint("workspace_align_route", __name__)
 
@@ -83,16 +86,9 @@ def get_workspace_align_fasta_fastq(relative_path):
 
         if not os.path.exists(fastq_file_folder):
             raise FileNotFoundError(f"FASTQ data not found at: {fastq_file_folder}")
-        
-        #
-        # TODO: Implement FASTA and FASTQ data align and save logic using defined parameters
-        # [destination_path, fasta_file, fastq_file_folder]
-        #
 
-        # TODO: Remove this sleep statement once the merge logic is implemented
-        time.sleep(1)  # Simulate a delay for the merge process
+        align_fasta_fastq_to_destination(destination_path, fasta_file, fastq_file_folder)
 
-        # Emit a feedback to the user's console
         socketio_emit_to_user_session(
             CONSOLE_FEEDBACK_EVENT,
             {
