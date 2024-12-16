@@ -159,8 +159,40 @@ This guide provides instructions on setting up and running a Flask-based develop
    mkdir -p src/workspace/fasta && cd src/workspace/fasta && curl -O https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz && gunzip hg38.fa.gz && cd ../../..
    ```
    This will download FASTA "hg38.fa" file that is required for correct work of SpliceAI
-
-3. **Run the application**
+ 
+3. **Download GATK**
+   ```powershell
+   cd src/tools && curl -O https://github.com/broadinstitute/gatk/releases/download/4.6.1.0/gatk-4.6.1.0.zip && unzip gatk-4.6.1.0.zip && rm gatk-4.6.1.0.zip && cd ../../..
+   ```
+   This will download GATK tool that will be required in aligning process
+4. **Download BWA**
+   ```powershell
+   cd src/tools && curl -L -o bwa-0.7.17.tar.bz2 https://sourceforge.net/projects/bio-bwa/files/bwa-0.7.17.tar.bz2/download && tar -xjf bwa-0.7.17.tar.bz2 && rm bwa-0.7.17.tar.bz2 && cd ../../..
+   ```
+   After that use this command to compile BWA
+   ```powershell
+   cd src/tools/bwa-0.7.17 && make && cd ../../..
+   ```
+   This will download BWA tool that will be required in aligning process
+   To test that it was installed correctly:
+   ```powershell
+   cd src/tools/bwa-0.7.17 && bwa && cd ../../..
+   ```
+   This should print out version of BWA and author information as well as a list of commands.
+5. **Download SAMtools**
+      ```powershell
+   cd src/tools && curl -L -o samtools-1.21.tar.bz2 https://sourceforge.net/projects/samtools/files/samtools/1.21/samtools-1.21.tar.bz2/download && tar -xjf samtools-1.21.tar.bz2 && rm samtools-1.21.tar.bz2 && cd ../../..
+   ```
+   After that use this command to compile SAMtools
+   ```powershell
+   cd src/tools/samtools-1.21 && make && cd ../../..
+   ```
+   This will download SAMtools tool that will be required in aligning process
+   To test that it was installed correctly:
+   ```powershell
+   cd src/tools/samtools-1.21 && samtools && cd ../../..
+   ```
+6. **Run the application**
    ```powershell
    gunicorn -c gunicorn_config.py run:app
    ```
